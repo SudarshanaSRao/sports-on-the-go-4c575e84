@@ -206,22 +206,6 @@ const Index = () => {
                 </Link>
               </Button>
             </div>
-            
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto pt-8 border-t border-border">
-              <div>
-                <div className="text-3xl sm:text-4xl font-black text-primary mb-1">2.5k+</div>
-                <div className="text-sm text-muted-foreground">Active Players</div>
-              </div>
-              <div>
-                <div className="text-3xl sm:text-4xl font-black text-primary mb-1">150+</div>
-                <div className="text-sm text-muted-foreground">Cities</div>
-              </div>
-              <div>
-                <div className="text-3xl sm:text-4xl font-black text-primary mb-1">4.8★</div>
-                <div className="text-sm text-muted-foreground">Avg Rating</div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -420,39 +404,38 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Disclaimer Section */}
-      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-muted/20">
-        <div className="container mx-auto">
-          <div className="max-w-4xl mx-auto text-center">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              <span className="font-semibold text-foreground">Personal Project Disclaimer:</span> SquadUp is a non-commercial hobby project created for educational and recreational purposes. Not affiliated with any sports organization or athletic association. No payments, ads, or monetization. User data (name, photo, location, preferences) is collected solely for in-app matching and securely stored. You may request data deletion anytime by contacting us.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
+      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border bg-muted/20">
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-                <MapPin className="w-4 h-4 text-white" />
+          <div className="flex flex-col items-center gap-6">
+            {/* Disclaimer */}
+            <div className="max-w-4xl text-center">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <span className="font-semibold text-foreground">Personal Project Disclaimer:</span> SquadUp is a non-commercial hobby project created for educational and recreational purposes. Not affiliated with any sports organization or athletic association. No payments, ads, or monetization. User data (name, photo, location, preferences) is collected solely for in-app matching and securely stored. You may request data deletion anytime by contacting us.
+              </p>
+            </div>
+            
+            {/* Footer Links */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full pt-6 border-t border-border">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
+                  <MapPin className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-bold text-lg">SquadUp</span>
               </div>
-              <span className="font-bold text-lg">SquadUp</span>
-            </div>
-            
-            <div className="flex items-center gap-6">
-              <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
-                Terms & Conditions
-              </Link>
-              <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
-                Privacy Policy
-              </Link>
-            </div>
-            
-            <div className="text-sm text-muted-foreground text-center md:text-right">
-              © 2025 SquadUp. Open-source & free to use.
+              
+              <div className="flex items-center gap-6">
+                <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+                  Terms & Conditions
+                </Link>
+                <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+                  Privacy Policy
+                </Link>
+              </div>
+              
+              <div className="text-sm text-muted-foreground text-center md:text-right">
+                © 2025 SquadUp. Open-source & free to use.
+              </div>
             </div>
           </div>
         </div>
