@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Users, MapPin, Navigation } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Game {
   id: number;
@@ -86,6 +90,10 @@ export default function GameMap({ games = sampleGames, center = [37.7749, -122.4
   const [map, setMap] = useState<any>(null);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [joiningGameId, setJoiningGameId] = useState<number | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Dynamically import Leaflet only on client side
@@ -150,6 +158,54 @@ export default function GameMap({ games = sampleGames, center = [37.7749, -122.4
       });
     }
   }, [games]);
+
+  const handleJoinGame = async (gameId: number) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to join a game.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    setJoiningGameId(gameId);
+
+    try {
+      const { error } = await supabase.from("rsvps").insert({
+        game_id: gameId.toString(),
+        user_id: user.id,
+        status: "CONFIRMED",
+      });
+
+      if (error) {
+        if (error.code === "23505") {
+          toast({
+            title: "Already joined",
+            description: "You've already joined this game.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Successfully joined!",
+          description: "You're confirmed for this game.",
+        });
+      }
+    } catch (error) {
+      console.error("Error joining game:", error);
+      toast({
+        title: "Error",
+        description: "Failed to join game. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setJoiningGameId(null);
+    }
+  };
 
   const handleLocateMe = () => {
     if (navigator.geolocation) {
@@ -298,8 +354,12 @@ export default function GameMap({ games = sampleGames, center = [37.7749, -122.4
                   </div>
                 </div>
 
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all">
-                  Join Game
+                <Button 
+                  onClick={() => selectedGame && handleJoinGame(selectedGame.id)}
+                  disabled={joiningGameId === selectedGame?.id}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
+                >
+                  {joiningGameId === selectedGame?.id ? "Joining..." : "Join Game"}
                 </Button>
 
                 <button
