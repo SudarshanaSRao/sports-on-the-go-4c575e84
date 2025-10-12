@@ -4,9 +4,42 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Users, Plus, Star } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const MyGames = () => {
+  const navigate = useNavigate();
+
+  const handleViewDetails = (gameId: number) => {
+    toast.info("Game details coming soon!");
+    // TODO: Navigate to game details page or show modal
+    // navigate(`/game/${gameId}`);
+  };
+
+  const handleManageGame = (gameId: number) => {
+    toast.info("Game management coming soon!");
+    // TODO: Navigate to game management page
+  };
+
+  const handleCancelGame = (gameId: number, gameName: string) => {
+    if (confirm(`Are you sure you want to cancel the ${gameName} game?`)) {
+      toast.success("Game cancelled successfully");
+      // TODO: Call Supabase to cancel the game
+    }
+  };
+
+  const handleMessageHost = (gameId: number, hostName: string) => {
+    toast.info(`Messaging ${hostName} coming soon!`);
+    // TODO: Open messaging interface
+  };
+
+  const handleLeaveGame = (gameId: number, gameName: string) => {
+    if (confirm(`Are you sure you want to leave the ${gameName} game?`)) {
+      toast.success("You've left the game");
+      // TODO: Call Supabase to remove RSVP
+    }
+  };
+
   // Mock data - will be replaced with real data later
   const upcomingGames = [
     {
@@ -127,24 +160,44 @@ const MyGames = () => {
 
                       {/* Right Section - Actions */}
                       <div className="flex flex-col space-y-2 md:min-w-[140px]">
-                        <Button variant="outline" className="w-full">
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => handleViewDetails(game.id)}
+                        >
                           View Details
                         </Button>
                         {game.role === "hosting" ? (
                           <>
-                            <Button variant="outline" className="w-full">
+                            <Button 
+                              variant="outline" 
+                              className="w-full"
+                              onClick={() => handleManageGame(game.id)}
+                            >
                               Manage
                             </Button>
-                            <Button variant="ghost" className="w-full text-destructive hover:text-destructive">
+                            <Button 
+                              variant="ghost" 
+                              className="w-full text-destructive hover:text-destructive"
+                              onClick={() => handleCancelGame(game.id, game.sport)}
+                            >
                               Cancel Game
                             </Button>
                           </>
                         ) : (
                           <>
-                            <Button variant="outline" className="w-full">
+                            <Button 
+                              variant="outline" 
+                              className="w-full"
+                              onClick={() => handleMessageHost(game.id, game.hostName)}
+                            >
                               Message Host
                             </Button>
-                            <Button variant="ghost" className="w-full text-muted-foreground">
+                            <Button 
+                              variant="ghost" 
+                              className="w-full text-muted-foreground"
+                              onClick={() => handleLeaveGame(game.id, game.sport)}
+                            >
                               Leave Game
                             </Button>
                           </>
