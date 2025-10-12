@@ -84,6 +84,159 @@ const sampleGames: Game[] = [
     lat: 37.7596,
     lng: -122.4269,
   },
+  {
+    id: 4,
+    sport: "Volleyball",
+    emoji: "🏐",
+    location: "Ocean Beach",
+    address: "Great Highway",
+    date: "Oct 18",
+    time: "4:00 PM",
+    distance: "4.2 mi",
+    players: { current: 6, max: 8 },
+    skillLevel: "Beginner",
+    hostName: "Sarah L.",
+    hostRating: 4.6,
+    price: "Free",
+    lat: 37.7694,
+    lng: -122.5107,
+  },
+  {
+    id: 5,
+    sport: "Football",
+    emoji: "🏈",
+    location: "Kezar Stadium",
+    address: "Golden Gate Park",
+    date: "Oct 19",
+    time: "2:00 PM",
+    distance: "2.8 mi",
+    players: { current: 18, max: 22 },
+    skillLevel: "Intermediate",
+    hostName: "Mike T.",
+    hostRating: 4.9,
+    price: "$10",
+    lat: 37.7683,
+    lng: -122.4569,
+  },
+  {
+    id: 6,
+    sport: "Baseball",
+    emoji: "⚾",
+    location: "Big Rec Ball Field",
+    address: "Golden Gate Park",
+    date: "Oct 20",
+    time: "11:00 AM",
+    distance: "3.5 mi",
+    players: { current: 12, max: 18 },
+    skillLevel: "All Levels",
+    hostName: "Chris P.",
+    hostRating: 4.5,
+    price: "Free",
+    lat: 37.7701,
+    lng: -122.4803,
+  },
+  {
+    id: 7,
+    sport: "Pickleball",
+    emoji: "🎾",
+    location: "Alice Marble Tennis Courts",
+    address: "Greenwich & Hyde",
+    date: "Oct 21",
+    time: "9:00 AM",
+    distance: "1.5 mi",
+    players: { current: 3, max: 4 },
+    skillLevel: "Intermediate",
+    hostName: "Linda W.",
+    hostRating: 4.8,
+    price: "$5",
+    lat: 37.8026,
+    lng: -122.4186,
+  },
+  {
+    id: 8,
+    sport: "Ultimate Frisbee",
+    emoji: "🥏",
+    location: "Crocker Amazon Playground",
+    address: "Moscow & Italy",
+    date: "Oct 22",
+    time: "3:00 PM",
+    distance: "5.1 mi",
+    players: { current: 10, max: 14 },
+    skillLevel: "All Levels",
+    hostName: "Tom H.",
+    hostRating: 4.7,
+    price: "Free",
+    lat: 37.7136,
+    lng: -122.4394,
+  },
+  {
+    id: 9,
+    sport: "Running",
+    emoji: "🏃",
+    location: "The Presidio",
+    address: "Main Post Trail",
+    date: "Oct 23",
+    time: "6:30 AM",
+    distance: "3.7 mi",
+    players: { current: 8, max: 15 },
+    skillLevel: "Intermediate",
+    hostName: "Emma R.",
+    hostRating: 4.9,
+    price: "Free",
+    lat: 37.7989,
+    lng: -122.4662,
+  },
+  {
+    id: 10,
+    sport: "Cycling",
+    emoji: "🚴",
+    location: "The Embarcadero",
+    address: "Ferry Building",
+    date: "Oct 24",
+    time: "8:00 AM",
+    distance: "2.1 mi",
+    players: { current: 5, max: 12 },
+    skillLevel: "All Levels",
+    hostName: "Jake M.",
+    hostRating: 4.6,
+    price: "Free",
+    lat: 37.7955,
+    lng: -122.3937,
+  },
+  {
+    id: 11,
+    sport: "Badminton",
+    emoji: "🏸",
+    location: "Minnie & Lovie Ward Rec Center",
+    address: "650 Capitol Ave",
+    date: "Oct 25",
+    time: "7:00 PM",
+    distance: "4.8 mi",
+    players: { current: 4, max: 8 },
+    skillLevel: "Beginner",
+    hostName: "Amy C.",
+    hostRating: 4.5,
+    price: "$3",
+    lat: 37.7184,
+    lng: -122.4565,
+  },
+  {
+    id: 12,
+    sport: "Golf",
+    emoji: "⛳",
+    location: "Lincoln Park Golf Course",
+    address: "34th Ave & Clement",
+    date: "Oct 26",
+    time: "10:00 AM",
+    distance: "4.3 mi",
+    players: { current: 3, max: 4 },
+    skillLevel: "Intermediate",
+    hostName: "Robert K.",
+    hostRating: 4.8,
+    price: "$25",
+    lat: 37.7841,
+    lng: -122.4965,
+  },
 ];
 
 // Calculate distance between two coordinates using Haversine formula
@@ -300,20 +453,15 @@ export default function GameMap({ games = sampleGames, center = [37.7749, -122.4
             </button>
 
             {/* Map Legend */}
-            <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-3 border border-gray-200">
-              <div className="text-xs font-semibold text-gray-700 mb-2">Games Nearby</div>
-              <div className="flex items-center gap-2 text-xs text-gray-600">
-                <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">🏀</span>
-                <span>Basketball</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
-                <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">⚽</span>
-                <span>Soccer</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
-                <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">🎾</span>
-                <span>Tennis</span>
-              </div>
+            <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-3 border border-gray-200 max-h-[300px] overflow-y-auto">
+              <div className="text-xs font-semibold text-gray-700 mb-2">Sports Available</div>
+              {Array.from(new Set(games.map(g => ({ sport: g.sport, emoji: g.emoji }))))
+                .map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+                    <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">{item.emoji}</span>
+                    <span>{item.sport}</span>
+                  </div>
+                ))}
             </div>
           </div>
 
