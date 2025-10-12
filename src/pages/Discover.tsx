@@ -310,6 +310,7 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [joiningGameId, setJoiningGameId] = useState<number | null>(null);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
+  const [markers, setMarkers] = useState<any[]>([]);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -337,6 +338,7 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
     }
   }, []);
 
+  // Initialize map once
   useEffect(() => {
     // Dynamically import Leaflet only on client side
     if (typeof window !== "undefined") {
@@ -358,39 +360,6 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
           maxZoom: 19,
         }).addTo(mapInstance);
 
-        // Add markers for each game
-        filteredGames.forEach((game) => {
-          const icon = L.divIcon({
-            className: "custom-marker",
-            html: `
-              <div style="
-                width: 40px;
-                height: 40px;
-                background: #3b82f6;
-                border: 3px solid #1e40af;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 20px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                cursor: pointer;
-              ">
-                ${game.emoji}
-              </div>
-            `,
-            iconSize: [40, 40],
-            iconAnchor: [20, 40],
-          });
-
-          const marker = L.marker([game.lat, game.lng], { icon }).addTo(mapInstance);
-
-          marker.on("click", () => {
-            setSelectedGame(game);
-            mapInstance.setView([game.lat, game.lng], 14);
-          });
-        });
-
         setMap(mapInstance);
 
         // Cleanup
@@ -399,7 +368,54 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
         };
       });
     }
-  }, [filteredGames]);
+  }, []);
+
+  // Update markers when filtered games change
+  useEffect(() => {
+    if (!map) return;
+
+    // Clear existing markers
+    markers.forEach(marker => marker.remove());
+
+    // Add markers for filtered games
+    import("leaflet").then((L) => {
+      const newMarkers = filteredGames.map((game) => {
+        const icon = L.divIcon({
+          className: "custom-marker",
+          html: `
+            <div style="
+              width: 40px;
+              height: 40px;
+              background: #3b82f6;
+              border: 3px solid #1e40af;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 20px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+              cursor: pointer;
+            ">
+              ${game.emoji}
+            </div>
+          `,
+          iconSize: [40, 40],
+          iconAnchor: [20, 40],
+        });
+
+        const marker = L.marker([game.lat, game.lng], { icon }).addTo(map);
+
+        marker.on("click", () => {
+          setSelectedGame(game);
+          map.setView([game.lat, game.lng], 14);
+        });
+
+        return marker;
+      });
+
+      setMarkers(newMarkers);
+    });
+  }, [map, filteredGames]);
 
   const toggleSportFilter = (sport: string) => {
     setSelectedSports(prev => 
