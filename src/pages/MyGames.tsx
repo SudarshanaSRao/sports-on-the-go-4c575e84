@@ -469,7 +469,7 @@ const MyGames = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-2">No Past Games Yet</h3>
                 <p className="text-muted-foreground mb-6">Join or host games to build your history and reputation</p>
-                <Button variant="outline" asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
                   <Link to="/discover">
                     Browse Games
                   </Link>

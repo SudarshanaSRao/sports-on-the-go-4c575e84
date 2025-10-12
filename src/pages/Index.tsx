@@ -4,6 +4,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { MapPin, Users, Star, Calendar, Trophy, Shield, Zap, MessageSquare, Medal, CalendarCheck } from "lucide-react";
 import heroImage from "@/assets/hero-sports.jpg";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useState } from "react";
 
 const Index = () => {
   const features = [
@@ -40,13 +49,93 @@ const Index = () => {
   ];
 
   const sports = [
-    { name: "Basketball", emoji: "🏀" },
-    { name: "Soccer", emoji: "⚽" },
-    { name: "Volleyball", emoji: "🏐" },
-    { name: "Tennis", emoji: "🎾" },
-    { name: "Baseball", emoji: "⚾" },
-    { name: "Football", emoji: "🏈" },
+    { 
+      name: "Basketball", 
+      emoji: "🏀",
+      description: "Fast-paced team sport played on a court. Perfect for cardio and teamwork.",
+      rules: [
+        "Two teams of 5 players each",
+        "Score by shooting ball through opponent's hoop (2 or 3 points)",
+        "Game typically played in 4 quarters (12 minutes each in NBA)",
+        "Players cannot run with the ball without dribbling",
+        "Physical contact is limited - fouls result in free throws"
+      ],
+      skillLevels: "Beginner to Advanced",
+      equipment: "Ball, court, hoops"
+    },
+    { 
+      name: "Soccer", 
+      emoji: "⚽",
+      description: "World's most popular sport. Great for endurance and coordination.",
+      rules: [
+        "Two teams of 11 players each",
+        "Score by kicking ball into opponent's goal",
+        "Game typically played in 2 halves (45 minutes each)",
+        "Only goalkeepers can use hands within penalty area",
+        "Offsides rule prevents players from goal-hanging"
+      ],
+      skillLevels: "All levels welcome",
+      equipment: "Ball, goals, field"
+    },
+    { 
+      name: "Volleyball", 
+      emoji: "🏐",
+      description: "Dynamic team sport played over a net. Excellent for agility and reflexes.",
+      rules: [
+        "Two teams of 6 players each",
+        "Score by grounding ball on opponent's court",
+        "Teams have 3 hits to return ball over net",
+        "Games played to 25 points (must win by 2)",
+        "Players rotate positions after winning serve"
+      ],
+      skillLevels: "Beginner to Intermediate",
+      equipment: "Ball, net, court"
+    },
+    { 
+      name: "Tennis", 
+      emoji: "🎾",
+      description: "Racket sport for singles or doubles. Great workout for the whole body.",
+      rules: [
+        "Singles (1v1) or Doubles (2v2)",
+        "Score by hitting ball over net into opponent's court",
+        "Points: 15, 30, 40, Game (must win by 2)",
+        "Ball can bounce once before being returned",
+        "Serve must land in diagonal service box"
+      ],
+      skillLevels: "All levels",
+      equipment: "Racket, balls, court"
+    },
+    { 
+      name: "Baseball", 
+      emoji: "⚾",
+      description: "Classic American sport combining strategy and athleticism.",
+      rules: [
+        "Two teams of 9 players each",
+        "Batting team scores by running bases and reaching home plate",
+        "Game played in 9 innings (each team bats and fields)",
+        "3 outs end the team's turn at bat",
+        "Pitcher tries to throw strikes past the batter"
+      ],
+      skillLevels: "Intermediate to Advanced",
+      equipment: "Bat, ball, gloves, bases"
+    },
+    { 
+      name: "Football", 
+      emoji: "🏈",
+      description: "Strategic team sport with high intensity. Build strength and teamwork.",
+      rules: [
+        "Two teams of 11 players each",
+        "Score by carrying/passing ball into end zone (6 points)",
+        "Teams have 4 downs to advance 10 yards",
+        "Game played in 4 quarters (15 minutes each in NFL)",
+        "Field goals (3 points) and safeties (2 points) also score"
+      ],
+      skillLevels: "Intermediate to Advanced",
+      equipment: "Ball, protective gear, field"
+    },
   ];
+
+  const [selectedSport, setSelectedSport] = useState<typeof sports[0] | null>(null);
 
   return (
     <div className="min-h-screen bg-background">
@@ -195,12 +284,70 @@ const Index = () => {
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {sports.map((sport) => (
-              <Card key={sport.name} className="hover:shadow-elevated transition-smooth cursor-pointer group">
-                <CardContent className="p-6 text-center">
-                  <div className="text-5xl mb-3 group-hover:scale-110 transition-bounce">{sport.emoji}</div>
-                  <div className="font-semibold">{sport.name}</div>
-                </CardContent>
-              </Card>
+              <Dialog key={sport.name}>
+                <DialogTrigger asChild>
+                  <Card className="hover:shadow-elevated transition-smooth cursor-pointer group">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-5xl mb-3 group-hover:scale-110 transition-bounce">{sport.emoji}</div>
+                      <div className="font-semibold">{sport.name}</div>
+                      <p className="text-xs text-muted-foreground mt-2">{sport.description}</p>
+                    </CardContent>
+                  </Card>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-3 text-3xl">
+                      <span className="text-4xl">{sport.emoji}</span>
+                      {sport.name}
+                    </DialogTitle>
+                    <DialogDescription className="text-base pt-2">
+                      {sport.description}
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-6 mt-4">
+                    <div>
+                      <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                        <Trophy className="w-5 h-5 text-primary" />
+                        Basic Rules
+                      </h3>
+                      <ul className="space-y-2">
+                        {sport.rules.map((rule, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="text-primary mt-1">•</span>
+                            <span className="text-muted-foreground">{rule}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                      <div>
+                        <h4 className="font-semibold mb-1 flex items-center gap-2">
+                          <Star className="w-4 h-4 text-primary" />
+                          Skill Levels
+                        </h4>
+                        <p className="text-sm text-muted-foreground">{sport.skillLevels}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold mb-1 flex items-center gap-2">
+                          <Shield className="w-4 h-4 text-primary" />
+                          Equipment Needed
+                        </h4>
+                        <p className="text-sm text-muted-foreground">{sport.equipment}</p>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t">
+                      <Button className="w-full gradient-primary text-white" asChild>
+                        <Link to="/discover">
+                          Find {sport.name} Games Near You
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             ))}
           </div>
         </div>
