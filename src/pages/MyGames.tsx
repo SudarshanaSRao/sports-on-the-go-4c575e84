@@ -230,7 +230,7 @@ const MyGames = () => {
               <p className="text-lg text-muted-foreground">Manage your upcoming and past games</p>
             </div>
             <Button className="gradient-primary text-white shadow-primary hover:opacity-90" asChild>
-              <Link to="/discover">
+              <Link to="/host-game">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Game
               </Link>

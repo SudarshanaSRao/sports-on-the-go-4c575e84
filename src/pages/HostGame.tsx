@@ -47,39 +47,30 @@ export default function HostGame() {
     equipment_requirements: "",
   });
 
-  const [coords, setCoords] = useState({ lat: "", lng: "" });
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleGetLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoords({
-            lat: position.coords.latitude.toString(),
-            lng: position.coords.longitude.toString()
-          });
-          toast({
-            title: "Location captured",
-            description: "Your current location has been set."
-          });
-        },
-        (error) => {
-          toast({
-            title: "Location error",
-            description: "Unable to get your location. Please enter manually.",
-            variant: "destructive"
-          });
-        }
+  const geocodeAddress = async () => {
+    const fullAddress = `${formData.address}, ${formData.city}, ${formData.state} ${formData.zip_code}`.trim();
+    
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`
       );
-    } else {
-      toast({
-        title: "Not supported",
-        description: "Geolocation is not supported by your browser.",
-        variant: "destructive"
-      });
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        return {
+          latitude: parseFloat(data[0].lat),
+          longitude: parseFloat(data[0].lon),
+        };
+      } else {
+        throw new Error("Location not found");
+      }
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      throw error;
     }
   };
 
@@ -98,10 +89,10 @@ export default function HostGame() {
 
     if (!formData.sport || !formData.skill_level || !formData.location_name || 
         !formData.game_date || !formData.start_time || !formData.max_players ||
-        !coords.lat || !coords.lng) {
+        !formData.address || !formData.city) {
       toast({
         title: "Missing fields",
-        description: "Please fill in all required fields and set location.",
+        description: "Please fill in all required fields including address and city.",
         variant: "destructive"
       });
       return;
@@ -110,6 +101,14 @@ export default function HostGame() {
     setLoading(true);
 
     try {
+      // Geocode the address to get coordinates
+      toast({
+        title: "Finding location...",
+        description: "Converting address to coordinates..."
+      });
+      
+      const coords = await geocodeAddress();
+
       const { error } = await (supabase as any).from("games").insert({
         host_id: user.id,
         sport: formData.sport,
@@ -119,8 +118,8 @@ export default function HostGame() {
         city: formData.city,
         state: formData.state,
         zip_code: formData.zip_code,
-        latitude: parseFloat(coords.lat),
-        longitude: parseFloat(coords.lng),
+        latitude: coords.latitude,
+        longitude: coords.longitude,
         game_date: format(formData.game_date, "yyyy-MM-dd"),
         start_time: formData.start_time,
         duration_minutes: parseInt(formData.duration_minutes) || 60,
@@ -145,7 +144,7 @@ export default function HostGame() {
       console.error("Error creating game:", error);
       toast({
         title: "Error",
-        description: "Failed to create game. Please try again.",
+        description: "Failed to create game. Please check the address and try again.",
         variant: "destructive"
       });
     } finally {
@@ -246,24 +245,16 @@ export default function HostGame() {
               </div>
             </div>
 
-            {/* Coordinates */}
-            <div>
-              <Label>Coordinates *</Label>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Latitude"
-                  value={coords.lat}
-                  onChange={(e) => setCoords(prev => ({ ...prev, lat: e.target.value }))}
-                />
-                <Input
-                  placeholder="Longitude"
-                  value={coords.lng}
-                  onChange={(e) => setCoords(prev => ({ ...prev, lng: e.target.value }))}
-                />
-                <Button type="button" onClick={handleGetLocation} variant="outline">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  Use My Location
-                </Button>
+            {/* Location Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Automatic Location Detection</p>
+                  <p className="text-sm text-blue-700 mt-1">
+                    The map will automatically pinpoint your game location based on the address you provide above.
+                  </p>
+                </div>
               </div>
             </div>
 

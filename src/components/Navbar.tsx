@@ -78,7 +78,7 @@ export const Navbar = () => {
                   className="gradient-primary text-white shadow-primary hover:opacity-90 transition-smooth"
                   asChild
                 >
-                  <Link to="/discover">
+                  <Link to="/host-game">
                     <Calendar className="w-4 h-4 mr-2" />
                     Create Game
                   </Link>
