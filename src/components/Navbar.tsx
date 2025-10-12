@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { MapPin, User, Calendar, LogOut, Search, MessageSquare, Trophy, Grid3x3, Activity } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,6 +72,7 @@ export const Navbar = () => {
 
           {/* CTA Buttons */}
           <div className="flex items-center space-x-3">
+            <ThemeToggle />
             {user ? (
               <>
                 <Button 
