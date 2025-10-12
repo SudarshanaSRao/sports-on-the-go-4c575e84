@@ -310,7 +310,7 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [joiningGameId, setJoiningGameId] = useState<number | null>(null);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
-  const [markers, setMarkers] = useState<any[]>([]);
+  const [markerMap, setMarkerMap] = useState<Map<number, any>>(new Map());
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -338,9 +338,8 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
     }
   }, []);
 
-  // Initialize map once
+  // Initialize map and create all markers once
   useEffect(() => {
-    // Dynamically import Leaflet only on client side
     if (typeof window !== "undefined") {
       import("leaflet").then((L) => {
         // Fix default marker icon
@@ -360,6 +359,43 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
           maxZoom: 19,
         }).addTo(mapInstance);
 
+        // Create markers for all games
+        const newMarkerMap = new Map();
+        games.forEach((game) => {
+          const icon = L.divIcon({
+            className: "custom-marker",
+            html: `
+              <div style="
+                width: 40px;
+                height: 40px;
+                background: #3b82f6;
+                border: 3px solid #1e40af;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                cursor: pointer;
+              ">
+                ${game.emoji}
+              </div>
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+          });
+
+          const marker = L.marker([game.lat, game.lng], { icon }).addTo(mapInstance);
+
+          marker.on("click", () => {
+            setSelectedGame(game);
+            mapInstance.setView([game.lat, game.lng], 14);
+          });
+
+          newMarkerMap.set(game.id, marker);
+        });
+
+        setMarkerMap(newMarkerMap);
         setMap(mapInstance);
 
         // Cleanup
@@ -370,52 +406,23 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
     }
   }, []);
 
-  // Update markers when filtered games change
+  // Show/hide markers based on filter
   useEffect(() => {
-    if (!map) return;
+    if (markerMap.size === 0) return;
 
-    // Clear existing markers
-    markers.forEach(marker => marker.remove());
-
-    // Add markers for filtered games
-    import("leaflet").then((L) => {
-      const newMarkers = filteredGames.map((game) => {
-        const icon = L.divIcon({
-          className: "custom-marker",
-          html: `
-            <div style="
-              width: 40px;
-              height: 40px;
-              background: #3b82f6;
-              border: 3px solid #1e40af;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-size: 20px;
-              box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-              cursor: pointer;
-            ">
-              ${game.emoji}
-            </div>
-          `,
-          iconSize: [40, 40],
-          iconAnchor: [20, 40],
-        });
-
-        const marker = L.marker([game.lat, game.lng], { icon }).addTo(map);
-
-        marker.on("click", () => {
-          setSelectedGame(game);
-          map.setView([game.lat, game.lng], 14);
-        });
-
-        return marker;
-      });
-
-      setMarkers(newMarkers);
+    const filteredIds = new Set(filteredGames.map(g => g.id));
+    
+    games.forEach((game) => {
+      const marker = markerMap.get(game.id);
+      if (marker) {
+        if (filteredIds.has(game.id)) {
+          marker.setOpacity(1);
+        } else {
+          marker.setOpacity(0);
+        }
+      }
     });
-  }, [map, filteredGames]);
+  }, [filteredGames, markerMap, games]);
 
   const toggleSportFilter = (sport: string) => {
     setSelectedSports(prev => 
