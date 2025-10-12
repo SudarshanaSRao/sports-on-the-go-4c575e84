@@ -22,7 +22,7 @@ interface Game {
 }
 
 interface GameMapProps {
-  games: Game[];
+  games?: Game[];
   center?: [number, number];
   zoom?: number;
 }
