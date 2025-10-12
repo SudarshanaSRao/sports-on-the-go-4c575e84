@@ -159,3 +159,18 @@ All colors MUST be HSL.
     background-image: var(--gradient-primary);
   }
 }
+
+/* Leaflet map styles */
+.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0.75rem;
+  padding: 0;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+}

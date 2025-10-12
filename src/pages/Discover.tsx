@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
+import { GameMap } from "@/components/GameMap";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +26,8 @@ const Discover = () => {
       hostName: "Mike Jordan",
       hostRating: 4.8,
       price: "Free",
+      lat: 40.7829,
+      lng: -73.9654,
     },
     {
       id: 2,
@@ -40,6 +43,8 @@ const Discover = () => {
       hostName: "Sarah Lee",
       hostRating: 4.9,
       price: "Free",
+      lat: 40.6782,
+      lng: -73.9442,
     },
     {
       id: 3,
@@ -55,6 +60,8 @@ const Discover = () => {
       hostName: "Alex Kim",
       hostRating: 4.7,
       price: "Free",
+      lat: 40.7282,
+      lng: -73.7949,
     },
   ];
 
@@ -93,16 +100,14 @@ const Discover = () => {
             </Button>
           </div>
 
-          {/* Map Placeholder */}
-          <Card className="mb-8 overflow-hidden border-2">
-            <div className="relative h-96 bg-muted flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="w-16 h-16 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-bold mb-2">Interactive Map</h3>
-                <p className="text-muted-foreground">Map view will be implemented with Leaflet</p>
-              </div>
-            </div>
-          </Card>
+          {/* Interactive Map */}
+          <div className="mb-8">
+            <GameMap 
+              games={games} 
+              center={[40.7128, -74.0060]} 
+              zoom={11} 
+            />
+          </div>
 
           {/* Games List */}
           <div className="space-y-4">
