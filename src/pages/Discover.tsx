@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import GameMap from "@/components/GameMap";
 import { Button } from "@/components/ui/button";
@@ -6,9 +7,74 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Search, Filter, Users, Calendar, Clock, Star } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 const Discover = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [joiningGameId, setJoiningGameId] = useState<number | null>(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleJoinGame = async (gameId: number, currentPlayers: number, maxPlayers: number) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to join a game.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    if (currentPlayers >= maxPlayers) {
+      toast({
+        title: "Game Full",
+        description: "This game has reached maximum capacity.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setJoiningGameId(gameId);
+
+    try {
+      const { error } = await supabase
+        .from("rsvps")
+        .insert({
+          game_id: gameId.toString(),
+          user_id: user.id,
+          status: "CONFIRMED",
+        });
+
+      if (error) {
+        if (error.code === "23505") {
+          toast({
+            title: "Already Joined",
+            description: "You've already joined this game.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Successfully Joined!",
+          description: "You've been added to the game. Check My Games to see details.",
+        });
+      }
+    } catch (error) {
+      console.error("Error joining game:", error);
+      toast({
+        title: "Error",
+        description: "Failed to join game. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setJoiningGameId(null);
+    }
+  };
 
   // Mock data - will be replaced with real data later
   const games = [
@@ -186,8 +252,12 @@ const Discover = () => {
                       <div className="text-2xl font-black text-primary text-right">
                         {game.price}
                       </div>
-                      <Button className="gradient-primary text-white shadow-primary hover:opacity-90 w-full">
-                        Join Game
+                      <Button 
+                        className="gradient-primary text-white shadow-primary hover:opacity-90 w-full"
+                        onClick={() => handleJoinGame(game.id, game.players.current, game.players.max)}
+                        disabled={joiningGameId === game.id || game.players.current >= game.players.max}
+                      >
+                        {joiningGameId === game.id ? "Joining..." : game.players.current >= game.players.max ? "Game Full" : "Join Game"}
                       </Button>
                       <Button variant="ghost" size="sm" className="w-full">
                         View Details
