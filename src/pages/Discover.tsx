@@ -1,282 +1,186 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
-import { ExternalLink } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, Users, MapPin, Navigation } from "lucide-react";
 
 interface Game {
-  id: string;
+  id: number;
   sport: string;
-  location_name: string;
+  emoji: string;
+  location: string;
   address: string;
-  game_date: string;
-  start_time: string;
-  current_players: number | null;
-  max_players: number;
-  skill_level: string;
-  host_id: string;
-  cost_per_person: number | null;
-  latitude: number;
-  longitude: number;
-  profiles?: {
-    first_name: string;
-    last_name: string;
-  };
+  date: string;
+  time: string;
+  distance: string;
+  players: { current: number; max: number };
+  skillLevel: string;
+  hostName: string;
+  hostRating: number;
+  price: string;
+  lat: number;
+  lng: number;
 }
 
-export default function Discover() {
-  const center: [number, number] = [37.7749, -122.4194];
-  const zoom = 12;
+interface GameMapProps {
+  games: Game[];
+  center?: [number, number];
+  zoom?: number;
+}
+
+// Sample games data for demo
+const sampleGames: Game[] = [
+  {
+    id: 1,
+    sport: "Basketball",
+    emoji: "🏀",
+    location: "Mission Playground",
+    address: "19th & Valencia",
+    date: "Oct 15",
+    time: "6:00 PM",
+    distance: "2.3 mi",
+    players: { current: 8, max: 10 },
+    skillLevel: "Intermediate",
+    hostName: "John D.",
+    hostRating: 4.8,
+    price: "Free",
+    lat: 37.7599,
+    lng: -122.4219,
+  },
+  {
+    id: 2,
+    sport: "Soccer",
+    emoji: "⚽",
+    location: "Golden Gate Park",
+    address: "Polo Fields",
+    date: "Oct 16",
+    time: "5:00 PM",
+    distance: "3.1 mi",
+    players: { current: 14, max: 20 },
+    skillLevel: "All Levels",
+    hostName: "Maria S.",
+    hostRating: 4.9,
+    price: "$5",
+    lat: 37.7694,
+    lng: -122.4862,
+  },
+  {
+    id: 3,
+    sport: "Tennis",
+    emoji: "🎾",
+    location: "Dolores Park",
+    address: "Tennis Courts",
+    date: "Oct 17",
+    time: "7:00 AM",
+    distance: "1.8 mi",
+    players: { current: 3, max: 4 },
+    skillLevel: "Advanced",
+    hostName: "Alex K.",
+    hostRating: 4.7,
+    price: "Free",
+    lat: 37.7596,
+    lng: -122.4269,
+  },
+];
+
+export default function GameMap({ games = sampleGames, center = [37.7749, -122.4194], zoom = 12 }: GameMapProps) {
   const [map, setMap] = useState<any>(null);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  const [leafletLoaded, setLeafletLoaded] = useState(false);
-  const [games, setGames] = useState<Game[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [joiningGameId, setJoiningGameId] = useState<string | null>(null);
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-
-  const fetchGames = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("games")
-        .select(`
-          *,
-          profiles:host_id (
-            first_name,
-            last_name
-          )
-        `)
-        .order("game_date", { ascending: true });
-
-      if (error) throw error;
-      setGames(data || []);
-    } catch (error) {
-      console.error("Error fetching games:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load games",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
   useEffect(() => {
-    fetchGames();
-  }, []);
-
-  useEffect(() => {
-    // Load Leaflet CSS
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    link.integrity = "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=";
-    link.crossOrigin = "";
-    document.head.appendChild(link);
-
-    // Load Leaflet JS
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-    script.integrity = "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=";
-    script.crossOrigin = "";
-    script.onload = () => setLeafletLoaded(true);
-    document.body.appendChild(script);
-
-    return () => {
-      document.head.removeChild(link);
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!leafletLoaded || !window.L || map || games.length === 0) return;
-
-    const L = window.L;
-
-    // Fix default marker icon
-    delete (L.Icon.Default.prototype as any)._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-      iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-      shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    });
-
-    // Initialize map
-    const mapInstance = L.map("map", {
-      center: center,
-      zoom: zoom,
-      zoomControl: true,
-    });
-
-    // Add OpenStreetMap tiles
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19,
-    }).addTo(mapInstance);
-
-    // Add markers for each game
-    games.forEach((game) => {
-      const emoji = getSportEmoji(game.sport);
-      const icon = L.divIcon({
-        className: "custom-marker",
-        html: `
-          <div style="
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 3px solid white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: transform 0.2s;
-          ">
-            ${emoji}
-          </div>
-        `,
-        iconSize: [40, 40],
-        iconAnchor: [20, 40],
-      });
-
-      const marker = L.marker([game.latitude, game.longitude], { icon }).addTo(mapInstance);
-
-      // Create popup content
-      const popupContent = `
-        <div style="padding: 8px; min-width: 200px;">
-          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-            <div>
-              <h3 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 700;">${game.sport.replace(/_/g, ' ')}</h3>
-              <p style="margin: 0; font-size: 12px; color: #666;">${game.location_name}</p>
-            </div>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; font-size: 12px;">
-            <div>📅 ${format(new Date(game.game_date), 'MMM d')}</div>
-            <div>🕒 ${game.start_time}</div>
-            <div>👥 ${game.current_players || 0}/${game.max_players}</div>
-            <div style="padding: 2px 6px; background: #f3f4f6; border-radius: 8px; text-align: center;">${formatSkillLevel(game.skill_level)}</div>
-          </div>
-          <div style="padding-top: 12px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 18px; font-weight: 700; color: #667eea;">$${game.cost_per_person || 0}</span>
-          </div>
-        </div>
-      `;
-
-      marker.bindPopup(popupContent, { maxWidth: 300 });
-
-      marker.on("click", () => {
-        setSelectedGame(game);
-      });
-    });
-
-    setMap(mapInstance);
-
-    return () => {
-      mapInstance.remove();
-    };
-  }, [leafletLoaded, games]);
-
-  const handleJoinGame = async (gameId: string, currentPlayers: number, maxPlayers: number) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to join games",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    if (currentPlayers >= maxPlayers) {
-      toast({
-        title: "Game is full",
-        description: "This game has reached maximum capacity",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setJoiningGameId(gameId);
-      const { error } = await supabase.from("rsvps").insert({
-        game_id: gameId,
-        user_id: user.id,
-        status: "CONFIRMED",
-      });
-
-      if (error) {
-        if (error.code === "23505") {
-          toast({
-            title: "Already joined",
-            description: "You've already joined this game",
-          });
-        } else {
-          throw error;
-        }
-      } else {
-        toast({
-          title: "Success!",
-          description: "You've joined the game",
+    // Dynamically import Leaflet only on client side
+    if (typeof window !== "undefined") {
+      import("leaflet").then((L) => {
+        // Fix default marker icon
+        delete (L.Icon.Default.prototype as any)._getIconUrl;
+        L.Icon.Default.mergeOptions({
+          iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+          iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+          shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
         });
-        // Refresh games to update player count
-        fetchGames();
-      }
-    } catch (error) {
-      console.error("Error joining game:", error);
-      toast({
-        title: "Error",
-        description: "Failed to join game",
-        variant: "destructive",
-      });
-    } finally {
-      setJoiningGameId(null);
-    }
-  };
 
-  const handleViewDetails = () => {
-    toast({
-      title: "Coming Soon",
-      description: "Game details page is under development",
-    });
-  };
+        // Initialize map
+        const mapInstance = L.map("map").setView(center, zoom);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19,
+        }).addTo(mapInstance);
+
+        // Add markers for each game
+        games.forEach((game) => {
+          const icon = L.divIcon({
+            className: "custom-marker",
+            html: `
+              <div style="
+                width: 40px;
+                height: 40px;
+                background: #3b82f6;
+                border: 3px solid #1e40af;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                cursor: pointer;
+              ">
+                ${game.emoji}
+              </div>
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+          });
+
+          const marker = L.marker([game.lat, game.lng], { icon }).addTo(mapInstance);
+
+          marker.on("click", () => {
+            setSelectedGame(game);
+            mapInstance.setView([game.lat, game.lng], 14);
+          });
+        });
+
+        setMap(mapInstance);
+
+        // Cleanup
+        return () => {
+          mapInstance.remove();
+        };
+      });
+    }
+  }, [games]);
 
   const handleLocateMe = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
+          setUserLocation([latitude, longitude]);
 
-          if (map && window.L) {
+          if (map) {
             map.setView([latitude, longitude], 14);
 
             // Add user location marker
-            const L = window.L;
-            L.marker([latitude, longitude], {
-              icon: L.divIcon({
-                className: "user-marker",
-                html: `
-                  <div style="
-                    width: 20px;
-                    height: 20px;
-                    background: #ef4444;
-                    border: 3px solid white;
-                    border-radius: 50%;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                  "></div>
-                `,
-                iconSize: [20, 20],
-                iconAnchor: [10, 10],
-              }),
-            })
-              .addTo(map)
-              .bindPopup("You are here");
+            import("leaflet").then((L) => {
+              L.marker([latitude, longitude], {
+                icon: L.divIcon({
+                  className: "user-marker",
+                  html: `
+                    <div style="
+                      width: 20px;
+                      height: 20px;
+                      background: #ef4444;
+                      border: 3px solid white;
+                      border-radius: 50%;
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    "></div>
+                  `,
+                  iconSize: [20, 20],
+                  iconAnchor: [10, 10],
+                }),
+              }).addTo(map);
+            });
           }
         },
         (error) => {
@@ -288,145 +192,167 @@ export default function Discover() {
     }
   };
 
-  const getSportEmoji = (sport: string): string => {
-    const sportEmojis: Record<string, string> = {
-      BASKETBALL: "🏀",
-      SOCCER: "⚽",
-      TENNIS: "🎾",
-      VOLLEYBALL: "🏐",
-      FOOTBALL: "🏈",
-      BASEBALL: "⚾",
-    };
-    return sportEmojis[sport] || "⚽";
-  };
-
-  const formatSkillLevel = (level: string): string => {
-    return level.charAt(0) + level.slice(1).toLowerCase();
-  };
-
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): string => {
-    const R = 3959; // Earth's radius in miles
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const distance = R * c;
-    return `${distance.toFixed(1)} mi`;
-  };
-
-  if (!leafletLoaded || loading) {
-    return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading map...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full min-h-screen bg-background p-4">
+    <div className="w-full h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Discover Games</h1>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Your Game</h1>
+          <p className="text-gray-600">Discover pickup games near you</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-140px)]">
           {/* Map Section */}
-          <div className="relative w-full h-[600px] rounded-lg overflow-hidden border-2 border-border shadow-lg">
-            <div id="map" className="w-full h-full"></div>
+          <div className="lg:col-span-2 relative">
+            <div id="map" className="w-full h-full rounded-xl shadow-lg border-2 border-gray-200"></div>
+
+            {/* Locate Me Button */}
             <button
               onClick={handleLocateMe}
-              className="absolute bottom-4 right-4 z-[1000] w-12 h-12 rounded-full bg-background shadow-lg border-2 border-primary flex items-center justify-center hover:bg-accent transition-all hover:scale-110"
+              className="absolute bottom-4 right-4 z-[1000] w-12 h-12 rounded-full bg-white shadow-lg border-2 border-blue-500 flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110"
               title="Locate Me"
             >
-              <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+              <Navigation className="w-5 h-5 text-blue-600" />
             </button>
+
+            {/* Map Legend */}
+            <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-3 border border-gray-200">
+              <div className="text-xs font-semibold text-gray-700 mb-2">Games Nearby</div>
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">🏀</span>
+                <span>Basketball</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+                <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">⚽</span>
+                <span>Soccer</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+                <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">🎾</span>
+                <span>Tennis</span>
+              </div>
+            </div>
           </div>
 
-          {/* Games List Section */}
-          <div className="space-y-4">
-            <h2 className="text-2xl font-semibold">Nearby Games</h2>
-            {games.length === 0 ? (
-              <p className="text-muted-foreground">No games available</p>
-            ) : (
-              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
-                {games.map((game) => (
-                  <div
-                    key={game.id}
-                    className="bg-card border border-border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h3 className="text-lg font-bold flex items-center gap-2">
-                          <span>{getSportEmoji(game.sport)}</span>
-                          {game.sport.replace(/_/g, ' ')}
-                        </h3>
-                        <p className="text-sm text-muted-foreground">{game.location_name}</p>
-                        <p className="text-xs text-muted-foreground">{game.address}</p>
-                      </div>
+          {/* Game Details Panel */}
+          <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-6 overflow-y-auto">
+            {selectedGame ? (
+              <div>
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <div className="text-4xl mb-2">{selectedGame.emoji}</div>
+                    <h2 className="text-2xl font-bold text-gray-900">{selectedGame.sport}</h2>
+                    <div className="flex items-center text-sm text-gray-600 mt-1">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      {selectedGame.location}
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
-                      <div className="flex items-center gap-1">
-                        <span>📅</span>
-                        <span>{format(new Date(game.game_date), 'MMM d, yyyy')}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span>🕒</span>
-                        <span>{game.start_time}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span>👥</span>
-                        <span>{game.current_players || 0}/{game.max_players} players</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span>⭐</span>
-                        <span>{formatSkillLevel(game.skill_level)}</span>
-                      </div>
+                  </div>
+                  <Badge className="bg-blue-100 text-blue-700 border-blue-300">{selectedGame.distance}</Badge>
+                </div>
+
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Calendar className="w-5 h-5 text-gray-600" />
+                    <div>
+                      <div className="text-xs text-gray-500">Date</div>
+                      <div className="font-semibold text-gray-900">{selectedGame.date}</div>
                     </div>
+                  </div>
 
-                    {game.profiles && (
-                      <p className="text-sm text-muted-foreground mb-3">
-                        Host: {game.profiles.first_name} {game.profiles.last_name}
-                      </p>
-                    )}
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Clock className="w-5 h-5 text-gray-600" />
+                    <div>
+                      <div className="text-xs text-gray-500">Time</div>
+                      <div className="font-semibold text-gray-900">{selectedGame.time}</div>
+                    </div>
+                  </div>
 
-                    <div className="flex justify-between items-center pt-3 border-t border-border">
-                      <span className="text-xl font-bold text-primary">${game.cost_per_person || 0}</span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleViewDetails}
-                          className="px-3 py-2 text-sm border border-border rounded-lg hover:bg-accent transition-colors flex items-center gap-1"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                          Details
-                        </button>
-                        <button
-                          onClick={() => handleJoinGame(game.id, game.current_players || 0, game.max_players)}
-                          disabled={joiningGameId === game.id || (game.current_players || 0) >= game.max_players}
-                          className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {joiningGameId === game.id ? "Joining..." : (game.current_players || 0) >= game.max_players ? "Full" : "Join Game"}
-                        </button>
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Users className="w-5 h-5 text-gray-600" />
+                    <div>
+                      <div className="text-xs text-gray-500">Players</div>
+                      <div className="font-semibold text-gray-900">
+                        {selectedGame.players.current}/{selectedGame.players.max}
                       </div>
                     </div>
                   </div>
-                ))}
+                </div>
+
+                <div className="flex items-center justify-between mb-4 pb-4 border-b">
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Skill Level</div>
+                    <Badge className="bg-green-100 text-green-700 border-green-300">{selectedGame.skillLevel}</Badge>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs text-gray-500 mb-1">Cost</div>
+                    <div className="text-xl font-bold text-blue-600">{selectedGame.price}</div>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <div className="text-sm text-gray-700 mb-2">
+                    <span className="font-semibold">Host:</span> {selectedGame.hostName}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-yellow-500">★</span>
+                    <span className="font-semibold text-gray-900">{selectedGame.hostRating}</span>
+                    <span className="text-sm text-gray-500">/5.0</span>
+                  </div>
+                </div>
+
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all">
+                  Join Game
+                </Button>
+
+                <button
+                  onClick={() => setSelectedGame(null)}
+                  className="w-full mt-3 text-sm text-gray-600 hover:text-gray-900 font-medium"
+                >
+                  ← Back to all games
+                </button>
+              </div>
+            ) : (
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Nearby Games</h3>
+                <div className="space-y-3">
+                  {games.map((game) => (
+                    <button
+                      key={game.id}
+                      onClick={() => setSelectedGame(game)}
+                      className="w-full text-left p-4 bg-gray-50 hover:bg-blue-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{game.emoji}</span>
+                          <div>
+                            <div className="font-semibold text-gray-900">{game.sport}</div>
+                            <div className="text-xs text-gray-600">{game.location}</div>
+                          </div>
+                        </div>
+                        <Badge className="bg-blue-100 text-blue-700 text-xs">{game.distance}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-gray-600">
+                        <span>
+                          {game.date} • {game.time}
+                        </span>
+                        <span>
+                          {game.players.current}/{game.players.max} players
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Required Leaflet CSS */}
+      <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossOrigin=""
+      />
     </div>
   );
 }
