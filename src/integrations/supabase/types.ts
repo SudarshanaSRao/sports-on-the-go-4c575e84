@@ -128,7 +128,6 @@ export type Database = {
           phone_number: string | null
           phone_verified: boolean | null
           profile_photo: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
           state: string | null
           total_reviews: number | null
           updated_at: string
@@ -156,7 +155,6 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           profile_photo?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           state?: string | null
           total_reviews?: number | null
           updated_at?: string
@@ -184,7 +182,6 @@ export type Database = {
           phone_number?: string | null
           phone_verified?: boolean | null
           profile_photo?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           state?: string | null
           total_reviews?: number | null
           updated_at?: string
@@ -311,6 +308,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_sports: {
         Row: {
           created_at: string
@@ -348,10 +366,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       account_status: "ACTIVE" | "SUSPENDED" | "BANNED"
+      app_role: "admin" | "moderator" | "user"
       game_status: "UPCOMING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
       game_visibility: "PUBLIC" | "FRIENDS_ONLY" | "INVITE_ONLY"
       rsvp_status: "CONFIRMED" | "WAITLISTED" | "CANCELLED"
@@ -502,6 +527,7 @@ export const Constants = {
   public: {
     Enums: {
       account_status: ["ACTIVE", "SUSPENDED", "BANNED"],
+      app_role: ["admin", "moderator", "user"],
       game_status: ["UPCOMING", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
       game_visibility: ["PUBLIC", "FRIENDS_ONLY", "INVITE_ONLY"],
       rsvp_status: ["CONFIRMED", "WAITLISTED", "CANCELLED"],
