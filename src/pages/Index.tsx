@@ -265,15 +265,25 @@ const Index = () => {
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
                 <MapPin className="w-4 h-4 text-white" />
               </div>
               <span className="font-bold text-lg">SquadUp</span>
             </div>
-            <div className="text-sm text-muted-foreground">
-              © 2025 SquadUp. Connecting athletes, one game at a time.
+            
+            <div className="flex items-center gap-6">
+              <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+                Terms & Conditions
+              </Link>
+              <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+                Privacy Policy
+              </Link>
+            </div>
+            
+            <div className="text-sm text-muted-foreground text-center md:text-right">
+              © 2025 SquadUp. Open-source & free to use.
             </div>
           </div>
         </div>
