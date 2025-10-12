@@ -166,6 +166,11 @@ const Index = () => {
               <span className="text-sm font-semibold text-primary">Join thousands of active players</span>
             </div>
             
+            {/* Catchphrase */}
+            <div className="text-2xl sm:text-3xl font-bold text-primary mb-4 tracking-wide">
+              Seek. Squad. Score.
+            </div>
+            
             {/* Headline */}
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 leading-tight">
               Find Pickup Games
@@ -411,6 +416,17 @@ const Index = () => {
                 Create Free Account
               </Link>
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Disclaimer Section */}
+      <section className="py-8 px-4 sm:px-6 lg:px-8 bg-muted/20">
+        <div className="container mx-auto">
+          <div className="max-w-4xl mx-auto text-center">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              <span className="font-semibold text-foreground">Personal Project Disclaimer:</span> SquadUp is a non-commercial hobby project created for educational and recreational purposes. Not affiliated with any sports organization or athletic association. No payments, ads, or monetization. User data (name, photo, location, preferences) is collected solely for in-app matching and securely stored. You may request data deletion anytime by contacting us.
+            </p>
           </div>
         </div>
       </section>
