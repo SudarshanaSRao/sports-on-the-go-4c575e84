@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MapPin, User, Calendar, LogOut, Search, MessageSquare, Trophy, Grid3x3 } from "lucide-react";
+import { MapPin, User, Calendar, LogOut, Search, MessageSquare, Trophy, Grid3x3, Activity } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -21,9 +21,9 @@ export const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-primary transition-smooth group-hover:scale-105">
-              <MapPin className="w-5 h-5 text-white" />
+              <Activity className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-foreground">PickupPro</span>
+            <span className="text-xl font-bold text-foreground">Sports on the go</span>
           </Link>
 
           {/* Navigation Links */}
