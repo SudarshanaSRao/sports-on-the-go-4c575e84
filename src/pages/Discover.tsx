@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink } from "lucide-react";
@@ -315,6 +315,7 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Get unique sports from games
   const availableSports = Array.from(new Set(games.map(g => g.sport))).sort();
@@ -323,6 +324,16 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
   const filteredGames = selectedSports.length === 0 
     ? games 
     : games.filter(game => selectedSports.includes(game.sport));
+
+  // Apply sport filter from URL on mount
+  useEffect(() => {
+    const sportParam = searchParams.get('sport');
+    if (sportParam && availableSports.includes(sportParam)) {
+      setSelectedSports([sportParam]);
+      // Clear the URL parameter after applying
+      setSearchParams({});
+    }
+  }, []);
 
   // Get user's location on mount
   useEffect(() => {

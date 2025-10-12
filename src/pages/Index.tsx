@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
@@ -136,6 +136,11 @@ const Index = () => {
   ];
 
   const [selectedSport, setSelectedSport] = useState<typeof sports[0] | null>(null);
+  const navigate = useNavigate();
+
+  const handleSportClick = (sportName: string) => {
+    navigate(`/discover?sport=${encodeURIComponent(sportName)}`);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -285,14 +290,18 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {sports.map((sport) => (
               <Dialog key={sport.name}>
+                <Card 
+                  className="hover:shadow-elevated transition-smooth cursor-pointer group"
+                  onClick={() => handleSportClick(sport.name)}
+                >
+                  <CardContent className="p-6 text-center">
+                    <div className="text-5xl mb-3 group-hover:scale-110 transition-bounce">{sport.emoji}</div>
+                    <div className="font-semibold">{sport.name}</div>
+                    <p className="text-xs text-muted-foreground mt-2">{sport.description}</p>
+                  </CardContent>
+                </Card>
                 <DialogTrigger asChild>
-                  <Card className="hover:shadow-elevated transition-smooth cursor-pointer group">
-                    <CardContent className="p-6 text-center">
-                      <div className="text-5xl mb-3 group-hover:scale-110 transition-bounce">{sport.emoji}</div>
-                      <div className="font-semibold">{sport.name}</div>
-                      <p className="text-xs text-muted-foreground mt-2">{sport.description}</p>
-                    </CardContent>
-                  </Card>
+                  <button className="sr-only">Open {sport.name} info</button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
