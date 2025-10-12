@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MapPin, User, Calendar, LogOut } from "lucide-react";
+import { MapPin, User, Calendar, LogOut, Search, MessageSquare, Trophy, Grid3x3 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -30,34 +30,39 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center space-x-6">
             <Link 
               to="/discover" 
-              className="text-muted-foreground hover:text-foreground transition-smooth font-medium"
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth font-medium"
             >
+              <Search className="w-4 h-4" />
               Discover
             </Link>
             {user && (
               <>
                 <Link 
                   to="/host-game" 
-                  className="text-muted-foreground hover:text-foreground transition-smooth font-medium"
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth font-medium"
                 >
+                  <Calendar className="w-4 h-4" />
                   Host Game
                 </Link>
                 <Link 
                   to="/community" 
-                  className="text-muted-foreground hover:text-foreground transition-smooth font-medium"
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth font-medium"
                 >
+                  <MessageSquare className="w-4 h-4" />
                   Community
                 </Link>
                 <Link 
                   to="/leaderboard" 
-                  className="text-muted-foreground hover:text-foreground transition-smooth font-medium"
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth font-medium"
                 >
+                  <Trophy className="w-4 h-4" />
                   Leaderboard
                 </Link>
                 <Link 
                   to="/my-games" 
-                  className="text-muted-foreground hover:text-foreground transition-smooth font-medium"
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth font-medium"
                 >
+                  <Grid3x3 className="w-4 h-4" />
                   My Games
                 </Link>
               </>
