@@ -408,15 +408,8 @@ const Index = () => {
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-border bg-muted/20">
         <div className="container mx-auto">
           <div className="flex flex-col items-center gap-6">
-            {/* Disclaimer */}
-            <div className="max-w-4xl text-center">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                <span className="font-semibold text-foreground">Personal Project Disclaimer:</span> SquadUp is a non-commercial hobby project created for educational and recreational purposes. Not affiliated with any sports organization or athletic association. No payments, ads, or monetization. User data (name, photo, location, preferences) is collected solely for in-app matching and securely stored. You may request data deletion anytime by contacting us.
-              </p>
-            </div>
-            
             {/* Footer Links */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full pt-6 border-t border-border">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
                   <MapPin className="w-4 h-4 text-white" />
@@ -436,6 +429,13 @@ const Index = () => {
               <div className="text-sm text-muted-foreground text-center md:text-right">
                 © 2025 SquadUp. Open-source & free to use.
               </div>
+            </div>
+            
+            {/* Disclaimer */}
+            <div className="max-w-4xl text-center pt-4 border-t border-border w-full">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                <span className="font-semibold text-foreground">Personal Project Disclaimer:</span> SquadUp is a non-commercial hobby project created for educational and recreational purposes. Not affiliated with any sports organization or athletic association. No payments, ads, or monetization. User data (name, photo, location, preferences) is collected solely for in-app matching and securely stored. You may request data deletion anytime by contacting us.
+              </p>
             </div>
           </div>
         </div>
