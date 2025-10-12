@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Star, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Navbar } from "@/components/Navbar";
 
 interface LeaderboardEntry {
   id: string;
@@ -62,8 +63,10 @@ export default function Leaderboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      <Navbar />
+      <div className="pt-20 px-4 pb-4">
+        <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
             <Trophy className="w-8 h-8 text-yellow-500" />
@@ -155,6 +158,7 @@ export default function Leaderboard() {
             <p>• Only players with at least one review appear on the leaderboard</p>
           </CardContent>
         </Card>
+        </div>
       </div>
     </div>
   );

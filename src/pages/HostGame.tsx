@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarIcon, MapPin } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Navbar } from "@/components/Navbar";
 
 const sports = [
   "Basketball", "Soccer", "Tennis", "Volleyball", "Football", 
@@ -153,8 +154,10 @@ export default function HostGame() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      <Navbar />
+      <div className="pt-20 px-4 pb-4">
+        <div className="max-w-3xl mx-auto">
         <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Host a Game</h1>
           <p className="text-gray-600 mb-6">Create and advertise your pickup game</p>
@@ -385,6 +388,7 @@ export default function HostGame() {
               </Button>
             </div>
           </form>
+        </div>
         </div>
       </div>
     </div>

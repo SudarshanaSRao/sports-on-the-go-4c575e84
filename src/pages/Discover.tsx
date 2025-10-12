@@ -6,6 +6,7 @@ import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink } from
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Navbar } from "@/components/Navbar";
 
 interface Game {
   id: number;
@@ -532,8 +533,10 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
   };
 
   return (
-    <div className="w-full h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="w-full h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      <Navbar />
+      <div className="pt-20 px-4 pb-4">
+        <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Your Game</h1>
           <p className="text-gray-600">Discover pickup games near you</p>
@@ -761,6 +764,7 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
               </div>
             )}
           </div>
+        </div>
         </div>
       </div>
 

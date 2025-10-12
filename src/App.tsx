@@ -22,17 +22,19 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/discover" element={<Discover />} />
-            <Route path="/host-game" element={<HostGame />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/my-games" element={<MyGames />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <div className="min-h-screen">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/discover" element={<Discover />} />
+              <Route path="/host-game" element={<HostGame />} />
+              <Route path="/community" element={<Community />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/my-games" element={<MyGames />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

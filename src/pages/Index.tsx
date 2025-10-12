@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
-import { MapPin, Users, Star, Calendar, Trophy, Shield, Zap } from "lucide-react";
+import { MapPin, Users, Star, Calendar, Trophy, Shield, Zap, MessageSquare, Medal, CalendarCheck } from "lucide-react";
 import heroImage from "@/assets/hero-sports.jpg";
 
 const Index = () => {
@@ -127,12 +127,70 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Sports Grid */}
+      {/* Quick Actions Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-black mb-4">Play Your Favorite Sports</h2>
-            <p className="text-lg text-muted-foreground">From basketball to volleyball, find games for every sport</p>
+            <h2 className="text-3xl sm:text-4xl font-black mb-4">Everything You Need</h2>
+            <p className="text-lg text-muted-foreground">Discover games, connect with players, and track your stats</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            <Card className="hover:shadow-elevated transition-smooth border-2 hover:border-primary/50">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 rounded-xl gradient-primary flex items-center justify-center mb-4 mx-auto shadow-primary">
+                  <MessageSquare className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">Community</h3>
+                <p className="text-muted-foreground mb-6">
+                  Connect with players, share tips, and discuss upcoming games in our vibrant community
+                </p>
+                <Button asChild className="w-full">
+                  <Link to="/community">
+                    Visit Community
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-elevated transition-smooth border-2 hover:border-primary/50">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 rounded-xl gradient-primary flex items-center justify-center mb-4 mx-auto shadow-primary">
+                  <Medal className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">Leaderboard</h3>
+                <p className="text-muted-foreground mb-6">
+                  Track top players, see ratings, and compete to climb the rankings in your area
+                </p>
+                <Button asChild className="w-full">
+                  <Link to="/leaderboard">
+                    View Rankings
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-elevated transition-smooth border-2 hover:border-primary/50">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 rounded-xl gradient-primary flex items-center justify-center mb-4 mx-auto shadow-primary">
+                  <CalendarCheck className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold mb-3">My Games</h3>
+                <p className="text-muted-foreground mb-6">
+                  Manage your hosted games and track games you've joined all in one place
+                </p>
+                <Button asChild className="w-full">
+                  <Link to="/my-games">
+                    My Games
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mb-12">
+            <h3 className="text-2xl sm:text-3xl font-black mb-4">Play Your Favorite Sports</h3>
+            <p className="text-muted-foreground">From basketball to volleyball, find games for every sport</p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">

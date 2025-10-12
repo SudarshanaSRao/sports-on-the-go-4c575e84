@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThumbsUp, ThumbsDown, MessageSquare, Send } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Navbar } from "@/components/Navbar";
 
 interface Post {
   id: string;
@@ -206,8 +207,10 @@ export default function Community() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      <Navbar />
+      <div className="pt-20 px-4 pb-4">
+        <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Community</h1>
           <p className="text-gray-600">Connect with players and discuss games</p>
@@ -333,6 +336,7 @@ export default function Community() {
             </Card>
           ))}
         </div>
+      </div>
       </div>
     </div>
   );
