@@ -138,7 +138,7 @@ const Index = () => {
   const [selectedSport, setSelectedSport] = useState<typeof sports[0] | null>(null);
   const navigate = useNavigate();
 
-  const handleSportClick = (sportName: string) => {
+  const handleFindGames = (sportName: string) => {
     navigate(`/discover?sport=${encodeURIComponent(sportName)}`);
   };
 
@@ -290,18 +290,14 @@ const Index = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {sports.map((sport) => (
               <Dialog key={sport.name}>
-                <Card 
-                  className="hover:shadow-elevated transition-smooth cursor-pointer group"
-                  onClick={() => handleSportClick(sport.name)}
-                >
-                  <CardContent className="p-6 text-center">
-                    <div className="text-5xl mb-3 group-hover:scale-110 transition-bounce">{sport.emoji}</div>
-                    <div className="font-semibold">{sport.name}</div>
-                    <p className="text-xs text-muted-foreground mt-2">{sport.description}</p>
-                  </CardContent>
-                </Card>
                 <DialogTrigger asChild>
-                  <button className="sr-only">Open {sport.name} info</button>
+                  <Card className="hover:shadow-elevated transition-smooth cursor-pointer group">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-5xl mb-3 group-hover:scale-110 transition-bounce">{sport.emoji}</div>
+                      <div className="font-semibold">{sport.name}</div>
+                      <p className="text-xs text-muted-foreground mt-2">{sport.description}</p>
+                    </CardContent>
+                  </Card>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                   <DialogHeader>
@@ -348,10 +344,11 @@ const Index = () => {
                     </div>
 
                     <div className="pt-4 border-t">
-                      <Button className="w-full gradient-primary text-white" asChild>
-                        <Link to="/discover">
-                          Find {sport.name} Games Near You
-                        </Link>
+                      <Button 
+                        className="w-full gradient-primary text-white" 
+                        onClick={() => handleFindGames(sport.name)}
+                      >
+                        Find {sport.name} Games Near You
                       </Button>
                     </div>
                   </div>
