@@ -27,19 +27,41 @@ export const Navbar = () => {
           </Link>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             <Link 
               to="/discover" 
               className="text-muted-foreground hover:text-foreground transition-smooth font-medium"
             >
-              Discover Games
+              Discover
             </Link>
-            <Link 
-              to="/my-games" 
-              className="text-muted-foreground hover:text-foreground transition-smooth font-medium"
-            >
-              My Games
-            </Link>
+            {user && (
+              <>
+                <Link 
+                  to="/host-game" 
+                  className="text-muted-foreground hover:text-foreground transition-smooth font-medium"
+                >
+                  Host Game
+                </Link>
+                <Link 
+                  to="/community" 
+                  className="text-muted-foreground hover:text-foreground transition-smooth font-medium"
+                >
+                  Community
+                </Link>
+                <Link 
+                  to="/leaderboard" 
+                  className="text-muted-foreground hover:text-foreground transition-smooth font-medium"
+                >
+                  Leaderboard
+                </Link>
+                <Link 
+                  to="/my-games" 
+                  className="text-muted-foreground hover:text-foreground transition-smooth font-medium"
+                >
+                  My Games
+                </Link>
+              </>
+            )}
           </div>
 
           {/* CTA Buttons */}
