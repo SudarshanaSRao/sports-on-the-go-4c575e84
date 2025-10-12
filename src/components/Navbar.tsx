@@ -32,7 +32,7 @@ export const Navbar = () => {
               to="/discover" 
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth font-medium"
             >
-              <Search className="w-4 h-4" />
+              <MapPin className="w-4 h-4" />
               Find Games
             </Link>
             {user && (
