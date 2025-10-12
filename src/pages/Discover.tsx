@@ -701,7 +701,12 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
                   {filteredGames.map((game) => (
                     <button
                       key={game.id}
-                      onClick={() => setSelectedGame(game)}
+                      onClick={() => {
+                        setSelectedGame(game);
+                        if (map) {
+                          map.setView([game.lat, game.lng], 14);
+                        }
+                      }}
                       className="w-full text-left p-4 bg-gray-50 hover:bg-blue-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-all"
                     >
                       <div className="flex items-start justify-between mb-2">
