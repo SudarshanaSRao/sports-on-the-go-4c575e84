@@ -77,7 +77,7 @@ export default function Community() {
   }, [selectedSport, posts]);
 
   const fetchPosts = async () => {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("posts")
       .select(`
         *,
@@ -95,14 +95,14 @@ export default function Community() {
   const fetchUserVotes = async () => {
     if (!user) return;
     
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("post_votes")
       .select("post_id, vote_type")
       .eq("user_id", user.id);
 
     if (data) {
       const votesMap: Record<string, string> = {};
-      data.forEach(vote => {
+      data.forEach((vote: any) => {
         votesMap[vote.post_id] = vote.vote_type;
       });
       setUserVotes(votesMap);
@@ -110,7 +110,7 @@ export default function Community() {
   };
 
   const fetchComments = async (postId: string) => {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("comments")
       .select(`
         *,
@@ -136,7 +136,7 @@ export default function Community() {
       return;
     }
 
-    const { error } = await supabase.from("posts").insert({
+    const { error } = await (supabase as any).from("posts").insert({
       user_id: user.id,
       title: newPost.title,
       content: newPost.content,
@@ -164,13 +164,13 @@ export default function Community() {
 
     if (currentVote === voteType) {
       // Remove vote
-      await supabase.from("post_votes").delete().match({ post_id: postId, user_id: user.id });
+      await (supabase as any).from("post_votes").delete().match({ post_id: postId, user_id: user.id });
     } else if (currentVote) {
       // Update vote
-      await supabase.from("post_votes").update({ vote_type: voteType }).match({ post_id: postId, user_id: user.id });
+      await (supabase as any).from("post_votes").update({ vote_type: voteType }).match({ post_id: postId, user_id: user.id });
     } else {
       // Create vote
-      await supabase.from("post_votes").insert({ post_id: postId, user_id: user.id, vote_type: voteType });
+      await (supabase as any).from("post_votes").insert({ post_id: postId, user_id: user.id, vote_type: voteType });
     }
 
     fetchUserVotes();
@@ -180,7 +180,7 @@ export default function Community() {
   const handleAddComment = async (postId: string) => {
     if (!user || !newComment.trim()) return;
 
-    const { error } = await supabase.from("comments").insert({
+    const { error } = await (supabase as any).from("comments").insert({
       post_id: postId,
       user_id: user.id,
       content: newComment

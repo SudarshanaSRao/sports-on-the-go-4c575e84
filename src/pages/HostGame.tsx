@@ -109,7 +109,7 @@ export default function HostGame() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.from("games").insert({
+      const { error } = await (supabase as any).from("games").insert({
         host_id: user.id,
         sport: formData.sport,
         skill_level: formData.skill_level,
