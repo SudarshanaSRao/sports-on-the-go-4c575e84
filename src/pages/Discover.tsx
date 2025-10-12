@@ -533,10 +533,10 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
   };
 
   return (
-    <div className="w-full h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <Navbar />
-      <div className="pt-20 px-4 pb-4">
-        <div className="max-w-7xl mx-auto">
+      <div className="pt-20 px-4 pb-4 flex justify-center">
+        <div className="w-full max-w-7xl">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Your Game</h1>
           <p className="text-gray-600">Discover pickup games near you</p>
@@ -579,7 +579,7 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-140px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-200px)]">
           {/* Map Section */}
           <div className="lg:col-span-2 relative">
             <div id="map" className="w-full h-full rounded-xl shadow-lg border-2 border-gray-200"></div>

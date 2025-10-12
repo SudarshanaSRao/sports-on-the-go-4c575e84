@@ -260,7 +260,7 @@ const MyGames = () => {
                   </div>
                   <h3 className="text-xl font-bold mb-2">No Upcoming Games</h3>
                   <p className="text-muted-foreground mb-6">Join games to see them here</p>
-                  <Button className="gradient-primary text-white shadow-primary hover:opacity-90" asChild>
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
                     <Link to="/discover">Browse Games</Link>
                   </Button>
                 </div>
