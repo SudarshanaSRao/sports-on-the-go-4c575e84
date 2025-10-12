@@ -20,10 +20,10 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-primary transition-smooth group-hover:scale-105">
-              <Activity className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-primary transition-smooth group-hover:scale-105 text-2xl">
+              🤾🏼
             </div>
-            <span className="text-xl font-bold text-foreground">Sports on the go</span>
+            <span className="text-xl font-bold text-foreground">SquadUp</span>
           </Link>
 
           {/* Navigation Links */}
