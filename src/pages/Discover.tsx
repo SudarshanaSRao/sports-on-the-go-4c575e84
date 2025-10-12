@@ -86,6 +86,20 @@ const sampleGames: Game[] = [
   },
 ];
 
+// Calculate distance between two coordinates using Haversine formula
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): string => {
+  const R = 3959; // Earth's radius in miles
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  return `${distance.toFixed(1)} mi`;
+};
+
 export default function GameMap({ games = sampleGames, center = [37.7749, -122.4194], zoom = 12 }: GameMapProps) {
   const [map, setMap] = useState<any>(null);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
@@ -94,6 +108,21 @@ export default function GameMap({ games = sampleGames, center = [37.7749, -122.4
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Get user's location on mount
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation([latitude, longitude]);
+        },
+        (error) => {
+          console.log("Location access denied or unavailable");
+        }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     // Dynamically import Leaflet only on client side
@@ -301,7 +330,12 @@ export default function GameMap({ games = sampleGames, center = [37.7749, -122.4
                       {selectedGame.location}
                     </div>
                   </div>
-                  <Badge className="bg-blue-100 text-blue-700 border-blue-300">{selectedGame.distance}</Badge>
+                        <Badge className="bg-blue-100 text-blue-700 border-blue-300">
+                          {userLocation 
+                            ? calculateDistance(userLocation[0], userLocation[1], selectedGame.lat, selectedGame.lng)
+                            : selectedGame.distance
+                          }
+                        </Badge>
                 </div>
 
                 <div className="space-y-3 mb-6">
@@ -387,7 +421,12 @@ export default function GameMap({ games = sampleGames, center = [37.7749, -122.4
                             <div className="text-xs text-gray-600">{game.location}</div>
                           </div>
                         </div>
-                        <Badge className="bg-blue-100 text-blue-700 text-xs">{game.distance}</Badge>
+                        <Badge className="bg-blue-100 text-blue-700 text-xs">
+                          {userLocation 
+                            ? calculateDistance(userLocation[0], userLocation[1], game.lat, game.lng)
+                            : game.distance
+                          }
+                        </Badge>
                       </div>
                       <div className="flex items-center justify-between text-xs text-gray-600">
                         <span>
