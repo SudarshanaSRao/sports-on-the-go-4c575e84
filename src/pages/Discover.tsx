@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, MapPin, Navigation } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -309,9 +309,18 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [joiningGameId, setJoiningGameId] = useState<number | null>(null);
+  const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Get unique sports from games
+  const availableSports = Array.from(new Set(games.map(g => g.sport))).sort();
+
+  // Filter games based on selected sports
+  const filteredGames = selectedSports.length === 0 
+    ? games 
+    : games.filter(game => selectedSports.includes(game.sport));
 
   // Get user's location on mount
   useEffect(() => {
@@ -350,7 +359,7 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
         }).addTo(mapInstance);
 
         // Add markers for each game
-        games.forEach((game) => {
+        filteredGames.forEach((game) => {
           const icon = L.divIcon({
             className: "custom-marker",
             html: `
@@ -390,7 +399,25 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
         };
       });
     }
-  }, [games]);
+  }, [filteredGames]);
+
+  const toggleSportFilter = (sport: string) => {
+    setSelectedSports(prev => 
+      prev.includes(sport) 
+        ? prev.filter(s => s !== sport)
+        : [...prev, sport]
+    );
+  };
+
+  const openInAppleMaps = (game: Game) => {
+    const url = `https://maps.apple.com/?q=${encodeURIComponent(game.location)}&ll=${game.lat},${game.lng}`;
+    window.open(url, '_blank');
+  };
+
+  const openInGoogleMaps = (game: Game) => {
+    const url = `https://www.google.com/maps/search/?api=1&query=${game.lat},${game.lng}`;
+    window.open(url, '_blank');
+  };
 
   const handleJoinGame = async (gameId: number) => {
     if (!user) {
@@ -487,6 +514,43 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Your Game</h1>
           <p className="text-gray-600">Discover pickup games near you</p>
+          
+          {/* Sports Filter Bar */}
+          <div className="mt-4 p-4 bg-white rounded-lg shadow-md border border-gray-200">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-semibold text-gray-700">Filter by Sport:</span>
+              {selectedSports.length > 0 && (
+                <button
+                  onClick={() => setSelectedSports([])}
+                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {availableSports.map((sport) => {
+                const isSelected = selectedSports.includes(sport);
+                const game = games.find(g => g.sport === sport);
+                return (
+                  <button
+                    key={sport}
+                    onClick={() => toggleSportFilter(sport)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                      isSelected
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {game?.emoji} {sport}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Showing {filteredGames.length} of {games.length} games
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-140px)]">
@@ -505,8 +569,8 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
 
             {/* Map Legend */}
             <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-3 border border-gray-200 max-h-[300px] overflow-y-auto">
-              <div className="text-xs font-semibold text-gray-700 mb-2">Sports Available</div>
-              {Array.from(new Set(games.map(g => ({ sport: g.sport, emoji: g.emoji }))))
+              <div className="text-xs font-semibold text-gray-700 mb-2">Sports on Map</div>
+              {Array.from(new Set(filteredGames.map(g => ({ sport: g.sport, emoji: g.emoji }))))
                 .map((item, idx) => (
                   <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 mt-1">
                     <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">{item.emoji}</span>
@@ -587,6 +651,34 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
                   </div>
                 </div>
 
+                {/* Share Location Buttons */}
+                <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="text-xs text-gray-600 mb-2 flex items-center gap-1">
+                    <Share2 className="w-3 h-3" />
+                    <span className="font-semibold">Open location in:</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => openInAppleMaps(selectedGame)}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-xs"
+                    >
+                      <ExternalLink className="w-3 h-3 mr-1" />
+                      Apple Maps
+                    </Button>
+                    <Button
+                      onClick={() => openInGoogleMaps(selectedGame)}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-xs"
+                    >
+                      <ExternalLink className="w-3 h-3 mr-1" />
+                      Google Maps
+                    </Button>
+                  </div>
+                </div>
+
                 <Button 
                   onClick={() => selectedGame && handleJoinGame(selectedGame.id)}
                   disabled={joiningGameId === selectedGame?.id}
@@ -606,7 +698,7 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Nearby Games</h3>
                 <div className="space-y-3">
-                  {games.map((game) => (
+                  {filteredGames.map((game) => (
                     <button
                       key={game.id}
                       onClick={() => setSelectedGame(game)}
