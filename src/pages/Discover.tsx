@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
-import { GameMap } from "@/components/GameMap";
+import GameMap from "@/components/GameMap";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
