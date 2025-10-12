@@ -128,7 +128,7 @@ const Auth = () => {
               <MapPin className="w-7 h-7 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-black text-center">Welcome to PickupPro</CardTitle>
+          <CardTitle className="text-2xl font-black text-center">Welcome to SquadUp</CardTitle>
           <CardDescription className="text-center">
             Sign in to discover games or create your account
           </CardDescription>

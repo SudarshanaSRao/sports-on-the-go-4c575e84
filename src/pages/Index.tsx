@@ -210,7 +210,7 @@ const Index = () => {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-black mb-4">Why PickupPro?</h2>
+            <h2 className="text-3xl sm:text-4xl font-black mb-4">Why SquadUp?</h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               The most trusted platform for organizing and joining pickup games
             </p>
@@ -270,10 +270,10 @@ const Index = () => {
               <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
                 <MapPin className="w-4 h-4 text-white" />
               </div>
-              <span className="font-bold text-lg">PickupPro</span>
+              <span className="font-bold text-lg">SquadUp</span>
             </div>
             <div className="text-sm text-muted-foreground">
-              © 2025 PickupPro. Connecting athletes, one game at a time.
+              © 2025 SquadUp. Connecting athletes, one game at a time.
             </div>
           </div>
         </div>

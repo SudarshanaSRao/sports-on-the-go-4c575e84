@@ -33,7 +33,7 @@ export const Navbar = () => {
               className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth font-medium"
             >
               <MapPin className="w-4 h-4" />
-              Find Games
+              Discover Games
             </Link>
             {user && (
               <>

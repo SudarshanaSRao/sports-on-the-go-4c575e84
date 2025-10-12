@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
 
       if (data.user) {
-        toast.success("Account created successfully! Welcome to PickupPro.");
+        toast.success("Account created successfully! Welcome to SquadUp.");
       }
     } catch (error: any) {
       console.error("Sign up error:", error);
