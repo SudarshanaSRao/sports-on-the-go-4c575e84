@@ -34,6 +34,20 @@ const timeOptions = Array.from({ length: 48 }, (_, i) => {
   return { value, label };
 });
 
+const US_STATE_MAP = {
+  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+  CO: "Colorado", CT: "Connecticut", DE: "Delaware", FL: "Florida", GA: "Georgia",
+  HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa",
+  KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
+  MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri",
+  MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
+  NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio",
+  OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
+  SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont",
+  VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
+  DC: "District of Columbia"
+} as const;
+
 export default function HostGame() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -65,46 +79,59 @@ export default function HostGame() {
   const geocodeAddress = async () => {
     const street = formData.address.trim();
     const city = formData.city.trim();
-    const state = formData.state.trim();
+    const stateInput = formData.state.trim();
     const postalcode = formData.zip_code.trim();
 
-    const params = new URLSearchParams({
-      format: "jsonv2",
-      street,
-      city,
-      state,
-      postalcode,
-      country: "United States",
-      countrycodes: "us",
-      addressdetails: "1",
-      limit: "1",
-    });
+    const stateUpper = stateInput.toUpperCase();
+    const stateFull = (US_STATE_MAP as Record<string, string>)[stateUpper] || stateInput;
 
-    const url = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
-    console.debug("Geocoding URL:", url);
+    const buildStructured = (stateVal: string) =>
+      new URLSearchParams({
+        format: "jsonv2",
+        street,
+        city,
+        state: stateVal,
+        postalcode,
+        country: "United States",
+        countrycodes: "us",
+        addressdetails: "1",
+        limit: "1",
+      });
 
-    try {
-      const response = await fetch(url, { headers: { Accept: "application/json" } });
-      if (response.status === 429) {
-        throw new Error("RATE_LIMIT");
-      }
-      if (!response.ok) {
-        throw new Error(`HTTP_${response.status}`);
-      }
-
-      const data = await response.json();
-      if (!Array.isArray(data) || data.length === 0) {
-        throw new Error("NO_RESULTS");
-      }
-
-      return {
-        latitude: parseFloat(data[0].lat),
-        longitude: parseFloat(data[0].lon),
-      };
-    } catch (error) {
-      console.error("Geocoding error:", error);
-      throw error;
+    const candidates: string[] = [];
+    candidates.push(`https://nominatim.openstreetmap.org/search?${buildStructured(stateInput).toString()}`);
+    if (stateFull && stateFull !== stateInput) {
+      candidates.push(`https://nominatim.openstreetmap.org/search?${buildStructured(stateFull).toString()}`);
     }
+    const common = "format=jsonv2&limit=1&addressdetails=1&countrycodes=us";
+    const q1 = `${street}, ${city}, ${stateInput} ${postalcode}, USA`;
+    const q2 = `${street}, ${city}, ${stateFull} ${postalcode}, USA`;
+    candidates.push(`https://nominatim.openstreetmap.org/search?${common}&q=${encodeURIComponent(q1)}`);
+    if (q2 !== q1) {
+      candidates.push(`https://nominatim.openstreetmap.org/search?${common}&q=${encodeURIComponent(q2)}`);
+    }
+
+    for (const url of candidates) {
+      console.debug("Geocoding attempt:", url);
+      try {
+        const response = await fetch(url, { headers: { Accept: "application/json" } });
+        if (response.status === 429) throw new Error("RATE_LIMIT");
+        if (!response.ok) throw new Error(`HTTP_${response.status}`);
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          return {
+            latitude: parseFloat(data[0].lat),
+            longitude: parseFloat(data[0].lon),
+          };
+        }
+      } catch (err: any) {
+        if (err?.message === "RATE_LIMIT") throw err;
+        // Otherwise try next candidate
+        continue;
+      }
+    }
+
+    throw new Error("NO_RESULTS");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
