@@ -1,150 +1,198 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Search, Filter, Users, Calendar, Clock, Star } from "lucide-react";
-import GameMap from "@/components/GameMap";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { Navbar } from "@/components/Navbar";
 
-export default function Discover() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [userLocation, setUserLocation] = useState({ lat: 40.7128, lng: -74.006 });
+const SPORTS = [
+  "Basketball",
+  "Soccer",
+  "Tennis",
+  "Volleyball",
+  "Football",
+  "Baseball",
+  "Pickleball",
+  "Ultimate Frisbee",
+  "Running",
+  "Cycling",
+  "Badminton",
+  "Golf",
+];
+
+const SKILL_LEVELS = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "ALL_LEVELS"];
+
+const US_STATE_MAP = {
+  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
+  CO: "Colorado", CT: "Connecticut", DE: "Delaware", FL: "Florida", GA: "Georgia",
+  HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa",
+  KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
+  MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri",
+  MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
+  NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio",
+  OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
+  SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont",
+  VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
+};
+
+export default function HostGame() {
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
 
-  // Get user's location
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.log("Geolocation error:", error);
-          // Use default location (New York)
-        },
-      );
-    }
-  }, []);
+  const [formData, setFormData] = useState({
+    sport: "",
+    skillLevel: "",
+    gameDate: "",
+    startTime: "",
+    durationMinutes: "",
+    maxPlayers: "",
+    costPerPerson: "",
+    locationName: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    description: "",
+    equipmentRequirements: "",
+    gameRules: "",
+  });
 
-  // Fetch games from database
-  useEffect(() => {
-    fetchGames();
-  }, []);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const fetchGames = async () => {
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const geocodeAddress = async () => {
+    const { address, city, state, zipCode } = formData;
+    const stateName = US_STATE_MAP[state.toUpperCase() as keyof typeof US_STATE_MAP] || state;
+
     try {
-      setLoading(true);
+      // Try structured query first
+      const structuredUrl = `https://nominatim.openstreetmap.org/search?` +
+        `street=${encodeURIComponent(address)}&` +
+        `city=${encodeURIComponent(city)}&` +
+        `state=${encodeURIComponent(stateName)}&` +
+        `postalcode=${encodeURIComponent(zipCode)}&` +
+        `country=USA&format=json&limit=1`;
 
-      const { data, error } = await supabase
-        .from("games")
-        .select(
-          `
-          *,
-          profiles:host_id (
-            first_name,
-            last_name,
-            profile_photo
-          )
-        `,
-        )
-        .eq("status", "UPCOMING")
-        .gte("game_date", new Date().toISOString().split("T")[0])
-        .order("game_date", { ascending: true })
-        .order("start_time", { ascending: true });
-
-      if (error) {
-        console.error("Error fetching games:", error);
-        toast({
-          title: "Error loading games",
-          description: "Could not load games. Please refresh the page.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Transform data for map component
-      const transformedGames = (data || []).map((game) => {
-        const hostName = game.profiles
-          ? `${game.profiles.first_name || ""} ${game.profiles.last_name || ""}`.trim() || "Anonymous"
-          : "Anonymous";
-
-        // Calculate distance from user location
-        const distance = calculateDistance(userLocation.lat, userLocation.lng, game.latitude, game.longitude);
-
-        // Format date
-        const gameDate = new Date(game.game_date);
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-
-        let dateStr = gameDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-        if (gameDate.toDateString() === today.toDateString()) {
-          dateStr = "Today";
-        } else if (gameDate.toDateString() === tomorrow.toDateString()) {
-          dateStr = "Tomorrow";
-        }
-
-        // Format time (convert 24h to 12h)
-        const [hours, minutes] = game.start_time.split(":");
-        const hour = parseInt(hours);
-        const period = hour >= 12 ? "PM" : "AM";
-        const hour12 = hour % 12 || 12;
-        const timeStr = `${hour12}:${minutes} ${period}`;
-
-        // Get emoji for sport
-        const sportEmojis = {
-          Basketball: "🏀",
-          Soccer: "⚽",
-          Tennis: "🎾",
-          Volleyball: "🏐",
-          Football: "🏈",
-          Baseball: "⚾",
-          Pickleball: "🏓",
-          "Ultimate Frisbee": "🥏",
-          Running: "🏃",
-          Cycling: "🚴",
-          Badminton: "🏸",
-          Golf: "⛳",
-        };
-
-        return {
-          id: game.id,
-          sport: game.sport,
-          emoji: sportEmojis[game.sport] || "⚽",
-          location: game.location_name,
-          address: `${game.city}, ${game.state}`,
-          date: dateStr,
-          time: timeStr,
-          distance: `${distance.toFixed(1)} mi`,
-          players: {
-            current: game.current_players || 1,
-            max: game.max_players,
-          },
-          skillLevel: game.skill_level,
-          hostName: hostName,
-          hostRating: 4.5, // TODO: Get from reviews
-          price: game.cost_per_person > 0 ? `$${game.cost_per_person}` : "Free",
-          lat: game.latitude,
-          lng: game.longitude,
-          description: game.description,
-          equipmentRequirements: game.equipment_requirements,
-          gameRules: game.game_rules,
-        };
+      let response = await fetch(structuredUrl, {
+        headers: { "User-Agent": "SquadUp-App" },
       });
 
-      setGames(transformedGames);
-    } catch (error) {
-      console.error("Unexpected error:", error);
+      if (response.status === 429) {
+        throw new Error("Rate limit exceeded. Please try again in a minute.");
+      }
+
+      if (!response.ok) {
+        throw new Error(`Geocoding failed: ${response.statusText}`);
+      }
+
+      let data = await response.json();
+
+      // If structured query fails, try full-text search
+      if (!data || data.length === 0) {
+        const fullAddress = `${address}, ${city}, ${stateName} ${zipCode}, USA`;
+        const fullTextUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(fullAddress)}&format=json&limit=1`;
+
+        response = await fetch(fullTextUrl, {
+          headers: { "User-Agent": "SquadUp-App" },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Geocoding failed: ${response.statusText}`);
+        }
+
+        data = await response.json();
+      }
+
+      if (!data || data.length === 0) {
+        throw new Error("Could not find coordinates for this address. Please verify the address is correct.");
+      }
+
+      return {
+        latitude: parseFloat(data[0].lat),
+        longitude: parseFloat(data[0].lon),
+      };
+    } catch (error: any) {
+      console.error("Geocoding error:", error);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
+        title: "Authentication required",
+        description: "Please sign in to host a game.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Geocode the address
+      toast({
+        title: "Validating address...",
+        description: "Please wait while we verify your location.",
+      });
+
+      const { latitude, longitude } = await geocodeAddress();
+
+      // Create the game
+      const { error } = await supabase.from("games").insert({
+        host_id: user.id,
+        sport: formData.sport as any,
+        skill_level: formData.skillLevel as any,
+        game_date: formData.gameDate,
+        start_time: formData.startTime,
+        duration_minutes: parseInt(formData.durationMinutes),
+        max_players: parseInt(formData.maxPlayers),
+        cost_per_person: parseFloat(formData.costPerPerson) || 0,
+        location_name: formData.locationName,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip_code: formData.zipCode,
+        latitude,
+        longitude,
+        description: formData.description || null,
+        equipment_requirements: formData.equipmentRequirements || null,
+        game_rules: formData.gameRules || null,
+        status: "UPCOMING" as any,
+        visibility: "PUBLIC" as any,
+        current_players: 1,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Game created!",
+        description: "Your game has been posted successfully.",
+      });
+
+      navigate("/my-games");
+    } catch (error: any) {
+      console.error("Error creating game:", error);
+      toast({
+        title: "Error creating game",
+        description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -152,195 +200,144 @@ export default function Discover() {
     }
   };
 
-  // Calculate distance between two coordinates (Haversine formula)
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 3959; // Earth's radius in miles
-    const dLat = toRad(lat2 - lat1);
-    const dLon = toRad(lon2 - lon1);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
-
-  const toRad = (value) => {
-    return (value * Math.PI) / 180;
-  };
-
-  // Filter games based on search
-  const filteredGames = games.filter((game) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      game.sport.toLowerCase().includes(query) ||
-      game.location.toLowerCase().includes(query) ||
-      game.hostName.toLowerCase().includes(query) ||
-      game.address.toLowerCase().includes(query)
-    );
-  });
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading games...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      <Navbar />
       <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto max-w-7xl">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-black mb-2 text-gray-900">Discover Games</h1>
-            <p className="text-lg text-gray-600">Seek. Squad. Score. 🎯</p>
-          </div>
+        <div className="container mx-auto max-w-3xl">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-3xl font-black">Host a Game</CardTitle>
+              <CardDescription>Fill out the details to create your game</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Sport & Skill Level */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="sport">Sport *</Label>
+                    <Select name="sport" value={formData.sport} onValueChange={(value) => handleSelectChange("sport", value)} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a sport" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SPORTS.map((sport) => (
+                          <SelectItem key={sport} value={sport}>
+                            {sport}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-          {/* Search and Filters */}
-          <div className="grid lg:grid-cols-4 gap-6 mb-8">
-            <div className="lg:col-span-3">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Search by sport, location, or host..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12 text-base bg-white border-2 border-gray-200 focus:border-blue-500"
-                />
-              </div>
-            </div>
-
-            <Button variant="outline" className="h-12 border-2 border-gray-200 hover:border-blue-500 bg-white">
-              <Filter className="w-4 h-4 mr-2" />
-              Filters
-            </Button>
-          </div>
-
-          {/* Interactive Map */}
-          <div className="mb-8">
-            {games.length > 0 ? (
-              <GameMap games={filteredGames} center={[userLocation.lat, userLocation.lng]} zoom={12} />
-            ) : (
-              <div className="w-full h-96 bg-white rounded-lg border-2 border-gray-200 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-gray-600 text-lg mb-4">No games found nearby</p>
-                  <Button onClick={() => (window.location.href = "/host")}>Host Your First Game</Button>
+                  <div className="space-y-2">
+                    <Label htmlFor="skillLevel">Skill Level *</Label>
+                    <Select name="skillLevel" value={formData.skillLevel} onValueChange={(value) => handleSelectChange("skillLevel", value)} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select skill level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SKILL_LEVELS.map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {level.replace("_", " ")}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
 
-          {/* Games List */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">Nearby Games ({filteredGames.length})</h2>
-              <Badge variant="secondary" className="text-sm">
-                Within 25 miles
-              </Badge>
-            </div>
+                {/* Date & Time */}
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="gameDate">Date *</Label>
+                    <Input type="date" id="gameDate" name="gameDate" value={formData.gameDate} onChange={handleInputChange} required />
+                  </div>
 
-            {filteredGames.length === 0 ? (
-              <Card className="border-2 border-gray-200">
-                <CardContent className="p-12 text-center">
-                  <p className="text-gray-600 text-lg mb-4">
-                    {searchQuery ? "No games match your search" : "No games available yet"}
-                  </p>
-                  <Button onClick={() => (window.location.href = "/host")}>Host a Game</Button>
-                </CardContent>
-              </Card>
-            ) : (
-              filteredGames.map((game) => (
-                <Card
-                  key={game.id}
-                  className="hover:shadow-xl transition-all cursor-pointer border-2 border-gray-200 hover:border-blue-400 bg-white"
-                >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                      {/* Left Section */}
-                      <div className="flex items-start space-x-4 flex-1">
-                        {/* Sport Icon */}
-                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl shadow-lg flex-shrink-0">
-                          {game.emoji}
-                        </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="startTime">Start Time *</Label>
+                    <Input type="time" id="startTime" name="startTime" value={formData.startTime} onChange={handleInputChange} required />
+                  </div>
 
-                        {/* Game Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <div>
-                              <h3 className="text-xl font-bold text-gray-900 mb-1">{game.sport}</h3>
-                              <div className="flex items-center text-gray-600 text-sm">
-                                <MapPin className="w-4 h-4 mr-1" />
-                                <span className="truncate">
-                                  {game.location} • {game.address}
-                                </span>
-                              </div>
-                            </div>
-                            <Badge
-                              variant="secondary"
-                              className="flex-shrink-0 bg-blue-100 text-blue-700 border-blue-300"
-                            >
-                              {game.distance}
-                            </Badge>
-                          </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="durationMinutes">Duration (minutes) *</Label>
+                    <Input type="number" id="durationMinutes" name="durationMinutes" placeholder="0" value={formData.durationMinutes} onChange={handleInputChange} min="0" required />
+                  </div>
+                </div>
 
-                          {/* Details Grid */}
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-                            <div className="flex items-center space-x-2 text-sm">
-                              <Calendar className="w-4 h-4 text-gray-500" />
-                              <span className="font-medium text-gray-700">{game.date}</span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-sm">
-                              <Clock className="w-4 h-4 text-gray-500" />
-                              <span className="font-medium text-gray-700">{game.time}</span>
-                            </div>
-                            <div className="flex items-center space-x-2 text-sm">
-                              <Users className="w-4 h-4 text-gray-500" />
-                              <span className="font-medium text-gray-700">
-                                {game.players.current}/{game.players.max}
-                              </span>
-                            </div>
-                            <Badge variant="outline" className="w-fit border-green-300 bg-green-50 text-green-700">
-                              {game.skillLevel}
-                            </Badge>
-                          </div>
+                {/* Players & Cost */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="maxPlayers">Max Players *</Label>
+                    <Input type="number" id="maxPlayers" name="maxPlayers" placeholder="Enter a number" value={formData.maxPlayers} onChange={handleInputChange} min="1" required />
+                  </div>
 
-                          {/* Host Info */}
-                          <div className="flex items-center space-x-2 mt-4 pt-4 border-t border-gray-200">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
-                              {game.hostName[0]}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-gray-700 truncate">{game.hostName}</div>
-                              <div className="flex items-center space-x-1 text-xs text-gray-500">
-                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                <span>{game.hostRating}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="costPerPerson">Cost per Person ($)</Label>
+                    <Input type="number" id="costPerPerson" name="costPerPerson" placeholder="0.00" value={formData.costPerPerson} onChange={handleInputChange} min="0" step="0.01" />
+                  </div>
+                </div>
 
-                      {/* Right Section - CTA */}
-                      <div className="flex flex-col items-stretch md:items-end space-y-2 md:min-w-[140px]">
-                        <div className="text-2xl font-black text-blue-600 text-right">{game.price}</div>
-                        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all w-full">
-                          Join Game
-                        </Button>
-                        <Button variant="ghost" size="sm" className="w-full text-gray-600 hover:text-gray-900">
-                          View Details
-                        </Button>
-                      </div>
+                {/* Location */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="locationName">Location Name *</Label>
+                    <Input type="text" id="locationName" name="locationName" placeholder="Central Park Basketball Court" value={formData.locationName} onChange={handleInputChange} required />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Street Address *</Label>
+                    <Input type="text" id="address" name="address" placeholder="123 Main St" value={formData.address} onChange={handleInputChange} required />
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="city">City *</Label>
+                      <Input type="text" id="city" name="city" placeholder="New York" value={formData.city} onChange={handleInputChange} required />
                     </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="state">State *</Label>
+                      <Input type="text" id="state" name="state" placeholder="NY" maxLength={2} value={formData.state} onChange={handleInputChange} required />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="zipCode">ZIP Code *</Label>
+                      <Input type="text" id="zipCode" name="zipCode" placeholder="10001" value={formData.zipCode} onChange={handleInputChange} required />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Optional Details */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea id="description" name="description" placeholder="Tell players about this game..." value={formData.description} onChange={handleInputChange} rows={3} />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="equipmentRequirements">Equipment Requirements</Label>
+                    <Textarea id="equipmentRequirements" name="equipmentRequirements" placeholder="What should players bring?" value={formData.equipmentRequirements} onChange={handleInputChange} rows={2} />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="gameRules">Game Rules</Label>
+                    <Textarea id="gameRules" name="gameRules" placeholder="Any specific rules or format?" value={formData.gameRules} onChange={handleInputChange} rows={2} />
+                  </div>
+                </div>
+
+                {/* Submit Buttons */}
+                <div className="flex gap-4 pt-4">
+                  <Button type="submit" disabled={loading} className="flex-1">
+                    {loading ? "Creating..." : "Create Game"}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => navigate("/discover")} disabled={loading}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
