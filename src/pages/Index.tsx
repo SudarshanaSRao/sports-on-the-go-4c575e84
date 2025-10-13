@@ -173,9 +173,10 @@ const Index = () => {
             
             {/* Headline */}
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 leading-tight">
-              Find Pickup Games
+              Find People,{" "}
+              <span className="text-gradient">Team Up</span>
               <br />
-              <span className="text-gradient">Near You</span>
+              and Game
             </h1>
             
             <p className="text-xl sm:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
