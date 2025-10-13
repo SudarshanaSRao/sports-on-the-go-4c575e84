@@ -23,6 +23,17 @@ const sports = [
 
 const skillLevels = ["Beginner", "Intermediate", "Advanced", "All Levels"];
 
+// 30-minute increments with AM/PM labels
+const timeOptions = Array.from({ length: 48 }, (_, i) => {
+  const hours = Math.floor(i / 2);
+  const minutes = i % 2 === 0 ? 0 : 30;
+  const value = `${String(hours).padStart(2, "0")}:${minutes === 0 ? "00" : "30"}`;
+  const hour12 = ((hours + 11) % 12) + 1;
+  const period = hours < 12 ? "AM" : "PM";
+  const label = `${hour12}:${minutes === 0 ? "00" : "30"} ${period}`;
+  return { value, label };
+});
+
 export default function HostGame() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -94,6 +105,8 @@ export default function HostGame() {
     if (!formData.location_name?.trim()) missingFields.push("Location Name");
     if (!formData.address?.trim()) missingFields.push("Street Address");
     if (!formData.city?.trim()) missingFields.push("City");
+    if (!formData.state?.trim()) missingFields.push("State");
+    if (!formData.zip_code?.trim()) missingFields.push("Zip Code");
     if (!formData.game_date) missingFields.push("Game Date");
     if (!formData.start_time?.trim()) missingFields.push("Start Time");
     if (!formData.max_players?.trim()) missingFields.push("Max Players");
@@ -102,6 +115,17 @@ export default function HostGame() {
       toast({
         title: "Missing required fields",
         description: `Please fill in: ${missingFields.join(", ")}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Basic zip code validation (US 5-digit)
+    const zip = formData.zip_code.trim();
+    if (!/^[0-9]{5}$/.test(zip)) {
+      toast({
+        title: "Invalid Zip Code",
+        description: "Please enter a valid 5-digit zip code.",
         variant: "destructive"
       });
       return;
@@ -123,7 +147,7 @@ export default function HostGame() {
         console.error("Geocoding error:", geocodeError);
         toast({
           title: "Location not found",
-          description: "Could not find the address. Please check the street address, city, and state.",
+          description: "Could not find the address. Please check the street address, city, state, and zip code.",
           variant: "destructive"
         });
         setLoading(false);
@@ -250,7 +274,7 @@ export default function HostGame() {
                 />
               </div>
               <div>
-                <Label htmlFor="state">State</Label>
+                <Label htmlFor="state">State *</Label>
                 <Input
                   id="state"
                   placeholder="State"
@@ -259,7 +283,7 @@ export default function HostGame() {
                 />
               </div>
               <div>
-                <Label htmlFor="zip_code">Zip Code</Label>
+                <Label htmlFor="zip_code">Zip Code *</Label>
                 <Input
                   id="zip_code"
                   placeholder="Zip"
@@ -312,13 +336,19 @@ export default function HostGame() {
                 </Popover>
               </div>
               <div>
-                <Label htmlFor="start_time">Start Time *</Label>
-                <Input
-                  id="start_time"
-                  type="time"
-                  value={formData.start_time}
-                  onChange={(e) => handleInputChange("start_time", e.target.value)}
-                />
+<Label htmlFor="start_time">Start Time *</Label>
+<Select value={formData.start_time} onValueChange={(value) => handleInputChange("start_time", value)}>
+  <SelectTrigger>
+    <SelectValue placeholder="Select time" />
+  </SelectTrigger>
+  <SelectContent className="max-h-64">
+    {timeOptions.map((t) => (
+      <SelectItem key={t.value} value={t.value}>
+        {t.label}
+      </SelectItem>
+    ))}
+  </SelectContent>
+</Select>
               </div>
             </div>
 
