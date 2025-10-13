@@ -1,498 +1,346 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarIcon, MapPin } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Navbar } from "@/components/Navbar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Search, Filter, Users, Calendar, Clock, Star } from "lucide-react";
+import GameMap from "@/components/GameMap";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-const sports = [
-  "Basketball", "Soccer", "Tennis", "Volleyball", "Football", 
-  "Baseball", "Pickleball", "Ultimate Frisbee", "Running", 
-  "Cycling", "Badminton", "Golf"
-];
-
-const skillLevels = ["Beginner", "Intermediate", "Advanced", "All Levels"];
-
-// 30-minute increments with AM/PM labels
-const timeOptions = Array.from({ length: 48 }, (_, i) => {
-  const hours = Math.floor(i / 2);
-  const minutes = i % 2 === 0 ? 0 : 30;
-  const value = `${String(hours).padStart(2, "0")}:${minutes === 0 ? "00" : "30"}`;
-  const hour12 = ((hours + 11) % 12) + 1;
-  const period = hours < 12 ? "AM" : "PM";
-  const label = `${hour12}:${minutes === 0 ? "00" : "30"} ${period}`;
-  return { value, label };
-});
-
-const US_STATE_MAP = {
-  AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
-  CO: "Colorado", CT: "Connecticut", DE: "Delaware", FL: "Florida", GA: "Georgia",
-  HI: "Hawaii", ID: "Idaho", IL: "Illinois", IN: "Indiana", IA: "Iowa",
-  KS: "Kansas", KY: "Kentucky", LA: "Louisiana", ME: "Maine", MD: "Maryland",
-  MA: "Massachusetts", MI: "Michigan", MN: "Minnesota", MS: "Mississippi", MO: "Missouri",
-  MT: "Montana", NE: "Nebraska", NV: "Nevada", NH: "New Hampshire", NJ: "New Jersey",
-  NM: "New Mexico", NY: "New York", NC: "North Carolina", ND: "North Dakota", OH: "Ohio",
-  OK: "Oklahoma", OR: "Oregon", PA: "Pennsylvania", RI: "Rhode Island", SC: "South Carolina",
-  SD: "South Dakota", TN: "Tennessee", TX: "Texas", UT: "Utah", VT: "Vermont",
-  VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
-  DC: "District of Columbia"
-} as const;
-
-export default function HostGame() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+export default function Discover() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [games, setGames] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userLocation, setUserLocation] = useState({ lat: 40.7128, lng: -74.006 });
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    sport: "",
-    skill_level: "",
-    location_name: "",
-    address: "",
-    city: "",
-    state: "",
-    zip_code: "",
-    game_date: undefined as Date | undefined,
-    start_time: "",
-    duration_minutes: "",
-    max_players: "",
-    cost_per_person: "0",
-    description: "",
-    game_rules: "",
-    equipment_requirements: "",
-  });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const geocodeAddress = async () => {
-    const street = formData.address.trim();
-    const city = formData.city.trim();
-    const stateInput = formData.state.trim();
-    const postalcode = formData.zip_code.trim();
-
-    const stateUpper = stateInput.toUpperCase();
-    const stateFull = (US_STATE_MAP as Record<string, string>)[stateUpper] || stateInput;
-
-    const buildStructured = (stateVal: string) =>
-      new URLSearchParams({
-        format: "jsonv2",
-        street,
-        city,
-        state: stateVal,
-        postalcode,
-        country: "United States",
-        countrycodes: "us",
-        addressdetails: "1",
-        limit: "1",
-      });
-
-    const candidates: string[] = [];
-    candidates.push(`https://nominatim.openstreetmap.org/search?${buildStructured(stateInput).toString()}`);
-    if (stateFull && stateFull !== stateInput) {
-      candidates.push(`https://nominatim.openstreetmap.org/search?${buildStructured(stateFull).toString()}`);
+  // Get user's location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.log("Geolocation error:", error);
+          // Use default location (New York)
+        },
+      );
     }
-    const common = "format=jsonv2&limit=1&addressdetails=1&countrycodes=us";
-    const q1 = `${street}, ${city}, ${stateInput} ${postalcode}, USA`;
-    const q2 = `${street}, ${city}, ${stateFull} ${postalcode}, USA`;
-    candidates.push(`https://nominatim.openstreetmap.org/search?${common}&q=${encodeURIComponent(q1)}`);
-    if (q2 !== q1) {
-      candidates.push(`https://nominatim.openstreetmap.org/search?${common}&q=${encodeURIComponent(q2)}`);
-    }
+  }, []);
 
-    for (const url of candidates) {
-      console.debug("Geocoding attempt:", url);
-      try {
-        const response = await fetch(url, { headers: { Accept: "application/json" } });
-        if (response.status === 429) throw new Error("RATE_LIMIT");
-        if (!response.ok) throw new Error(`HTTP_${response.status}`);
-        const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
-          return {
-            latitude: parseFloat(data[0].lat),
-            longitude: parseFloat(data[0].lon),
-          };
-        }
-      } catch (err: any) {
-        if (err?.message === "RATE_LIMIT") throw err;
-        // Otherwise try next candidate
-        continue;
-      }
-    }
+  // Fetch games from database
+  useEffect(() => {
+    fetchGames();
+  }, []);
 
-    throw new Error("NO_RESULTS");
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to host a game.",
-        variant: "destructive"
-      });
-      navigate("/auth");
-      return;
-    }
-
-    // Validate required fields
-    const missingFields = [];
-    if (!formData.sport?.trim()) missingFields.push("Sport");
-    if (!formData.skill_level?.trim()) missingFields.push("Skill Level");
-    if (!formData.location_name?.trim()) missingFields.push("Location Name");
-    if (!formData.address?.trim()) missingFields.push("Street Address");
-    if (!formData.city?.trim()) missingFields.push("City");
-    if (!formData.state?.trim()) missingFields.push("State");
-    if (!formData.zip_code?.trim()) missingFields.push("Zip Code");
-    if (!formData.game_date) missingFields.push("Game Date");
-    if (!formData.start_time?.trim()) missingFields.push("Start Time");
-    if (!formData.max_players?.trim()) missingFields.push("Max Players");
-
-    if (missingFields.length > 0) {
-      toast({
-        title: "Missing required fields",
-        description: `Please fill in: ${missingFields.join(", ")}`,
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Basic zip code validation (US 5-digit)
-    const zip = formData.zip_code.trim();
-    if (!/^[0-9]{5}$/.test(zip)) {
-      toast({
-        title: "Invalid Zip Code",
-        description: "Please enter a valid 5-digit zip code.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setLoading(true);
-
+  const fetchGames = async () => {
     try {
-      // Geocode the address to get coordinates
-      toast({
-        title: "Finding location...",
-        description: "Converting address to coordinates..."
-      });
-      
-      let coords;
-      try {
-        coords = await geocodeAddress();
-      } catch (geocodeError: any) {
-        console.error("Geocoding error:", geocodeError);
-        const msg = typeof geocodeError?.message === "string" ? geocodeError.message : "";
-        let description = "Could not find the address. Please check the street address, city, state, and zip code.";
-        let title = "Location not found";
-        if (msg === "RATE_LIMIT") {
-          title = "Service busy";
-          description = "The map service is rate-limiting requests. Please wait a minute and try again.";
-        } else if (msg.startsWith("HTTP_")) {
-          const code = msg.replace("HTTP_", "");
-          title = "Lookup failed";
-          description = `Address lookup failed (code ${code}). Please try again.`;
-        }
-        toast({ title, description, variant: "destructive" });
-        setLoading(false);
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("games")
+        .select(
+          `
+          *,
+          profiles:host_id (
+            first_name,
+            last_name,
+            avatar_url
+          )
+        `,
+        )
+        .eq("status", "UPCOMING")
+        .gte("game_date", new Date().toISOString().split("T")[0])
+        .order("game_date", { ascending: true })
+        .order("start_time", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching games:", error);
+        toast({
+          title: "Error loading games",
+          description: "Could not load games. Please refresh the page.",
+          variant: "destructive",
+        });
         return;
       }
 
-      const { data, error } = await (supabase as any).from("games").insert({
-        host_id: user.id,
-        sport: formData.sport,
-        skill_level: formData.skill_level,
-        location_name: formData.location_name,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state || null,
-        zip_code: formData.zip_code || null,
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        game_date: format(formData.game_date, "yyyy-MM-dd"),
-        start_time: formData.start_time,
-        duration_minutes: parseInt(formData.duration_minutes) || 60,
-        max_players: parseInt(formData.max_players),
-        cost_per_person: parseFloat(formData.cost_per_person) || 0,
-        description: formData.description || null,
-        game_rules: formData.game_rules || null,
-        equipment_requirements: formData.equipment_requirements || null,
-        visibility: "PUBLIC",
-        status: "UPCOMING"
+      // Transform data for map component
+      const transformedGames = (data || []).map((game) => {
+        const hostName = game.profiles
+          ? `${game.profiles.first_name || ""} ${game.profiles.last_name || ""}`.trim() || "Anonymous"
+          : "Anonymous";
+
+        // Calculate distance from user location
+        const distance = calculateDistance(userLocation.lat, userLocation.lng, game.latitude, game.longitude);
+
+        // Format date
+        const gameDate = new Date(game.game_date);
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        let dateStr = gameDate.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        if (gameDate.toDateString() === today.toDateString()) {
+          dateStr = "Today";
+        } else if (gameDate.toDateString() === tomorrow.toDateString()) {
+          dateStr = "Tomorrow";
+        }
+
+        // Format time (convert 24h to 12h)
+        const [hours, minutes] = game.start_time.split(":");
+        const hour = parseInt(hours);
+        const period = hour >= 12 ? "PM" : "AM";
+        const hour12 = hour % 12 || 12;
+        const timeStr = `${hour12}:${minutes} ${period}`;
+
+        // Get emoji for sport
+        const sportEmojis = {
+          Basketball: "🏀",
+          Soccer: "⚽",
+          Tennis: "🎾",
+          Volleyball: "🏐",
+          Football: "🏈",
+          Baseball: "⚾",
+          Pickleball: "🏓",
+          "Ultimate Frisbee": "🥏",
+          Running: "🏃",
+          Cycling: "🚴",
+          Badminton: "🏸",
+          Golf: "⛳",
+        };
+
+        return {
+          id: game.id,
+          sport: game.sport,
+          emoji: sportEmojis[game.sport] || "⚽",
+          location: game.location_name,
+          address: `${game.city}, ${game.state}`,
+          date: dateStr,
+          time: timeStr,
+          distance: `${distance.toFixed(1)} mi`,
+          players: {
+            current: game.current_players || 1,
+            max: game.max_players,
+          },
+          skillLevel: game.skill_level,
+          hostName: hostName,
+          hostRating: 4.5, // TODO: Get from reviews
+          price: game.cost_per_person > 0 ? `$${game.cost_per_person}` : "Free",
+          lat: game.latitude,
+          lng: game.longitude,
+          description: game.description,
+          equipmentRequirements: game.equipment_requirements,
+          gameRules: game.game_rules,
+        };
       });
 
-      if (error) {
-        console.error("Database error:", error);
-        throw error;
-      }
-
+      setGames(transformedGames);
+    } catch (error) {
+      console.error("Unexpected error:", error);
       toast({
-        title: "Game created!",
-        description: "Your game has been posted successfully."
-      });
-
-      navigate("/discover");
-    } catch (error: any) {
-      console.error("Error creating game:", error);
-      toast({
-        title: "Database Error",
-        description: error?.message || "Failed to save game to database. Please try again.",
-        variant: "destructive"
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
 
+  // Calculate distance between two coordinates (Haversine formula)
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 3959; // Earth's radius in miles
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const toRad = (value) => {
+    return (value * Math.PI) / 180;
+  };
+
+  // Filter games based on search
+  const filteredGames = games.filter((game) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      game.sport.toLowerCase().includes(query) ||
+      game.location.toLowerCase().includes(query) ||
+      game.hostName.toLowerCase().includes(query) ||
+      game.address.toLowerCase().includes(query)
+    );
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 text-lg">Loading games...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-      <Navbar />
-      <div className="pt-20 px-4 pb-4">
-        <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Host a Game</h1>
-          <p className="text-gray-600 mb-6">Create and advertise your pickup game</p>
+      <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto max-w-7xl">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-black mb-2 text-gray-900">Discover Games</h1>
+            <p className="text-lg text-gray-600">Seek. Squad. Score. 🎯</p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Sport Selection */}
-            <div>
-              <Label htmlFor="sport">Sport *</Label>
-              <Select value={formData.sport} onValueChange={(value) => handleInputChange("sport", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a sport" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sports.map(sport => (
-                    <SelectItem key={sport} value={sport}>{sport}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Skill Level */}
-            <div>
-              <Label htmlFor="skill_level">Skill Level *</Label>
-              <Select value={formData.skill_level} onValueChange={(value) => handleInputChange("skill_level", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select skill level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {skillLevels.map(level => (
-                    <SelectItem key={level} value={level}>{level}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Location Name */}
-            <div>
-              <Label htmlFor="location_name">Location Name *</Label>
-              <Input
-                id="location_name"
-                placeholder="e.g., Central Park Basketball Courts"
-                value={formData.location_name}
-                onChange={(e) => handleInputChange("location_name", e.target.value)}
-              />
-            </div>
-
-            {/* Address */}
-            <div>
-              <Label htmlFor="address">Street Address *</Label>
-              <Input
-                id="address"
-                placeholder="e.g., 123 Main St"
-                value={formData.address}
-                onChange={(e) => handleInputChange("address", e.target.value)}
-              />
-            </div>
-
-            {/* City, State, Zip */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="city">City *</Label>
+          {/* Search and Filters */}
+          <div className="grid lg:grid-cols-4 gap-6 mb-8">
+            <div className="lg:col-span-3">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
-                  id="city"
-                  placeholder="City"
-                  value={formData.city}
-                  onChange={(e) => handleInputChange("city", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="state">State *</Label>
-                <Input
-                  id="state"
-                  placeholder="State"
-                  value={formData.state}
-                  onChange={(e) => handleInputChange("state", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="zip_code">Zip Code *</Label>
-                <Input
-                  id="zip_code"
-                  placeholder="Zip"
-                  value={formData.zip_code}
-                  onChange={(e) => handleInputChange("zip_code", e.target.value)}
+                  type="text"
+                  placeholder="Search by sport, location, or host..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 h-12 text-base bg-white border-2 border-gray-200 focus:border-blue-500"
                 />
               </div>
             </div>
 
-            {/* Location Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-2">
-                <MapPin className="w-5 h-5 text-blue-600 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-blue-900">Automatic Location Detection</p>
-                  <p className="text-sm text-blue-700 mt-1">
-                    The map will automatically pinpoint your game location based on the address you provide above.
-                  </p>
+            <Button variant="outline" className="h-12 border-2 border-gray-200 hover:border-blue-500 bg-white">
+              <Filter className="w-4 h-4 mr-2" />
+              Filters
+            </Button>
+          </div>
+
+          {/* Interactive Map */}
+          <div className="mb-8">
+            {games.length > 0 ? (
+              <GameMap games={filteredGames} center={[userLocation.lat, userLocation.lng]} zoom={12} />
+            ) : (
+              <div className="w-full h-96 bg-white rounded-lg border-2 border-gray-200 flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-gray-600 text-lg mb-4">No games found nearby</p>
+                  <Button onClick={() => (window.location.href = "/host")}>Host Your First Game</Button>
                 </div>
               </div>
+            )}
+          </div>
+
+          {/* Games List */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Nearby Games ({filteredGames.length})</h2>
+              <Badge variant="secondary" className="text-sm">
+                Within 25 miles
+              </Badge>
             </div>
 
-            {/* Date and Time */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label>Game Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !formData.game_date && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {formData.game_date ? format(formData.game_date, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={formData.game_date}
-                      onSelect={(date) => setFormData(prev => ({ ...prev, game_date: date }))}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div>
-<Label htmlFor="start_time">Start Time *</Label>
-<Select value={formData.start_time} onValueChange={(value) => handleInputChange("start_time", value)}>
-  <SelectTrigger>
-    <SelectValue placeholder="Select time" />
-  </SelectTrigger>
-  <SelectContent className="max-h-64">
-    {timeOptions.map((t) => (
-      <SelectItem key={t.value} value={t.value}>
-        {t.label}
-      </SelectItem>
-    ))}
-  </SelectContent>
-</Select>
-              </div>
-            </div>
+            {filteredGames.length === 0 ? (
+              <Card className="border-2 border-gray-200">
+                <CardContent className="p-12 text-center">
+                  <p className="text-gray-600 text-lg mb-4">
+                    {searchQuery ? "No games match your search" : "No games available yet"}
+                  </p>
+                  <Button onClick={() => (window.location.href = "/host")}>Host a Game</Button>
+                </CardContent>
+              </Card>
+            ) : (
+              filteredGames.map((game) => (
+                <Card
+                  key={game.id}
+                  className="hover:shadow-xl transition-all cursor-pointer border-2 border-gray-200 hover:border-blue-400 bg-white"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                      {/* Left Section */}
+                      <div className="flex items-start space-x-4 flex-1">
+                        {/* Sport Icon */}
+                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl shadow-lg flex-shrink-0">
+                          {game.emoji}
+                        </div>
 
-            {/* Duration and Players */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="duration_minutes">Duration (minutes)</Label>
-                <Input
-                  id="duration_minutes"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={formData.duration_minutes}
-                  onChange={(e) => handleInputChange("duration_minutes", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="max_players">Max Players *</Label>
-                <Input
-                  id="max_players"
-                  type="number"
-                  min="1"
-                  placeholder="Enter a number"
-                  value={formData.max_players}
-                  onChange={(e) => handleInputChange("max_players", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="cost_per_person">Cost per Person ($)</Label>
-                <Input
-                  id="cost_per_person"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  value={formData.cost_per_person}
-                  onChange={(e) => handleInputChange("cost_per_person", e.target.value)}
-                />
-              </div>
-            </div>
+                        {/* Game Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div>
+                              <h3 className="text-xl font-bold text-gray-900 mb-1">{game.sport}</h3>
+                              <div className="flex items-center text-gray-600 text-sm">
+                                <MapPin className="w-4 h-4 mr-1" />
+                                <span className="truncate">
+                                  {game.location} • {game.address}
+                                </span>
+                              </div>
+                            </div>
+                            <Badge
+                              variant="secondary"
+                              className="flex-shrink-0 bg-blue-100 text-blue-700 border-blue-300"
+                            >
+                              {game.distance}
+                            </Badge>
+                          </div>
 
-            {/* Description */}
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Tell players about your game..."
-                value={formData.description}
-                onChange={(e) => handleInputChange("description", e.target.value)}
-                rows={3}
-              />
-            </div>
+                          {/* Details Grid */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+                            <div className="flex items-center space-x-2 text-sm">
+                              <Calendar className="w-4 h-4 text-gray-500" />
+                              <span className="font-medium text-gray-700">{game.date}</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-sm">
+                              <Clock className="w-4 h-4 text-gray-500" />
+                              <span className="font-medium text-gray-700">{game.time}</span>
+                            </div>
+                            <div className="flex items-center space-x-2 text-sm">
+                              <Users className="w-4 h-4 text-gray-500" />
+                              <span className="font-medium text-gray-700">
+                                {game.players.current}/{game.players.max}
+                              </span>
+                            </div>
+                            <Badge variant="outline" className="w-fit border-green-300 bg-green-50 text-green-700">
+                              {game.skillLevel}
+                            </Badge>
+                          </div>
 
-            {/* Game Rules */}
-            <div>
-              <Label htmlFor="game_rules">Game Rules</Label>
-              <Textarea
-                id="game_rules"
-                placeholder="Any specific rules for this game..."
-                value={formData.game_rules}
-                onChange={(e) => handleInputChange("game_rules", e.target.value)}
-                rows={3}
-              />
-            </div>
+                          {/* Host Info */}
+                          <div className="flex items-center space-x-2 mt-4 pt-4 border-t border-gray-200">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                              {game.hostName[0]}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-gray-700 truncate">{game.hostName}</div>
+                              <div className="flex items-center space-x-1 text-xs text-gray-500">
+                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                <span>{game.hostRating}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-            {/* Equipment Requirements */}
-            <div>
-              <Label htmlFor="equipment_requirements">Equipment Requirements</Label>
-              <Textarea
-                id="equipment_requirements"
-                placeholder="What should players bring..."
-                value={formData.equipment_requirements}
-                onChange={(e) => handleInputChange("equipment_requirements", e.target.value)}
-                rows={2}
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex gap-4">
-              <Button type="submit" disabled={loading} className="flex-1">
-                {loading ? "Creating..." : "Create Game"}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => navigate("/discover")}>
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </div>
+                      {/* Right Section - CTA */}
+                      <div className="flex flex-col items-stretch md:items-end space-y-2 md:min-w-[140px]">
+                        <div className="text-2xl font-black text-blue-600 text-right">{game.price}</div>
+                        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all w-full">
+                          Join Game
+                        </Button>
+                        <Button variant="ghost" size="sm" className="w-full text-gray-600 hover:text-gray-900">
+                          View Details
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
