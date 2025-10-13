@@ -88,7 +88,10 @@ export default function HostGame() {
         `country=USA&format=json&limit=1`;
 
       let response = await fetch(structuredUrl, {
-        headers: { "User-Agent": "SquadUp-App" },
+        headers: { 
+          "User-Agent": "SquadUp-App",
+          "Accept": "application/json"
+        },
       });
 
       if (response.status === 429) {
@@ -96,22 +99,27 @@ export default function HostGame() {
       }
 
       if (!response.ok) {
-        throw new Error(`Geocoding failed: ${response.statusText}`);
+        throw new Error(`Geocoding service unavailable (${response.status}). Please try again later.`);
       }
 
       let data = await response.json();
 
       // If structured query fails, try full-text search
       if (!data || data.length === 0) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Add delay between requests
+        
         const fullAddress = `${address}, ${city}, ${stateName} ${zipCode}, USA`;
         const fullTextUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(fullAddress)}&format=json&limit=1`;
 
         response = await fetch(fullTextUrl, {
-          headers: { "User-Agent": "SquadUp-App" },
+          headers: { 
+            "User-Agent": "SquadUp-App",
+            "Accept": "application/json"
+          },
         });
 
         if (!response.ok) {
-          throw new Error(`Geocoding failed: ${response.statusText}`);
+          throw new Error(`Geocoding service unavailable (${response.status}). Please try again later.`);
         }
 
         data = await response.json();
@@ -127,6 +135,9 @@ export default function HostGame() {
       };
     } catch (error: any) {
       console.error("Geocoding error:", error);
+      if (error.message.includes("Failed to fetch")) {
+        throw new Error("Network error. Please check your internet connection and try again.");
+      }
       throw error;
     }
   };
@@ -255,8 +266,9 @@ export default function HostGame() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="startTime">Start Time *</Label>
-                    <Input type="time" id="startTime" name="startTime" value={formData.startTime} onChange={handleInputChange} required />
+                    <Label htmlFor="startTime">Start Time (12-hour format) *</Label>
+                    <Input type="time" id="startTime" name="startTime" value={formData.startTime} onChange={handleInputChange} required className="[&::-webkit-calendar-picker-indicator]:cursor-pointer" />
+                    <p className="text-xs text-muted-foreground">Select time in AM/PM format</p>
                   </div>
 
                   <div className="space-y-2">
@@ -282,7 +294,7 @@ export default function HostGame() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="locationName">Location Name *</Label>
-                    <Input type="text" id="locationName" name="locationName" placeholder="Central Park Basketball Court" value={formData.locationName} onChange={handleInputChange} required />
+                    <Input type="text" id="locationName" name="locationName" placeholder="Enter a location" value={formData.locationName} onChange={handleInputChange} required />
                   </div>
 
                   <div className="space-y-2">
@@ -293,17 +305,17 @@ export default function HostGame() {
                   <div className="grid md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="city">City *</Label>
-                      <Input type="text" id="city" name="city" placeholder="New York" value={formData.city} onChange={handleInputChange} required />
+                      <Input type="text" id="city" name="city" placeholder="Enter a city" value={formData.city} onChange={handleInputChange} required />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="state">State *</Label>
-                      <Input type="text" id="state" name="state" placeholder="NY" maxLength={2} value={formData.state} onChange={handleInputChange} required />
+                      <Input type="text" id="state" name="state" placeholder="Enter a state" maxLength={2} value={formData.state} onChange={handleInputChange} required />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="zipCode">ZIP Code *</Label>
-                      <Input type="text" id="zipCode" name="zipCode" placeholder="10001" value={formData.zipCode} onChange={handleInputChange} required />
+                      <Input type="text" id="zipCode" name="zipCode" placeholder="Enter a zip code" value={formData.zipCode} onChange={handleInputChange} required />
                     </div>
                   </div>
                 </div>
