@@ -51,7 +51,9 @@ export default function HostGame() {
     sport: "",
     skillLevel: "",
     gameDate: "",
-    startTime: "",
+    startTimeHour: "",
+    startTimeMinute: "",
+    startTimePeriod: "",
     durationMinutes: "",
     maxPlayers: "",
     costPerPerson: "",
@@ -158,6 +160,15 @@ export default function HostGame() {
     setLoading(true);
 
     try {
+      // Convert 12-hour time to 24-hour format for database
+      let hour24 = parseInt(formData.startTimeHour);
+      if (formData.startTimePeriod === "PM" && hour24 !== 12) {
+        hour24 += 12;
+      } else if (formData.startTimePeriod === "AM" && hour24 === 12) {
+        hour24 = 0;
+      }
+      const startTime24 = `${hour24.toString().padStart(2, '0')}:${formData.startTimeMinute}`;
+
       // Geocode the address
       toast({
         title: "Validating address...",
@@ -172,7 +183,7 @@ export default function HostGame() {
         sport: formData.sport as any,
         skill_level: formData.skillLevel as any,
         game_date: formData.gameDate,
-        start_time: formData.startTime,
+        start_time: startTime24,
         duration_minutes: parseInt(formData.durationMinutes),
         max_players: parseInt(formData.maxPlayers),
         cost_per_person: parseFloat(formData.costPerPerson) || 0,
@@ -266,9 +277,44 @@ export default function HostGame() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="startTime">Start Time (12-hour format) *</Label>
-                    <Input type="time" id="startTime" name="startTime" value={formData.startTime} onChange={handleInputChange} required className="[&::-webkit-calendar-picker-indicator]:cursor-pointer" />
-                    <p className="text-xs text-muted-foreground">Select time in AM/PM format</p>
+                    <Label>Start Time *</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Select name="startTimeHour" value={formData.startTimeHour} onValueChange={(value) => handleSelectChange("startTimeHour", value)} required>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Hour" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
+                            <SelectItem key={hour} value={hour.toString()}>
+                              {hour}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Select name="startTimeMinute" value={formData.startTimeMinute} onValueChange={(value) => handleSelectChange("startTimeMinute", value)} required>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Min" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["00", "15", "30", "45"].map((minute) => (
+                            <SelectItem key={minute} value={minute}>
+                              {minute}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      
+                      <Select name="startTimePeriod" value={formData.startTimePeriod} onValueChange={(value) => handleSelectChange("startTimePeriod", value)} required>
+                        <SelectTrigger>
+                          <SelectValue placeholder="AM/PM" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="AM">AM</SelectItem>
+                          <SelectItem value="PM">PM</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
