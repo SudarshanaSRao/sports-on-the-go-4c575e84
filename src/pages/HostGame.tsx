@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/Navbar";
+import { IOSTimePicker } from "@/components/IOSTimePicker";
 
 const SPORTS = [
   "Basketball",
@@ -51,9 +52,7 @@ export default function HostGame() {
     sport: "",
     skillLevel: "",
     gameDate: "",
-    startTimeHour: "",
-    startTimeMinute: "",
-    startTimePeriod: "",
+    startTime: { hour: "12", minute: "00", period: "PM" },
     durationMinutes: "",
     maxPlayers: "",
     costPerPerson: "",
@@ -161,13 +160,13 @@ export default function HostGame() {
 
     try {
       // Convert 12-hour time to 24-hour format for database
-      let hour24 = parseInt(formData.startTimeHour);
-      if (formData.startTimePeriod === "PM" && hour24 !== 12) {
+      let hour24 = parseInt(formData.startTime.hour);
+      if (formData.startTime.period === "PM" && hour24 !== 12) {
         hour24 += 12;
-      } else if (formData.startTimePeriod === "AM" && hour24 === 12) {
+      } else if (formData.startTime.period === "AM" && hour24 === 12) {
         hour24 = 0;
       }
-      const startTime24 = `${hour24.toString().padStart(2, '0')}:${formData.startTimeMinute}`;
+      const startTime24 = `${hour24.toString().padStart(2, '0')}:${formData.startTime.minute}`;
 
       // Geocode the address
       toast({
@@ -278,43 +277,10 @@ export default function HostGame() {
 
                   <div className="space-y-2">
                     <Label>Start Time *</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                      <Select name="startTimeHour" value={formData.startTimeHour} onValueChange={(value) => handleSelectChange("startTimeHour", value)} required>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Hour" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
-                            <SelectItem key={hour} value={hour.toString()}>
-                              {hour}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      
-                      <Select name="startTimeMinute" value={formData.startTimeMinute} onValueChange={(value) => handleSelectChange("startTimeMinute", value)} required>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Min" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {["00", "15", "30", "45"].map((minute) => (
-                            <SelectItem key={minute} value={minute}>
-                              {minute}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      
-                      <Select name="startTimePeriod" value={formData.startTimePeriod} onValueChange={(value) => handleSelectChange("startTimePeriod", value)} required>
-                        <SelectTrigger>
-                          <SelectValue placeholder="AM/PM" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="AM">AM</SelectItem>
-                          <SelectItem value="PM">PM</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <IOSTimePicker
+                      value={formData.startTime}
+                      onChange={(time) => setFormData((prev) => ({ ...prev, startTime: time }))}
+                    />
                   </div>
 
                   <div className="space-y-2">
