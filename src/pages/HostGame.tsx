@@ -116,17 +116,29 @@ export default function HostGame() {
         description: "Converting address to coordinates..."
       });
       
-      const coords = await geocodeAddress();
+      let coords;
+      try {
+        coords = await geocodeAddress();
+      } catch (geocodeError) {
+        console.error("Geocoding error:", geocodeError);
+        toast({
+          title: "Location not found",
+          description: "Could not find the address. Please check the street address, city, and state.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
 
-      const { error } = await (supabase as any).from("games").insert({
+      const { data, error } = await (supabase as any).from("games").insert({
         host_id: user.id,
         sport: formData.sport,
         skill_level: formData.skill_level,
         location_name: formData.location_name,
         address: formData.address,
         city: formData.city,
-        state: formData.state,
-        zip_code: formData.zip_code,
+        state: formData.state || null,
+        zip_code: formData.zip_code || null,
         latitude: coords.latitude,
         longitude: coords.longitude,
         game_date: format(formData.game_date, "yyyy-MM-dd"),
@@ -134,14 +146,17 @@ export default function HostGame() {
         duration_minutes: parseInt(formData.duration_minutes) || 60,
         max_players: parseInt(formData.max_players),
         cost_per_person: parseFloat(formData.cost_per_person) || 0,
-        description: formData.description,
-        game_rules: formData.game_rules,
-        equipment_requirements: formData.equipment_requirements,
+        description: formData.description || null,
+        game_rules: formData.game_rules || null,
+        equipment_requirements: formData.equipment_requirements || null,
         visibility: "PUBLIC",
         status: "UPCOMING"
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Database error:", error);
+        throw error;
+      }
 
       toast({
         title: "Game created!",
@@ -149,11 +164,11 @@ export default function HostGame() {
       });
 
       navigate("/discover");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating game:", error);
       toast({
-        title: "Error",
-        description: "Failed to create game. Please check the address and try again.",
+        title: "Database Error",
+        description: error?.message || "Failed to save game to database. Please try again.",
         variant: "destructive"
       });
     } finally {
