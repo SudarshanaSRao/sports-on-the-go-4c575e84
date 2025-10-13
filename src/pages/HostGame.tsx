@@ -87,12 +87,21 @@ export default function HostGame() {
       return;
     }
 
-    if (!formData.sport || !formData.skill_level || !formData.location_name || 
-        !formData.game_date || !formData.start_time || !formData.max_players ||
-        !formData.address || !formData.city) {
+    // Validate required fields
+    const missingFields = [];
+    if (!formData.sport?.trim()) missingFields.push("Sport");
+    if (!formData.skill_level?.trim()) missingFields.push("Skill Level");
+    if (!formData.location_name?.trim()) missingFields.push("Location Name");
+    if (!formData.address?.trim()) missingFields.push("Street Address");
+    if (!formData.city?.trim()) missingFields.push("City");
+    if (!formData.game_date) missingFields.push("Game Date");
+    if (!formData.start_time?.trim()) missingFields.push("Start Time");
+    if (!formData.max_players?.trim()) missingFields.push("Max Players");
+
+    if (missingFields.length > 0) {
       toast({
-        title: "Missing fields",
-        description: "Please fill in all required fields including address and city.",
+        title: "Missing required fields",
+        description: `Please fill in: ${missingFields.join(", ")}`,
         variant: "destructive"
       });
       return;
