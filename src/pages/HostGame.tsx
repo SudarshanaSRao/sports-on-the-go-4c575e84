@@ -359,7 +359,8 @@ export default function HostGame() {
                 <Input
                   id="duration_minutes"
                   type="number"
-                  placeholder="60"
+                  min="0"
+                  placeholder="0"
                   value={formData.duration_minutes}
                   onChange={(e) => handleInputChange("duration_minutes", e.target.value)}
                 />
@@ -369,7 +370,8 @@ export default function HostGame() {
                 <Input
                   id="max_players"
                   type="number"
-                  placeholder="10"
+                  min="1"
+                  placeholder="Enter a number"
                   value={formData.max_players}
                   onChange={(e) => handleInputChange("max_players", e.target.value)}
                 />
@@ -379,6 +381,7 @@ export default function HostGame() {
                 <Input
                   id="cost_per_person"
                   type="number"
+                  min="0"
                   step="0.01"
                   placeholder="0.00"
                   value={formData.cost_per_person}
