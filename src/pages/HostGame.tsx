@@ -50,7 +50,7 @@ export default function Discover() {
           profiles:host_id (
             first_name,
             last_name,
-            avatar_url
+            profile_photo
           )
         `,
         )
