@@ -63,22 +63,44 @@ export default function HostGame() {
   };
 
   const geocodeAddress = async () => {
-    const fullAddress = `${formData.address}, ${formData.city}, ${formData.state} ${formData.zip_code}`.trim();
-    
+    const street = formData.address.trim();
+    const city = formData.city.trim();
+    const state = formData.state.trim();
+    const postalcode = formData.zip_code.trim();
+
+    const params = new URLSearchParams({
+      format: "jsonv2",
+      street,
+      city,
+      state,
+      postalcode,
+      country: "United States",
+      countrycodes: "us",
+      addressdetails: "1",
+      limit: "1",
+    });
+
+    const url = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
+    console.debug("Geocoding URL:", url);
+
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`
-      );
-      const data = await response.json();
-      
-      if (data && data.length > 0) {
-        return {
-          latitude: parseFloat(data[0].lat),
-          longitude: parseFloat(data[0].lon),
-        };
-      } else {
-        throw new Error("Location not found");
+      const response = await fetch(url, { headers: { Accept: "application/json" } });
+      if (response.status === 429) {
+        throw new Error("RATE_LIMIT");
       }
+      if (!response.ok) {
+        throw new Error(`HTTP_${response.status}`);
+      }
+
+      const data = await response.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        throw new Error("NO_RESULTS");
+      }
+
+      return {
+        latitude: parseFloat(data[0].lat),
+        longitude: parseFloat(data[0].lon),
+      };
     } catch (error) {
       console.error("Geocoding error:", error);
       throw error;
@@ -143,13 +165,20 @@ export default function HostGame() {
       let coords;
       try {
         coords = await geocodeAddress();
-      } catch (geocodeError) {
+      } catch (geocodeError: any) {
         console.error("Geocoding error:", geocodeError);
-        toast({
-          title: "Location not found",
-          description: "Could not find the address. Please check the street address, city, state, and zip code.",
-          variant: "destructive"
-        });
+        const msg = typeof geocodeError?.message === "string" ? geocodeError.message : "";
+        let description = "Could not find the address. Please check the street address, city, state, and zip code.";
+        let title = "Location not found";
+        if (msg === "RATE_LIMIT") {
+          title = "Service busy";
+          description = "The map service is rate-limiting requests. Please wait a minute and try again.";
+        } else if (msg.startsWith("HTTP_")) {
+          const code = msg.replace("HTTP_", "");
+          title = "Lookup failed";
+          description = `Address lookup failed (code ${code}). Please try again.`;
+        }
+        toast({ title, description, variant: "destructive" });
         setLoading(false);
         return;
       }
