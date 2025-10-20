@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filter } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filter, Trash2 } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 
@@ -52,6 +53,18 @@ interface Comment {
   };
 }
 
+interface CommunityMember {
+  id: string;
+  user_id: string;
+  role: string;
+  joined_at: string;
+  profiles: {
+    username: string | null;
+    first_name: string;
+    last_name: string;
+  };
+}
+
 export default function Community() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -72,6 +85,9 @@ export default function Community() {
   const [userVotes, setUserVotes] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<"list" | "posts">("list");
   const [sportFilter, setSportFilter] = useState<string>("ALL");
+  const [showMembersPanel, setShowMembersPanel] = useState(false);
+  const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -86,6 +102,7 @@ export default function Community() {
       fetchPosts(selectedCommunity.id);
       checkMembership(selectedCommunity.id);
       fetchUserVotes();
+      fetchCommunityMembers(selectedCommunity.id);
     }
   }, [selectedCommunity]);
 
@@ -149,12 +166,13 @@ export default function Community() {
     
     const { data } = await supabase
       .from("community_members")
-      .select("id")
+      .select("id, role")
       .eq("community_id", communityId)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     setIsMember(!!data);
+    setIsAdmin(data?.role === 'admin');
   };
 
   const fetchUserVotes = async () => {
@@ -386,6 +404,101 @@ export default function Community() {
     setSelectedCommunity(null);
     setViewMode("list");
     setShowNewPost(false);
+    setShowMembersPanel(false);
+  };
+
+  const fetchCommunityMembers = async (communityId: string) => {
+    const { data: membersData, error } = await supabase
+      .from("community_members")
+      .select("*")
+      .eq("community_id", communityId)
+      .order("joined_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching members:", error);
+      return;
+    }
+
+    if (membersData && membersData.length > 0) {
+      const userIds = [...new Set(membersData.map(m => m.user_id))];
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, username, first_name, last_name")
+        .in("id", userIds);
+
+      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      
+      const membersWithProfiles = membersData.map(member => ({
+        ...member,
+        profiles: profilesMap.get(member.user_id) || { username: null, first_name: "Unknown", last_name: "User" }
+      }));
+
+      setCommunityMembers(membersWithProfiles as CommunityMember[]);
+    }
+  };
+
+  const handleDeleteCommunity = async () => {
+    if (!selectedCommunity || !user) return;
+
+    if (selectedCommunity.created_by !== user.id) {
+      toast({
+        title: "Permission denied",
+        description: "Only the community owner can delete the community.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const confirmDelete = window.confirm(`Are you sure you want to delete "${selectedCommunity.name}"? This action cannot be undone.`);
+    
+    if (!confirmDelete) return;
+
+    const { error } = await supabase
+      .from("communities")
+      .delete()
+      .eq("id", selectedCommunity.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete community.",
+        variant: "destructive"
+      });
+    } else {
+      toast({ title: "Community deleted successfully!" });
+      handleBackToCommunities();
+      fetchCommunities();
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string, commentUserId: string, postId: string) => {
+    if (!user) return;
+
+    // Allow deletion if user is comment owner or community admin
+    if (commentUserId !== user.id && !isAdmin) {
+      toast({
+        title: "Permission denied",
+        description: "You can only delete your own comments or be an admin.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("comments")
+      .delete()
+      .eq("id", commentId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete comment.",
+        variant: "destructive"
+      });
+    } else {
+      toast({ title: "Comment deleted!" });
+      fetchComments(postId);
+    }
   };
 
   return (
@@ -562,11 +675,45 @@ export default function Community() {
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      <Sheet open={showMembersPanel} onOpenChange={setShowMembersPanel}>
+                        <SheetTrigger asChild>
+                          <Button variant="outline">
+                            <Users className="w-4 h-4 mr-2" />
+                            Members
+                          </Button>
+                        </SheetTrigger>
+                        <SheetContent>
+                          <SheetHeader>
+                            <SheetTitle>Community Members</SheetTitle>
+                          </SheetHeader>
+                          <div className="mt-6 space-y-3">
+                            {communityMembers.map(member => (
+                              <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                                <div>
+                                  <p className="font-medium">
+                                    {member.profiles.username || `${member.profiles.first_name} ${member.profiles.last_name}`}
+                                  </p>
+                                  <p className="text-xs text-gray-500">{member.role}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </SheetContent>
+                      </Sheet>
                       {isMember ? (
                         <>
                           <Button onClick={() => setShowNewPost(!showNewPost)}>
                             {showNewPost ? "Cancel" : "New Post"}
                           </Button>
+                          {selectedCommunity?.created_by === user?.id && (
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={handleDeleteCommunity}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
                           <Button 
                             variant="outline" 
                             onClick={() => selectedCommunity && handleLeaveCommunity(selectedCommunity.id)}
@@ -665,14 +812,28 @@ export default function Community() {
                     {selectedPost === post.id && (
                       <div className="mt-4 space-y-3">
                         {comments[post.id]?.map(comment => (
-                          <div key={comment.id} className="bg-gray-50 p-3 rounded">
-                            <p className="text-sm font-semibold">
-                              {comment.profiles.username || `${comment.profiles.first_name} ${comment.profiles.last_name}`}
-                            </p>
-                            <p className="text-sm text-gray-700">{comment.content}</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {new Date(comment.created_at).toLocaleDateString()}
-                            </p>
+                          <div key={comment.id} className="bg-gray-50 p-3 rounded relative group">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <p className="text-sm font-semibold">
+                                  {comment.profiles.username || `${comment.profiles.first_name} ${comment.profiles.last_name}`}
+                                </p>
+                                <p className="text-sm text-gray-700">{comment.content}</p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {new Date(comment.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
+                              {(comment.user_id === user?.id || isAdmin) && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteComment(comment.id, comment.user_id, post.id)}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <Trash2 className="w-4 h-4 text-red-600" />
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         ))}
                         <div className="flex gap-2">
