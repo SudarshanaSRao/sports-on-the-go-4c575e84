@@ -180,31 +180,62 @@ export default function HostGame() {
       const { latitude, longitude } = await geocodeAddress();
 
       // Create the game
-      const { error } = await supabase.from("games").insert({
-        host_id: user.id,
-        sport: formData.sport as any,
-        skill_level: formData.skillLevel as any,
-        game_date: formData.gameDate,
-        start_time: startTime24,
-        duration_minutes: parseInt(formData.durationMinutes),
-        max_players: parseInt(formData.maxPlayers),
-        cost_per_person: parseFloat(formData.costPerPerson) || 0,
-        location_name: formData.locationName,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip_code: formData.zipCode,
-        latitude,
-        longitude,
-        description: formData.description || null,
-        equipment_requirements: formData.equipmentRequirements || null,
-        game_rules: formData.gameRules || null,
-        status: "UPCOMING" as any,
-        visibility: "PUBLIC" as any,
-        current_players: 1,
-      });
+      const { data: gameData, error } = await supabase
+        .from("games")
+        .insert({
+          host_id: user.id,
+          sport: formData.sport as any,
+          skill_level: formData.skillLevel as any,
+          game_date: formData.gameDate,
+          start_time: startTime24,
+          duration_minutes: parseInt(formData.durationMinutes),
+          max_players: parseInt(formData.maxPlayers),
+          cost_per_person: parseFloat(formData.costPerPerson) || 0,
+          location_name: formData.locationName,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zip_code: formData.zipCode,
+          latitude,
+          longitude,
+          description: formData.description || null,
+          equipment_requirements: formData.equipmentRequirements || null,
+          game_rules: formData.gameRules || null,
+          status: "UPCOMING" as any,
+          visibility: "PUBLIC" as any,
+          current_players: 1,
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Auto-create a community for the game
+      const communityName = `${formData.sport} - ${formData.locationName}`;
+      const communityDescription = `Community for the ${formData.sport} game on ${formData.gameDate}. ${formData.description || ''}`;
+
+      const { data: communityData, error: communityError } = await supabase
+        .from("communities")
+        .insert({
+          name: communityName,
+          description: communityDescription,
+          game_id: gameData.id,
+          created_by: user.id,
+          type: 'game'
+        })
+        .select()
+        .single();
+
+      if (!communityError && communityData) {
+        // Add host as admin of the community
+        await supabase
+          .from("community_members")
+          .insert({
+            community_id: communityData.id,
+            user_id: user.id,
+            role: 'admin'
+          });
+      }
 
       toast({
         title: "Game created!",

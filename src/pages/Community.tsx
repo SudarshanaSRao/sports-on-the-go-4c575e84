@@ -5,23 +5,33 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ThumbsUp, ThumbsDown, MessageSquare, Send } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+interface Community {
+  id: string;
+  name: string;
+  description: string;
+  type: string;
+  member_count: number;
+  created_at: string;
+  game_id: string | null;
+  created_by: string;
+}
 
 interface Post {
   id: string;
   title: string;
   content: string;
-  sport: string | null;
-  game_id: string | null;
   upvotes: number;
   downvotes: number;
   created_at: string;
   user_id: string;
+  community_id: string;
   profiles: {
     first_name: string;
     last_name: string;
@@ -39,22 +49,19 @@ interface Comment {
   };
 }
 
-const sports = [
-  "All Sports", "Basketball", "Soccer", "Tennis", "Volleyball", "Football", 
-  "Baseball", "Pickleball", "Ultimate Frisbee", "Running", 
-  "Cycling", "Badminton", "Golf"
-];
-
 export default function Community() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
+  const [communities, setCommunities] = useState<Community[]>([]);
+  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
-  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
-  const [selectedSport, setSelectedSport] = useState("All Sports");
-  const [newPost, setNewPost] = useState({ title: "", content: "", sport: "" });
+  const [isMember, setIsMember] = useState(false);
+  const [showNewCommunity, setShowNewCommunity] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
+  const [newCommunity, setNewCommunity] = useState({ name: "", description: "" });
+  const [newPost, setNewPost] = useState({ title: "", content: "" });
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [newComment, setNewComment] = useState("");
@@ -65,38 +72,80 @@ export default function Community() {
       navigate("/auth");
       return;
     }
-    fetchPosts();
-    fetchUserVotes();
+    fetchCommunities();
   }, [user]);
 
   useEffect(() => {
-    if (selectedSport === "All Sports") {
-      setFilteredPosts(posts);
-    } else {
-      setFilteredPosts(posts.filter(post => post.sport === selectedSport));
+    if (selectedCommunity) {
+      fetchPosts(selectedCommunity.id);
+      checkMembership(selectedCommunity.id);
+      fetchUserVotes();
     }
-  }, [selectedSport, posts]);
+  }, [selectedCommunity]);
 
-  const fetchPosts = async () => {
-    const { data, error } = await (supabase as any)
-      .from("posts")
-      .select(`
-        *,
-        profiles (first_name, last_name)
-      `)
+  const fetchCommunities = async () => {
+    const { data, error } = await supabase
+      .from("communities")
+      .select("*")
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching posts:", error);
+      console.error("Error fetching communities:", error);
     } else {
-      setPosts(data || []);
+      setCommunities(data || []);
     }
+  };
+
+  const fetchPosts = async (communityId: string) => {
+    const { data: postsData, error: postsError } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("community_id", communityId)
+      .order("created_at", { ascending: false });
+
+    if (postsError) {
+      console.error("Error fetching posts:", postsError);
+      return;
+    }
+
+    // Fetch profiles separately
+    if (postsData && postsData.length > 0) {
+      const userIds = [...new Set(postsData.map(p => p.user_id))];
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name")
+        .in("id", userIds);
+
+      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      
+      const postsWithProfiles = postsData.map(post => ({
+        ...post,
+        profiles: profilesMap.get(post.user_id) || { first_name: "Unknown", last_name: "User" }
+      }));
+
+      setPosts(postsWithProfiles as Post[]);
+    } else {
+      setPosts([]);
+    }
+  };
+
+  const checkMembership = async (communityId: string) => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from("community_members")
+      .select("id")
+      .eq("community_id", communityId)
+      .eq("user_id", user.id)
+      .single();
+
+    setIsMember(!!data);
   };
 
   const fetchUserVotes = async () => {
     if (!user) return;
     
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from("post_votes")
       .select("post_id, vote_type")
       .eq("user_id", user.id);
@@ -111,24 +160,128 @@ export default function Community() {
   };
 
   const fetchComments = async (postId: string) => {
-    const { data, error } = await (supabase as any)
+    const { data: commentsData, error: commentsError } = await supabase
       .from("comments")
-      .select(`
-        *,
-        profiles (first_name, last_name)
-      `)
+      .select("*")
       .eq("post_id", postId)
       .order("created_at", { ascending: true });
 
-    if (error) {
-      console.error("Error fetching comments:", error);
+    if (commentsError) {
+      console.error("Error fetching comments:", commentsError);
+      return;
+    }
+
+    // Fetch profiles separately
+    if (commentsData && commentsData.length > 0) {
+      const userIds = [...new Set(commentsData.map(c => c.user_id))];
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name")
+        .in("id", userIds);
+
+      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      
+      const commentsWithProfiles = commentsData.map(comment => ({
+        ...comment,
+        profiles: profilesMap.get(comment.user_id) || { first_name: "Unknown", last_name: "User" }
+      }));
+
+      setComments(prev => ({ ...prev, [postId]: commentsWithProfiles as Comment[] }));
     } else {
-      setComments(prev => ({ ...prev, [postId]: data || [] }));
+      setComments(prev => ({ ...prev, [postId]: [] }));
+    }
+  };
+
+  const handleCreateCommunity = async () => {
+    if (!user || !newCommunity.name) {
+      toast({
+        title: "Missing fields",
+        description: "Please fill in the community name.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { data: communityData, error } = await supabase
+      .from("communities")
+      .insert({
+        name: newCommunity.name,
+        description: newCommunity.description,
+        created_by: user.id,
+        type: 'general'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create community.",
+        variant: "destructive"
+      });
+    } else {
+      // Add creator as admin
+      await supabase
+        .from("community_members")
+        .insert({
+          community_id: communityData.id,
+          user_id: user.id,
+          role: 'admin'
+        });
+
+      toast({ title: "Community created!" });
+      setNewCommunity({ name: "", description: "" });
+      setShowNewCommunity(false);
+      fetchCommunities();
+    }
+  };
+
+  const handleJoinCommunity = async (communityId: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("community_members")
+      .insert({
+        community_id: communityId,
+        user_id: user.id,
+        role: 'member'
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to join community.",
+        variant: "destructive"
+      });
+    } else {
+      toast({ title: "Joined community!" });
+      checkMembership(communityId);
+    }
+  };
+
+  const handleLeaveCommunity = async (communityId: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from("community_members")
+      .delete()
+      .eq("community_id", communityId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to leave community.",
+        variant: "destructive"
+      });
+    } else {
+      toast({ title: "Left community!" });
+      checkMembership(communityId);
     }
   };
 
   const handleCreatePost = async () => {
-    if (!user || !newPost.title || !newPost.content) {
+    if (!user || !newPost.title || !newPost.content || !selectedCommunity) {
       toast({
         title: "Missing fields",
         description: "Please fill in title and content.",
@@ -137,11 +290,11 @@ export default function Community() {
       return;
     }
 
-    const { error } = await (supabase as any).from("posts").insert({
+    const { error } = await supabase.from("posts").insert({
       user_id: user.id,
+      community_id: selectedCommunity.id,
       title: newPost.title,
-      content: newPost.content,
-      sport: newPost.sport || null
+      content: newPost.content
     });
 
     if (error) {
@@ -152,9 +305,9 @@ export default function Community() {
       });
     } else {
       toast({ title: "Post created!" });
-      setNewPost({ title: "", content: "", sport: "" });
+      setNewPost({ title: "", content: "" });
       setShowNewPost(false);
-      fetchPosts();
+      fetchPosts(selectedCommunity.id);
     }
   };
 
@@ -165,23 +318,25 @@ export default function Community() {
 
     if (currentVote === voteType) {
       // Remove vote
-      await (supabase as any).from("post_votes").delete().match({ post_id: postId, user_id: user.id });
+      await supabase.from("post_votes").delete().match({ post_id: postId, user_id: user.id });
     } else if (currentVote) {
       // Update vote
-      await (supabase as any).from("post_votes").update({ vote_type: voteType }).match({ post_id: postId, user_id: user.id });
+      await supabase.from("post_votes").update({ vote_type: voteType }).match({ post_id: postId, user_id: user.id });
     } else {
       // Create vote
-      await (supabase as any).from("post_votes").insert({ post_id: postId, user_id: user.id, vote_type: voteType });
+      await supabase.from("post_votes").insert({ post_id: postId, user_id: user.id, vote_type: voteType });
     }
 
     fetchUserVotes();
-    fetchPosts();
+    if (selectedCommunity) {
+      fetchPosts(selectedCommunity.id);
+    }
   };
 
   const handleAddComment = async (postId: string) => {
     if (!user || !newComment.trim()) return;
 
-    const { error } = await (supabase as any).from("comments").insert({
+    const { error } = await supabase.from("comments").insert({
       post_id: postId,
       user_id: user.id,
       content: newComment
@@ -210,133 +365,246 @@ export default function Community() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <Navbar />
       <div className="pt-20 px-4 pb-4">
-        <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Community</h1>
-          <p className="text-gray-600">Connect with players and discuss games</p>
-        </div>
-
-        {/* Filter and Create Post */}
-        <div className="bg-white rounded-xl shadow-md p-4 mb-6">
-          <div className="flex gap-4 items-center flex-wrap">
-            <Select value={selectedSport} onValueChange={setSelectedSport}>
-              <SelectTrigger className="w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {sports.map(sport => (
-                  <SelectItem key={sport} value={sport}>{sport}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={() => setShowNewPost(!showNewPost)}>
-              {showNewPost ? "Cancel" : "New Post"}
-            </Button>
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Communities</h1>
+            <p className="text-gray-600">Join communities and connect with players</p>
           </div>
 
-          {showNewPost && (
-            <div className="mt-4 space-y-3">
-              <Input
-                placeholder="Post title"
-                value={newPost.title}
-                onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
-              />
-              <Textarea
-                placeholder="What's on your mind?"
-                value={newPost.content}
-                onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
-                rows={4}
-              />
-              <Select value={newPost.sport} onValueChange={(val) => setNewPost(prev => ({ ...prev, sport: val }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select sport (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sports.filter(s => s !== "All Sports").map(sport => (
-                    <SelectItem key={sport} value={sport}>{sport}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button onClick={handleCreatePost}>Post</Button>
-            </div>
-          )}
-        </div>
+          <Tabs defaultValue="communities" className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="communities">All Communities</TabsTrigger>
+              {selectedCommunity && (
+                <TabsTrigger value="posts">
+                  {selectedCommunity.name}
+                </TabsTrigger>
+              )}
+            </TabsList>
 
-        {/* Posts */}
-        <div className="space-y-4">
-          {filteredPosts.map(post => (
-            <Card key={post.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-xl">{post.title}</CardTitle>
-                    <p className="text-sm text-gray-500 mt-1">
-                      by {post.profiles.first_name} {post.profiles.last_name} • {new Date(post.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  {post.sport && <Badge>{post.sport}</Badge>}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-700 mb-4">{post.content}</p>
+            <TabsContent value="communities" className="space-y-4">
+              <div className="flex justify-end mb-4">
+                <Button onClick={() => setShowNewCommunity(!showNewCommunity)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {showNewCommunity ? "Cancel" : "Create Community"}
+                </Button>
+              </div>
 
-                {/* Vote buttons */}
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleVote(post.id, "up")}
-                    className={userVotes[post.id] === "up" ? "text-blue-600" : ""}
-                  >
-                    <ThumbsUp className="w-4 h-4 mr-1" />
-                    {post.upvotes}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleVote(post.id, "down")}
-                    className={userVotes[post.id] === "down" ? "text-red-600" : ""}
-                  >
-                    <ThumbsDown className="w-4 h-4 mr-1" />
-                    {post.downvotes}
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)}>
-                    <MessageSquare className="w-4 h-4 mr-1" />
-                    Comments
-                  </Button>
-                </div>
+              {showNewCommunity && (
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle>Create New Community</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Input
+                      placeholder="Community name"
+                      value={newCommunity.name}
+                      onChange={(e) => setNewCommunity(prev => ({ ...prev, name: e.target.value }))}
+                    />
+                    <Textarea
+                      placeholder="Description"
+                      value={newCommunity.description}
+                      onChange={(e) => setNewCommunity(prev => ({ ...prev, description: e.target.value }))}
+                      rows={3}
+                    />
+                    <Button onClick={handleCreateCommunity}>Create Community</Button>
+                  </CardContent>
+                </Card>
+              )}
 
-                {/* Comments section */}
-                {selectedPost === post.id && (
-                  <div className="mt-4 space-y-3">
-                    {comments[post.id]?.map(comment => (
-                      <div key={comment.id} className="bg-gray-50 p-3 rounded">
-                        <p className="text-sm font-semibold">
-                          {comment.profiles.first_name} {comment.profiles.last_name}
-                        </p>
-                        <p className="text-sm text-gray-700">{comment.content}</p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(comment.created_at).toLocaleDateString()}
-                        </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {communities.map(community => (
+                  <Card key={community.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">{community.name}</CardTitle>
+                          <CardDescription className="mt-2 line-clamp-2">
+                            {community.description}
+                          </CardDescription>
+                        </div>
+                        <Badge variant={community.type === 'game' ? 'default' : 'secondary'}>
+                          {community.type}
+                        </Badge>
                       </div>
-                    ))}
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add a comment..."
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                      />
-                      <Button size="sm" onClick={() => handleAddComment(post.id)}>
-                        <Send className="w-4 h-4" />
-                      </Button>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center text-sm text-gray-600">
+                          <Users className="w-4 h-4 mr-1" />
+                          {community.member_count} members
+                        </div>
+                        <Button 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedCommunity(community);
+                            setTimeout(() => {
+                              const postsTab = document.querySelector<HTMLButtonElement>('button[value="posts"]');
+                              if (postsTab) postsTab.click();
+                            }, 0);
+                          }}
+                        >
+                          View
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            {selectedCommunity && (
+              <TabsContent value="posts" className="space-y-4">
+                <Card className="bg-white">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-2xl">{selectedCommunity.name}</CardTitle>
+                        <CardDescription className="mt-2">
+                          {selectedCommunity.description}
+                        </CardDescription>
+                        <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
+                          <div className="flex items-center">
+                            <Users className="w-4 h-4 mr-1" />
+                            {selectedCommunity.member_count} members
+                          </div>
+                          <Badge variant={selectedCommunity.type === 'game' ? 'default' : 'secondary'}>
+                            {selectedCommunity.type}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {isMember ? (
+                          <>
+                            <Button onClick={() => setShowNewPost(!showNewPost)}>
+                              {showNewPost ? "Cancel" : "New Post"}
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => handleLeaveCommunity(selectedCommunity.id)}
+                            >
+                              Leave
+                            </Button>
+                          </>
+                        ) : (
+                          <Button onClick={() => handleJoinCommunity(selectedCommunity.id)}>
+                            Join Community
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </CardHeader>
+                </Card>
+
+                {showNewPost && isMember && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Create New Post</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Input
+                        placeholder="Post title"
+                        value={newPost.title}
+                        onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
+                      />
+                      <Textarea
+                        placeholder="What's on your mind?"
+                        value={newPost.content}
+                        onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
+                        rows={4}
+                      />
+                      <Button onClick={handleCreatePost}>Post</Button>
+                    </CardContent>
+                  </Card>
                 )}
-              </CardContent>
-            </Card>
-          ))}
+
+                {!isMember && (
+                  <Card className="bg-yellow-50 border-yellow-200">
+                    <CardContent className="pt-6">
+                      <p className="text-center text-gray-700">
+                        Join this community to view and create posts
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {isMember && posts.length === 0 && (
+                  <Card>
+                    <CardContent className="pt-6">
+                      <p className="text-center text-gray-600">
+                        No posts yet. Be the first to post!
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {isMember && posts.map(post => (
+                  <Card key={post.id}>
+                    <CardHeader>
+                      <CardTitle className="text-xl">{post.title}</CardTitle>
+                      <p className="text-sm text-gray-500 mt-1">
+                        by {post.profiles.first_name} {post.profiles.last_name} • {new Date(post.created_at).toLocaleDateString()}
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-700 mb-4">{post.content}</p>
+
+                      <div className="flex items-center gap-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleVote(post.id, "up")}
+                          className={userVotes[post.id] === "up" ? "text-blue-600" : ""}
+                        >
+                          <ThumbsUp className="w-4 h-4 mr-1" />
+                          {post.upvotes}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleVote(post.id, "down")}
+                          className={userVotes[post.id] === "down" ? "text-red-600" : ""}
+                        >
+                          <ThumbsDown className="w-4 h-4 mr-1" />
+                          {post.downvotes}
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)}>
+                          <MessageSquare className="w-4 h-4 mr-1" />
+                          Comments
+                        </Button>
+                      </div>
+
+                      {selectedPost === post.id && (
+                        <div className="mt-4 space-y-3">
+                          {comments[post.id]?.map(comment => (
+                            <div key={comment.id} className="bg-gray-50 p-3 rounded">
+                              <p className="text-sm font-semibold">
+                                {comment.profiles.first_name} {comment.profiles.last_name}
+                              </p>
+                              <p className="text-sm text-gray-700">{comment.content}</p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {new Date(comment.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          ))}
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Add a comment..."
+                              value={newComment}
+                              onChange={(e) => setNewComment(e.target.value)}
+                            />
+                            <Button size="sm" onClick={() => handleAddComment(post.id)}>
+                              <Send className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </TabsContent>
+            )}
+          </Tabs>
         </div>
-      </div>
       </div>
     </div>
   );

@@ -485,9 +485,29 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
           throw error;
         }
       } else {
+        // Auto-join the game's community
+        const { data: communityData } = await supabase
+          .from("communities")
+          .select("id")
+          .eq("game_id", gameId.toString())
+          .eq("type", "game")
+          .single();
+
+        if (communityData) {
+          // Add user to community as member (ignore if already a member)
+          await supabase
+            .from("community_members")
+            .insert({
+              community_id: communityData.id,
+              user_id: user.id,
+              role: 'member'
+            })
+            .select();
+        }
+
         toast({
           title: "Successfully joined!",
-          description: "You're confirmed for this game.",
+          description: "You're confirmed for this game and added to its community.",
         });
       }
     } catch (error) {
