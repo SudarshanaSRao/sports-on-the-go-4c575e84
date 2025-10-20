@@ -33,6 +33,7 @@ interface Post {
   user_id: string;
   community_id: string;
   profiles: {
+    username: string | null;
     first_name: string;
     last_name: string;
   };
@@ -44,6 +45,7 @@ interface Comment {
   created_at: string;
   user_id: string;
   profiles: {
+    username: string | null;
     first_name: string;
     last_name: string;
   };
@@ -113,14 +115,14 @@ export default function Community() {
       const userIds = [...new Set(postsData.map(p => p.user_id))];
       const { data: profilesData } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name")
+        .select("id, username, first_name, last_name")
         .in("id", userIds);
 
       const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
       
       const postsWithProfiles = postsData.map(post => ({
         ...post,
-        profiles: profilesMap.get(post.user_id) || { first_name: "Unknown", last_name: "User" }
+        profiles: profilesMap.get(post.user_id) || { username: null, first_name: "Unknown", last_name: "User" }
       }));
 
       setPosts(postsWithProfiles as Post[]);
@@ -176,14 +178,14 @@ export default function Community() {
       const userIds = [...new Set(commentsData.map(c => c.user_id))];
       const { data: profilesData } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name")
+        .select("id, username, first_name, last_name")
         .in("id", userIds);
 
       const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
       
       const commentsWithProfiles = commentsData.map(comment => ({
         ...comment,
-        profiles: profilesMap.get(comment.user_id) || { first_name: "Unknown", last_name: "User" }
+        profiles: profilesMap.get(comment.user_id) || { username: null, first_name: "Unknown", last_name: "User" }
       }));
 
       setComments(prev => ({ ...prev, [postId]: commentsWithProfiles as Comment[] }));
@@ -542,7 +544,7 @@ export default function Community() {
                     <CardHeader>
                       <CardTitle className="text-xl">{post.title}</CardTitle>
                       <p className="text-sm text-gray-500 mt-1">
-                        by {post.profiles.first_name} {post.profiles.last_name} • {new Date(post.created_at).toLocaleDateString()}
+                        by {post.profiles.username || `${post.profiles.first_name} ${post.profiles.last_name}`} • {new Date(post.created_at).toLocaleDateString()}
                       </p>
                     </CardHeader>
                     <CardContent>
@@ -578,7 +580,7 @@ export default function Community() {
                           {comments[post.id]?.map(comment => (
                             <div key={comment.id} className="bg-gray-50 p-3 rounded">
                               <p className="text-sm font-semibold">
-                                {comment.profiles.first_name} {comment.profiles.last_name}
+                                {comment.profiles.username || `${comment.profiles.first_name} ${comment.profiles.last_name}`}
                               </p>
                               <p className="text-sm text-gray-700">{comment.content}</p>
                               <p className="text-xs text-gray-500 mt-1">
