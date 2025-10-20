@@ -7,10 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Community {
   id: string;
@@ -68,6 +67,7 @@ export default function Community() {
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [newComment, setNewComment] = useState("");
   const [userVotes, setUserVotes] = useState<Record<string, string>>({});
+  const [viewMode, setViewMode] = useState<"list" | "posts">("list");
 
   useEffect(() => {
     if (!user) {
@@ -363,27 +363,28 @@ export default function Community() {
     }
   };
 
+  const handleViewCommunity = (community: Community) => {
+    setSelectedCommunity(community);
+    setViewMode("posts");
+  };
+
+  const handleBackToCommunities = () => {
+    setSelectedCommunity(null);
+    setViewMode("list");
+    setShowNewPost(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <Navbar />
       <div className="pt-20 px-4 pb-4">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Communities</h1>
-            <p className="text-gray-600">Join communities and connect with players</p>
-          </div>
-
-          <Tabs defaultValue="communities" className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="communities">All Communities</TabsTrigger>
-              {selectedCommunity && (
-                <TabsTrigger value="posts">
-                  {selectedCommunity.name}
-                </TabsTrigger>
-              )}
-            </TabsList>
-
-            <TabsContent value="communities" className="space-y-4">
+          {viewMode === "list" ? (
+            <>
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Communities</h1>
+                <p className="text-gray-600">Join communities and connect with players</p>
+              </div>
               <div className="flex justify-end mb-4">
                 <Button onClick={() => setShowNewCommunity(!showNewCommunity)}>
                   <Plus className="w-4 h-4 mr-2" />
@@ -437,13 +438,7 @@ export default function Community() {
                         </div>
                         <Button 
                           size="sm"
-                          onClick={() => {
-                            setSelectedCommunity(community);
-                            setTimeout(() => {
-                              const postsTab = document.querySelector<HTMLButtonElement>('button[value="posts"]');
-                              if (postsTab) postsTab.click();
-                            }, 0);
-                          }}
+                          onClick={() => handleViewCommunity(community)}
                         >
                           View
                         </Button>
@@ -452,160 +447,167 @@ export default function Community() {
                   </Card>
                 ))}
               </div>
-            </TabsContent>
+            </>
+          ) : (
+            <div className="space-y-4">
+              <Button 
+                variant="ghost" 
+                className="mb-4"
+                onClick={handleBackToCommunities}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Communities
+              </Button>
 
-            {selectedCommunity && (
-              <TabsContent value="posts" className="space-y-4">
-                <Card className="bg-white">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-2xl">{selectedCommunity.name}</CardTitle>
-                        <CardDescription className="mt-2">
-                          {selectedCommunity.description}
-                        </CardDescription>
-                        <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
-                          <div className="flex items-center">
-                            <Users className="w-4 h-4 mr-1" />
-                            {selectedCommunity.member_count} members
-                          </div>
-                          <Badge variant={selectedCommunity.type === 'game' ? 'default' : 'secondary'}>
-                            {selectedCommunity.type}
-                          </Badge>
+              <Card className="bg-white">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-2xl">{selectedCommunity?.name}</CardTitle>
+                      <CardDescription className="mt-2">
+                        {selectedCommunity?.description}
+                      </CardDescription>
+                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
+                        <div className="flex items-center">
+                          <Users className="w-4 h-4 mr-1" />
+                          {selectedCommunity?.member_count} members
                         </div>
-                      </div>
-                      <div className="flex gap-2">
-                        {isMember ? (
-                          <>
-                            <Button onClick={() => setShowNewPost(!showNewPost)}>
-                              {showNewPost ? "Cancel" : "New Post"}
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              onClick={() => handleLeaveCommunity(selectedCommunity.id)}
-                            >
-                              Leave
-                            </Button>
-                          </>
-                        ) : (
-                          <Button onClick={() => handleJoinCommunity(selectedCommunity.id)}>
-                            Join Community
-                          </Button>
-                        )}
+                        <Badge variant={selectedCommunity?.type === 'game' ? 'default' : 'secondary'}>
+                          {selectedCommunity?.type}
+                        </Badge>
                       </div>
                     </div>
-                  </CardHeader>
-                </Card>
-
-                {showNewPost && isMember && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Create New Post</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <Input
-                        placeholder="Post title"
-                        value={newPost.title}
-                        onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
-                      />
-                      <Textarea
-                        placeholder="What's on your mind?"
-                        value={newPost.content}
-                        onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
-                        rows={4}
-                      />
-                      <Button onClick={handleCreatePost}>Post</Button>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {!isMember && (
-                  <Card className="bg-yellow-50 border-yellow-200">
-                    <CardContent className="pt-6">
-                      <p className="text-center text-gray-700">
-                        Join this community to view and create posts
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {isMember && posts.length === 0 && (
-                  <Card>
-                    <CardContent className="pt-6">
-                      <p className="text-center text-gray-600">
-                        No posts yet. Be the first to post!
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {isMember && posts.map(post => (
-                  <Card key={post.id}>
-                    <CardHeader>
-                      <CardTitle className="text-xl">{post.title}</CardTitle>
-                      <p className="text-sm text-gray-500 mt-1">
-                        by {post.profiles.username || `${post.profiles.first_name} ${post.profiles.last_name}`} • {new Date(post.created_at).toLocaleDateString()}
-                      </p>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-700 mb-4">{post.content}</p>
-
-                      <div className="flex items-center gap-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleVote(post.id, "up")}
-                          className={userVotes[post.id] === "up" ? "text-blue-600" : ""}
-                        >
-                          <ThumbsUp className="w-4 h-4 mr-1" />
-                          {post.upvotes}
+                    <div className="flex gap-2">
+                      {isMember ? (
+                        <>
+                          <Button onClick={() => setShowNewPost(!showNewPost)}>
+                            {showNewPost ? "Cancel" : "New Post"}
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            onClick={() => selectedCommunity && handleLeaveCommunity(selectedCommunity.id)}
+                          >
+                            Leave
+                          </Button>
+                        </>
+                      ) : (
+                        <Button onClick={() => selectedCommunity && handleJoinCommunity(selectedCommunity.id)}>
+                          Join Community
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleVote(post.id, "down")}
-                          className={userVotes[post.id] === "down" ? "text-red-600" : ""}
-                        >
-                          <ThumbsDown className="w-4 h-4 mr-1" />
-                          {post.downvotes}
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)}>
-                          <MessageSquare className="w-4 h-4 mr-1" />
-                          Comments
-                        </Button>
-                      </div>
-
-                      {selectedPost === post.id && (
-                        <div className="mt-4 space-y-3">
-                          {comments[post.id]?.map(comment => (
-                            <div key={comment.id} className="bg-gray-50 p-3 rounded">
-                              <p className="text-sm font-semibold">
-                                {comment.profiles.username || `${comment.profiles.first_name} ${comment.profiles.last_name}`}
-                              </p>
-                              <p className="text-sm text-gray-700">{comment.content}</p>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {new Date(comment.created_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                          ))}
-                          <div className="flex gap-2">
-                            <Input
-                              placeholder="Add a comment..."
-                              value={newComment}
-                              onChange={(e) => setNewComment(e.target.value)}
-                            />
-                            <Button size="sm" onClick={() => handleAddComment(post.id)}>
-                              <Send className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
                       )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </TabsContent>
-            )}
-          </Tabs>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+
+              {showNewPost && isMember && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Create New Post</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Input
+                      placeholder="Post title"
+                      value={newPost.title}
+                      onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
+                    />
+                    <Textarea
+                      placeholder="What's on your mind?"
+                      value={newPost.content}
+                      onChange={(e) => setNewPost(prev => ({ ...prev, content: e.target.value }))}
+                      rows={4}
+                    />
+                    <Button onClick={handleCreatePost}>Post</Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              {!isMember && (
+                <Card className="bg-yellow-50 border-yellow-200">
+                  <CardContent className="pt-6">
+                    <p className="text-center text-gray-700">
+                      Join this community to view and create posts
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {isMember && posts.length === 0 && (
+                <Card>
+                  <CardContent className="pt-6">
+                    <p className="text-center text-gray-600">
+                      No posts yet. Be the first to post!
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+
+              {isMember && posts.map(post => (
+                <Card key={post.id}>
+                  <CardHeader>
+                    <CardTitle className="text-xl">{post.title}</CardTitle>
+                    <p className="text-sm text-gray-500 mt-1">
+                      by {post.profiles.username || `${post.profiles.first_name} ${post.profiles.last_name}`} • {new Date(post.created_at).toLocaleDateString()}
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 mb-4">{post.content}</p>
+
+                    <div className="flex items-center gap-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleVote(post.id, "up")}
+                        className={userVotes[post.id] === "up" ? "text-blue-600" : ""}
+                      >
+                        <ThumbsUp className="w-4 h-4 mr-1" />
+                        {post.upvotes}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleVote(post.id, "down")}
+                        className={userVotes[post.id] === "down" ? "text-red-600" : ""}
+                      >
+                        <ThumbsDown className="w-4 h-4 mr-1" />
+                        {post.downvotes}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)}>
+                        <MessageSquare className="w-4 h-4 mr-1" />
+                        Comments
+                      </Button>
+                    </div>
+
+                    {selectedPost === post.id && (
+                      <div className="mt-4 space-y-3">
+                        {comments[post.id]?.map(comment => (
+                          <div key={comment.id} className="bg-gray-50 p-3 rounded">
+                            <p className="text-sm font-semibold">
+                              {comment.profiles.username || `${comment.profiles.first_name} ${comment.profiles.last_name}`}
+                            </p>
+                            <p className="text-sm text-gray-700">{comment.content}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {new Date(comment.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        ))}
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Add a comment..."
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                          />
+                          <Button size="sm" onClick={() => handleAddComment(post.id)}>
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
