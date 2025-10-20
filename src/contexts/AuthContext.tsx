@@ -36,13 +36,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
-        // Redirect authenticated users to discover page
-        if (session && event === 'SIGNED_IN') {
-          setTimeout(() => {
-            navigate('/discover');
-          }, 0);
-        }
       }
     );
 
