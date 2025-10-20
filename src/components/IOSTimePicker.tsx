@@ -25,13 +25,16 @@ export function IOSTimePicker({ value, onChange }: IOSTimePickerProps) {
   };
 
   useEffect(() => {
-    const hourIndex = hours.indexOf(value.hour);
-    const minuteIndex = minutes.indexOf(value.minute);
-    const periodIndex = periods.indexOf(value.period);
+    // Use requestAnimationFrame to ensure DOM is fully rendered
+    requestAnimationFrame(() => {
+      const hourIndex = hours.indexOf(value.hour);
+      const minuteIndex = minutes.indexOf(value.minute);
+      const periodIndex = periods.indexOf(value.period);
 
-    if (hourIndex !== -1) scrollToIndex(hourRef, hourIndex);
-    if (minuteIndex !== -1) scrollToIndex(minuteRef, minuteIndex);
-    if (periodIndex !== -1) scrollToIndex(periodRef, periodIndex);
+      if (hourIndex !== -1) scrollToIndex(hourRef, hourIndex);
+      if (minuteIndex !== -1) scrollToIndex(minuteRef, minuteIndex);
+      if (periodIndex !== -1) scrollToIndex(periodRef, periodIndex);
+    });
   }, []);
 
   const handleScroll = (
