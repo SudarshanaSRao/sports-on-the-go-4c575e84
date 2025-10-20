@@ -52,7 +52,7 @@ export default function HostGame() {
     sport: "",
     skillLevel: "",
     gameDate: "",
-    startTime: { hour: "12", minute: "00", period: "PM" },
+    startTime: "12:00", // 24-hour format
     durationMinutes: "",
     maxPlayers: "",
     costPerPerson: "",
@@ -159,15 +159,6 @@ export default function HostGame() {
     setLoading(true);
 
     try {
-      // Convert 12-hour time to 24-hour format for database
-      let hour24 = parseInt(formData.startTime.hour);
-      if (formData.startTime.period === "PM" && hour24 !== 12) {
-        hour24 += 12;
-      } else if (formData.startTime.period === "AM" && hour24 === 12) {
-        hour24 = 0;
-      }
-      const startTime24 = `${hour24.toString().padStart(2, '0')}:${formData.startTime.minute}`;
-
       // Geocode the address
       toast({
         title: "Validating address...",
@@ -182,7 +173,7 @@ export default function HostGame() {
         sport: formData.sport as any,
         skill_level: formData.skillLevel as any,
         game_date: formData.gameDate,
-        start_time: startTime24,
+        start_time: formData.startTime,
         duration_minutes: parseInt(formData.durationMinutes),
         max_players: parseInt(formData.maxPlayers),
         cost_per_person: parseFloat(formData.costPerPerson) || 0,
