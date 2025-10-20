@@ -517,19 +517,19 @@ export default function Community() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-20 px-4 pb-4">
         <div className="max-w-7xl mx-auto">
           {viewMode === "list" ? (
             <>
               <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Communities</h1>
-                <p className="text-gray-600">Join communities and connect with players</p>
+                <h1 className="text-3xl font-bold text-foreground mb-2">Communities</h1>
+                <p className="text-muted-foreground">Join communities and connect with players</p>
               </div>
               <div className="flex justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-gray-600" />
+                  <Filter className="w-4 h-4 text-muted-foreground" />
                   <Select value={sportFilter} onValueChange={setSportFilter}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Filter by sport" />
@@ -642,7 +642,7 @@ export default function Community() {
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center text-sm text-gray-600">
+                        <div className="flex items-center text-sm text-muted-foreground">
                           <Users className="w-4 h-4 mr-1" />
                           {community.member_count} members
                         </div>
@@ -669,7 +669,7 @@ export default function Community() {
                 Back to Communities
               </Button>
 
-              <Card className="bg-white">
+              <Card>
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -677,7 +677,7 @@ export default function Community() {
                       <CardDescription className="mt-2">
                         {selectedCommunity?.description}
                       </CardDescription>
-                      <div className="flex items-center gap-4 mt-3 text-sm text-gray-600">
+                      <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
                         <div className="flex items-center">
                           <Users className="w-4 h-4 mr-1" />
                           {selectedCommunity?.member_count} members
@@ -705,11 +705,11 @@ export default function Community() {
                             {communityMembers.map(member => (
                               <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                                 <div>
-                                  <p className="font-medium">
-                                    {getDisplayName(member.profiles, member.user_id)}
-                                  </p>
-                                  <p className="text-xs text-gray-500">{member.role}</p>
-                                </div>
+                                <p className="font-medium">
+                                  {getDisplayName(member.profiles, member.user_id)}
+                                </p>
+                                <p className="text-xs text-muted-foreground">{member.role}</p>
+                              </div>
                               </div>
                             ))}
                           </div>
@@ -769,9 +769,9 @@ export default function Community() {
               )}
 
               {!isMember && (
-                <Card className="bg-yellow-50 border-yellow-200">
+                <Card className="bg-muted border-border">
                   <CardContent className="pt-6">
-                    <p className="text-center text-gray-700">
+                    <p className="text-center text-foreground">
                       Join this community to view and create posts
                     </p>
                   </CardContent>
@@ -781,7 +781,7 @@ export default function Community() {
               {isMember && posts.length === 0 && (
                 <Card>
                   <CardContent className="pt-6">
-                    <p className="text-center text-gray-600">
+                    <p className="text-center text-muted-foreground">
                       No posts yet. Be the first to post!
                     </p>
                   </CardContent>
@@ -792,12 +792,12 @@ export default function Community() {
                 <Card key={post.id}>
                   <CardHeader>
                     <CardTitle className="text-xl">{post.title}</CardTitle>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       by {getDisplayName(post.profiles, post.user_id)} • {new Date(post.created_at).toLocaleDateString()}
                     </p>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-700 mb-4">{post.content}</p>
+                    <p className="text-foreground mb-4">{post.content}</p>
 
                     <div className="flex items-center gap-4">
                       <Button
@@ -830,13 +830,13 @@ export default function Community() {
                           <div key={comment.id} className="bg-gray-50 p-3 rounded relative group">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
-                                <p className="text-sm font-semibold">
-                                  {getDisplayName(comment.profiles, comment.user_id)}
-                                </p>
-                                <p className="text-sm text-gray-700">{comment.content}</p>
-                                <p className="text-xs text-gray-500 mt-1">
-                                  {new Date(comment.created_at).toLocaleDateString()}
-                                </p>
+                              <p className="text-sm font-semibold">
+                                {getDisplayName(comment.profiles, comment.user_id)}
+                              </p>
+                              <p className="text-sm text-foreground">{comment.content}</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {new Date(comment.created_at).toLocaleDateString()}
+                              </p>
                               </div>
                               {(comment.user_id === user?.id || isAdmin) && (
                                 <Button
