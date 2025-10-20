@@ -175,6 +175,21 @@ export default function Community() {
     setIsAdmin(data?.role === 'admin');
   };
 
+  // Helper to display a sensible member name
+  const getDisplayName = (
+    p: { username?: string | null; first_name?: string; last_name?: string } = {},
+    userId?: string
+  ) => {
+    const uname = (p?.username || "").trim();
+    if (uname) return uname;
+    const first = (p?.first_name || "").trim();
+    const last = (p?.last_name || "").trim();
+    const full = [first, last].filter(Boolean).join(" ");
+    if (full) return full;
+    if (userId) return `User-${userId.slice(0, 6)}`;
+    return "Member";
+  };
+
   const fetchUserVotes = async () => {
     if (!user) return;
     
@@ -691,7 +706,7 @@ export default function Community() {
                               <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                                 <div>
                                   <p className="font-medium">
-                                    {member.profiles.username || `${member.profiles.first_name} ${member.profiles.last_name}`}
+                                    {getDisplayName(member.profiles, member.user_id)}
                                   </p>
                                   <p className="text-xs text-gray-500">{member.role}</p>
                                 </div>
@@ -778,7 +793,7 @@ export default function Community() {
                   <CardHeader>
                     <CardTitle className="text-xl">{post.title}</CardTitle>
                     <p className="text-sm text-gray-500 mt-1">
-                      by {post.profiles.username || `${post.profiles.first_name} ${post.profiles.last_name}`} • {new Date(post.created_at).toLocaleDateString()}
+                      by {getDisplayName(post.profiles, post.user_id)} • {new Date(post.created_at).toLocaleDateString()}
                     </p>
                   </CardHeader>
                   <CardContent>
@@ -816,7 +831,7 @@ export default function Community() {
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <p className="text-sm font-semibold">
-                                  {comment.profiles.username || `${comment.profiles.first_name} ${comment.profiles.last_name}`}
+                                  {getDisplayName(comment.profiles, comment.user_id)}
                                 </p>
                                 <p className="text-sm text-gray-700">{comment.content}</p>
                                 <p className="text-xs text-gray-500 mt-1">
