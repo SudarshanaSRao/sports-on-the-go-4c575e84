@@ -10,7 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/Navbar";
-import { IOSTimePicker } from "@/components/IOSTimePicker";
 
 const SPORTS = [
   "Basketball",
@@ -52,7 +51,8 @@ export default function HostGame() {
     sport: "",
     skillLevel: "",
     gameDate: "",
-    startTime: "12:00", // 24-hour format
+    timeInput: "12:00",
+    timePeriod: "PM",
     durationMinutes: "",
     maxPlayers: "",
     costPerPerson: "",
@@ -159,6 +159,18 @@ export default function HostGame() {
     setLoading(true);
 
     try {
+      // Convert 12-hour time to 24-hour format for database
+      const [hours, minutes] = formData.timeInput.split(':');
+      let hour24 = parseInt(hours);
+      
+      if (formData.timePeriod === "PM" && hour24 !== 12) {
+        hour24 += 12;
+      } else if (formData.timePeriod === "AM" && hour24 === 12) {
+        hour24 = 0;
+      }
+      
+      const startTime24 = `${hour24.toString().padStart(2, '0')}:${minutes}`;
+
       // Geocode the address
       toast({
         title: "Validating address...",
@@ -173,7 +185,7 @@ export default function HostGame() {
         sport: formData.sport as any,
         skill_level: formData.skillLevel as any,
         game_date: formData.gameDate,
-        start_time: formData.startTime,
+        start_time: startTime24,
         duration_minutes: parseInt(formData.durationMinutes),
         max_players: parseInt(formData.maxPlayers),
         cost_per_person: parseFloat(formData.costPerPerson) || 0,
@@ -267,11 +279,33 @@ export default function HostGame() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Start Time *</Label>
-                    <IOSTimePicker
-                      value={formData.startTime}
-                      onChange={(time) => setFormData((prev) => ({ ...prev, startTime: time }))}
-                    />
+                    <Label htmlFor="timeInput">Start Time *</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="time"
+                        id="timeInput"
+                        name="timeInput"
+                        value={formData.timeInput}
+                        onChange={handleInputChange}
+                        placeholder="00:00"
+                        required
+                        className="flex-1"
+                      />
+                      <Select
+                        name="timePeriod"
+                        value={formData.timePeriod}
+                        onValueChange={(value) => handleSelectChange("timePeriod", value)}
+                        required
+                      >
+                        <SelectTrigger className="w-24">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="AM">AM</SelectItem>
+                          <SelectItem value="PM">PM</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
