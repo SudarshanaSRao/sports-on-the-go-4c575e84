@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 
@@ -16,6 +17,7 @@ interface Community {
   name: string;
   description: string;
   type: string;
+  sport: string | null;
   member_count: number;
   created_at: string;
   game_id: string | null;
@@ -56,18 +58,20 @@ export default function Community() {
   const { toast } = useToast();
   
   const [communities, setCommunities] = useState<Community[]>([]);
+  const [filteredCommunities, setFilteredCommunities] = useState<Community[]>([]);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isMember, setIsMember] = useState(false);
   const [showNewCommunity, setShowNewCommunity] = useState(false);
   const [showNewPost, setShowNewPost] = useState(false);
-  const [newCommunity, setNewCommunity] = useState({ name: "", description: "" });
+  const [newCommunity, setNewCommunity] = useState({ name: "", description: "", sport: "" });
   const [newPost, setNewPost] = useState({ title: "", content: "" });
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [newComment, setNewComment] = useState("");
   const [userVotes, setUserVotes] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<"list" | "posts">("list");
+  const [sportFilter, setSportFilter] = useState<string>("ALL");
 
   useEffect(() => {
     if (!user) {
@@ -95,8 +99,17 @@ export default function Community() {
       console.error("Error fetching communities:", error);
     } else {
       setCommunities(data || []);
+      setFilteredCommunities(data || []);
     }
   };
+
+  useEffect(() => {
+    if (sportFilter === "ALL") {
+      setFilteredCommunities(communities);
+    } else {
+      setFilteredCommunities(communities.filter(c => c.sport === sportFilter));
+    }
+  }, [sportFilter, communities]);
 
   const fetchPosts = async (communityId: string) => {
     const { data: postsData, error: postsError } = await supabase
@@ -195,10 +208,10 @@ export default function Community() {
   };
 
   const handleCreateCommunity = async () => {
-    if (!user || !newCommunity.name) {
+    if (!user || !newCommunity.name || !newCommunity.sport) {
       toast({
         title: "Missing fields",
-        description: "Please fill in the community name.",
+        description: "Please fill in the community name and sport.",
         variant: "destructive"
       });
       return;
@@ -210,7 +223,8 @@ export default function Community() {
         name: newCommunity.name,
         description: newCommunity.description,
         created_by: user.id,
-        type: 'general'
+        type: 'general',
+        sport: newCommunity.sport as any
       })
       .select()
       .single();
@@ -232,7 +246,7 @@ export default function Community() {
         });
 
       toast({ title: "Community created!" });
-      setNewCommunity({ name: "", description: "" });
+      setNewCommunity({ name: "", description: "", sport: "" });
       setShowNewCommunity(false);
       fetchCommunities();
     }
@@ -385,7 +399,42 @@ export default function Community() {
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">Communities</h1>
                 <p className="text-gray-600">Join communities and connect with players</p>
               </div>
-              <div className="flex justify-end mb-4">
+              <div className="flex justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-gray-600" />
+                  <Select value={sportFilter} onValueChange={setSportFilter}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Filter by sport" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Sports</SelectItem>
+                      <SelectItem value="BASKETBALL">Basketball</SelectItem>
+                      <SelectItem value="SOCCER">Soccer</SelectItem>
+                      <SelectItem value="TENNIS">Tennis</SelectItem>
+                      <SelectItem value="VOLLEYBALL">Volleyball</SelectItem>
+                      <SelectItem value="FOOTBALL">Football</SelectItem>
+                      <SelectItem value="BASEBALL">Baseball</SelectItem>
+                      <SelectItem value="CRICKET">Cricket</SelectItem>
+                      <SelectItem value="RUGBY">Rugby</SelectItem>
+                      <SelectItem value="HOCKEY">Hockey</SelectItem>
+                      <SelectItem value="BADMINTON">Badminton</SelectItem>
+                      <SelectItem value="TABLE_TENNIS">Table Tennis</SelectItem>
+                      <SelectItem value="GOLF">Golf</SelectItem>
+                      <SelectItem value="SWIMMING">Swimming</SelectItem>
+                      <SelectItem value="RUNNING">Running</SelectItem>
+                      <SelectItem value="CYCLING">Cycling</SelectItem>
+                      <SelectItem value="GYM">Gym</SelectItem>
+                      <SelectItem value="YOGA">Yoga</SelectItem>
+                      <SelectItem value="MARTIAL_ARTS">Martial Arts</SelectItem>
+                      <SelectItem value="BOXING">Boxing</SelectItem>
+                      <SelectItem value="CLIMBING">Climbing</SelectItem>
+                      <SelectItem value="SKATING">Skating</SelectItem>
+                      <SelectItem value="SKIING">Skiing</SelectItem>
+                      <SelectItem value="SURFING">Surfing</SelectItem>
+                      <SelectItem value="OTHER">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button onClick={() => setShowNewCommunity(!showNewCommunity)}>
                   <Plus className="w-4 h-4 mr-2" />
                   {showNewCommunity ? "Cancel" : "Create Community"}
@@ -409,13 +458,44 @@ export default function Community() {
                       onChange={(e) => setNewCommunity(prev => ({ ...prev, description: e.target.value }))}
                       rows={3}
                     />
+                    <Select value={newCommunity.sport} onValueChange={(value) => setNewCommunity(prev => ({ ...prev, sport: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select sport" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BASKETBALL">Basketball</SelectItem>
+                        <SelectItem value="SOCCER">Soccer</SelectItem>
+                        <SelectItem value="TENNIS">Tennis</SelectItem>
+                        <SelectItem value="VOLLEYBALL">Volleyball</SelectItem>
+                        <SelectItem value="FOOTBALL">Football</SelectItem>
+                        <SelectItem value="BASEBALL">Baseball</SelectItem>
+                        <SelectItem value="CRICKET">Cricket</SelectItem>
+                        <SelectItem value="RUGBY">Rugby</SelectItem>
+                        <SelectItem value="HOCKEY">Hockey</SelectItem>
+                        <SelectItem value="BADMINTON">Badminton</SelectItem>
+                        <SelectItem value="TABLE_TENNIS">Table Tennis</SelectItem>
+                        <SelectItem value="GOLF">Golf</SelectItem>
+                        <SelectItem value="SWIMMING">Swimming</SelectItem>
+                        <SelectItem value="RUNNING">Running</SelectItem>
+                        <SelectItem value="CYCLING">Cycling</SelectItem>
+                        <SelectItem value="GYM">Gym</SelectItem>
+                        <SelectItem value="YOGA">Yoga</SelectItem>
+                        <SelectItem value="MARTIAL_ARTS">Martial Arts</SelectItem>
+                        <SelectItem value="BOXING">Boxing</SelectItem>
+                        <SelectItem value="CLIMBING">Climbing</SelectItem>
+                        <SelectItem value="SKATING">Skating</SelectItem>
+                        <SelectItem value="SKIING">Skiing</SelectItem>
+                        <SelectItem value="SURFING">Surfing</SelectItem>
+                        <SelectItem value="OTHER">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Button onClick={handleCreateCommunity}>Create Community</Button>
                   </CardContent>
                 </Card>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {communities.map(community => (
+                {filteredCommunities.map(community => (
                   <Card key={community.id} className="hover:shadow-lg transition-shadow cursor-pointer">
                     <CardHeader>
                       <div className="flex items-start justify-between">
@@ -425,9 +505,11 @@ export default function Community() {
                             {community.description}
                           </CardDescription>
                         </div>
-                        <Badge variant={community.type === 'game' ? 'default' : 'secondary'}>
-                          {community.type}
-                        </Badge>
+                        {community.sport && (
+                          <Badge variant="default">
+                            {community.sport.replace(/_/g, ' ')}
+                          </Badge>
+                        )}
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -472,9 +554,11 @@ export default function Community() {
                           <Users className="w-4 h-4 mr-1" />
                           {selectedCommunity?.member_count} members
                         </div>
-                        <Badge variant={selectedCommunity?.type === 'game' ? 'default' : 'secondary'}>
-                          {selectedCommunity?.type}
-                        </Badge>
+                        {selectedCommunity?.sport && (
+                          <Badge variant="default">
+                            {selectedCommunity.sport.replace(/_/g, ' ')}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-2">

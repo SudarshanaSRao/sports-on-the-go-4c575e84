@@ -221,7 +221,8 @@ export default function HostGame() {
           description: communityDescription,
           game_id: gameData.id,
           created_by: user.id,
-          type: 'game'
+          type: 'game',
+          sport: formData.sport as any
         })
         .select()
         .single();

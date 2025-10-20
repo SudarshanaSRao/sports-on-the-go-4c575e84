@@ -55,6 +55,7 @@ export type Database = {
           id: string
           member_count: number | null
           name: string
+          sport: Database["public"]["Enums"]["sport_type"] | null
           type: string
         }
         Insert: {
@@ -65,6 +66,7 @@ export type Database = {
           id?: string
           member_count?: number | null
           name: string
+          sport?: Database["public"]["Enums"]["sport_type"] | null
           type?: string
         }
         Update: {
@@ -75,6 +77,7 @@ export type Database = {
           id?: string
           member_count?: number | null
           name?: string
+          sport?: Database["public"]["Enums"]["sport_type"] | null
           type?: string
         }
         Relationships: [
