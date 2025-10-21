@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -346,28 +346,10 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
   const [joiningGameId, setJoiningGameId] = useState<number | null>(null);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [markerMap, setMarkerMap] = useState<Map<number, any>>(new Map());
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-
-  // Comprehensive sports data
-  const allSportsData = [
-    { name: "Basketball", emoji: "🏀", description: "Fast-paced team sport played on a court. Perfect for cardio and teamwork." },
-    { name: "Soccer", emoji: "⚽", description: "World's most popular sport. Great for endurance and coordination." },
-    { name: "Cricket", emoji: "🏏", description: "Strategic bat-and-ball sport popular worldwide. Tests patience and skill." },
-    { name: "Volleyball", emoji: "🏐", description: "Dynamic team sport played over a net. Excellent for agility and reflexes." },
-    { name: "Tennis", emoji: "🎾", description: "Racket sport for singles or doubles. Great workout for the whole body." },
-    { name: "Baseball", emoji: "⚾", description: "Classic American sport combining strategy and athleticism." },
-    { name: "Football", emoji: "🏈", description: "Strategic team sport with high intensity. Build strength and teamwork." },
-    { name: "Pickleball", emoji: "🎾", description: "Paddle sport combining elements of tennis, badminton, and ping-pong." },
-    { name: "Ultimate Frisbee", emoji: "🥏", description: "Fast-paced team sport with a flying disc. Combines elements of soccer and football." },
-    { name: "Running", emoji: "🏃", description: "Individual or group running activities. Great for fitness and mental health." },
-    { name: "Cycling", emoji: "🚴", description: "Bike riding activities for fitness and fun. Explore your city on two wheels." },
-    { name: "Badminton", emoji: "🏸", description: "Racquet sport with a shuttlecock. Fast reflexes and agility required." },
-    { name: "Golf", emoji: "⛳", description: "Precision club-and-ball sport. Perfect for strategy and concentration." },
-  ];
 
   // Get unique sports from games
   const availableSports = Array.from(new Set(games.map(g => g.sport))).sort();
@@ -494,20 +476,6 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
         ? prev.filter(s => s !== sport)
         : [...prev, sport]
     );
-  };
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 320; // Width of one card plus gap
-      const newScrollLeft = direction === 'left' 
-        ? scrollContainerRef.current.scrollLeft - scrollAmount
-        : scrollContainerRef.current.scrollLeft + scrollAmount;
-      
-      scrollContainerRef.current.scrollTo({
-        left: newScrollLeft,
-        behavior: 'smooth'
-      });
-    }
   };
 
   const openInAppleMaps = (game: Game) => {
@@ -657,75 +625,17 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
               </p>
             </div>
 
-            <div className="relative group">
-              {/* Left Arrow */}
-              <button
-                onClick={() => scroll('left')}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/95 hover:bg-white shadow-lg rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                aria-label="Scroll left"
-              >
-                <ChevronLeft className="w-5 h-5 text-gray-700" />
-              </button>
-
-              {/* Scrollable Container */}
-              <div
-                ref={scrollContainerRef}
-                className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-              >
-                {allSportsData.map((sport) => {
-                  const isSelected = selectedSports.includes(sport.name);
-                  const hasGames = availableSports.includes(sport.name);
-                  const gameCount = games.filter(g => g.sport === sport.name).length;
-                  
-                  return (
-                    <button
-                      key={sport.name}
-                      onClick={() => hasGames && toggleSportFilter(sport.name)}
-                      disabled={!hasGames}
-                      className={`
-                        flex-shrink-0 w-[280px] p-6 rounded-xl border-2 transition-all text-left
-                        ${isSelected
-                          ? 'bg-primary border-primary shadow-lg scale-105'
-                          : hasGames
-                          ? 'bg-card border-border hover:border-primary/50 hover:shadow-md'
-                          : 'bg-muted/30 border-border/50 opacity-50 cursor-not-allowed'
-                        }
-                      `}
-                    >
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-start justify-between">
-                          <div className={`text-5xl ${isSelected ? 'scale-110' : ''} transition-transform`}>
-                            {sport.emoji}
-                          </div>
-                          {hasGames && (
-                            <Badge variant={isSelected ? "secondary" : "outline"} className="text-xs">
-                              {gameCount} {gameCount === 1 ? 'game' : 'games'}
-                            </Badge>
-                          )}
-                        </div>
-                        <div>
-                          <h3 className={`font-bold text-lg mb-1 ${isSelected ? 'text-white' : 'text-foreground'}`}>
-                            {sport.name}
-                          </h3>
-                          <p className={`text-sm line-clamp-2 ${isSelected ? 'text-white/90' : 'text-muted-foreground'}`}>
-                            {sport.description}
-                          </p>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Right Arrow */}
-              <button
-                onClick={() => scroll('right')}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/95 hover:bg-white shadow-lg rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                aria-label="Scroll right"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-700" />
-              </button>
+            <div className="flex flex-wrap gap-2">
+              {availableSports.map((sport) => (
+                <Badge
+                  key={sport}
+                  variant={selectedSports.includes(sport) ? "default" : "outline"}
+                  className="cursor-pointer hover:scale-105 transition-smooth"
+                  onClick={() => toggleSportFilter(sport)}
+                >
+                  {sport}
+                </Badge>
+              ))}
             </div>
           </div>
         </div>

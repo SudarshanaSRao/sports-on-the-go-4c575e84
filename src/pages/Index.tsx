@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
-import { MapPin, Users, Star, Calendar, Trophy, Shield, Zap, MessageSquare, Medal, CalendarCheck } from "lucide-react";
+import { MapPin, Users, Star, Calendar, Trophy, Shield, Zap, MessageSquare, Medal, CalendarCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import heroImage from "@/assets/hero-sports.jpg";
 import {
   Dialog,
@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const Index = () => {
   const features = [
@@ -151,9 +151,18 @@ const Index = () => {
 
   const [selectedSport, setSelectedSport] = useState<typeof sports[0] | null>(null);
   const navigate = useNavigate();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleFindGames = (sportName: string) => {
     navigate(`/discover?sport=${encodeURIComponent(sportName)}`);
+  };
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 350;
+      const newScrollLeft = scrollContainerRef.current.scrollLeft + (direction === 'right' ? scrollAmount : -scrollAmount);
+      scrollContainerRef.current.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -291,74 +300,97 @@ const Index = () => {
             <p className="text-muted-foreground">From basketball to cricket, find games for every sport</p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {sports.map((sport) => (
-              <Dialog key={sport.name}>
-                <DialogTrigger asChild>
-                  <Card className="hover:shadow-elevated transition-smooth cursor-pointer group">
-                    <CardContent className="p-6 text-center">
-                      <div className="text-5xl mb-3 group-hover:scale-110 transition-bounce">{sport.emoji}</div>
-                      <div className="font-semibold">{sport.name}</div>
-                      <p className="text-xs text-muted-foreground mt-2">{sport.description}</p>
-                    </CardContent>
-                  </Card>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-3 text-3xl">
-                      <span className="text-4xl">{sport.emoji}</span>
-                      {sport.name}
-                    </DialogTitle>
-                    <DialogDescription className="text-base pt-2">
-                      {sport.description}
-                    </DialogDescription>
-                  </DialogHeader>
-                  
-                  <div className="space-y-6 mt-4">
-                    <div>
-                      <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
-                        <Trophy className="w-5 h-5 text-primary" />
-                        Basic Rules
-                      </h3>
-                      <ul className="space-y-2">
-                        {sport.rules.map((rule, idx) => (
-                          <li key={idx} className="flex items-start gap-2">
-                            <span className="text-primary mt-1">•</span>
-                            <span className="text-muted-foreground">{rule}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                      <div>
-                        <h4 className="font-semibold mb-1 flex items-center gap-2">
-                          <Star className="w-4 h-4 text-primary" />
-                          Skill Levels
-                        </h4>
-                        <p className="text-sm text-muted-foreground">{sport.skillLevels}</p>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-1 flex items-center gap-2">
-                          <Shield className="w-4 h-4 text-primary" />
-                          Equipment Needed
-                        </h4>
-                        <p className="text-sm text-muted-foreground">{sport.equipment}</p>
-                      </div>
-                    </div>
+          <div className="relative group">
+            {/* Left Arrow */}
+            <button
+              onClick={() => scroll('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 hover:bg-background border border-border rounded-full p-3 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Scroll left"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
 
-                    <div className="pt-4 border-t">
-                      <Button 
-                        className="w-full gradient-primary text-white" 
-                        onClick={() => handleFindGames(sport.name)}
-                      >
-                        Find {sport.name} Games Near You
-                      </Button>
+            {/* Right Arrow */}
+            <button
+              onClick={() => scroll('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background/90 hover:bg-background border border-border rounded-full p-3 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+
+            <div 
+              ref={scrollContainerRef}
+              className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+            >
+              {sports.map((sport) => (
+                <Dialog key={sport.name}>
+                  <DialogTrigger asChild>
+                    <Card className="flex-shrink-0 w-72 hover:shadow-elevated transition-smooth cursor-pointer group/card">
+                      <CardContent className="p-6">
+                        <div className="text-6xl mb-4 text-center group-hover/card:scale-110 transition-bounce">{sport.emoji}</div>
+                        <div className="font-bold text-lg text-center mb-2">{sport.name}</div>
+                        <p className="text-sm text-muted-foreground text-center line-clamp-2">{sport.description}</p>
+                      </CardContent>
+                    </Card>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-3 text-3xl">
+                        <span className="text-4xl">{sport.emoji}</span>
+                        {sport.name}
+                      </DialogTitle>
+                      <DialogDescription className="text-base pt-2">
+                        {sport.description}
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="space-y-6 mt-4">
+                      <div>
+                        <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+                          <Trophy className="w-5 h-5 text-primary" />
+                          Basic Rules
+                        </h3>
+                        <ul className="space-y-2">
+                          {sport.rules.map((rule, idx) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <span className="text-primary mt-1">•</span>
+                              <span className="text-muted-foreground">{rule}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                        <div>
+                          <h4 className="font-semibold mb-1 flex items-center gap-2">
+                            <Star className="w-4 h-4 text-primary" />
+                            Skill Levels
+                          </h4>
+                          <p className="text-sm text-muted-foreground">{sport.skillLevels}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold mb-1 flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-primary" />
+                            Equipment Needed
+                          </h4>
+                          <p className="text-sm text-muted-foreground">{sport.equipment}</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t">
+                        <Button 
+                          className="w-full gradient-primary text-white" 
+                          onClick={() => handleFindGames(sport.name)}
+                        >
+                          Find {sport.name} Games Near You
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            ))}
+                  </DialogContent>
+                </Dialog>
+              ))}
+            </div>
           </div>
         </div>
       </section>
