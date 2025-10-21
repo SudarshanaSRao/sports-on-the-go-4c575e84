@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filter, Trash2 } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filter, Trash2, Search } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -88,6 +88,7 @@ export default function Community() {
   const [showMembersPanel, setShowMembersPanel] = useState(false);
   const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!user) {
@@ -746,6 +747,18 @@ export default function Community() {
                 </CardHeader>
               </Card>
 
+              {isMember && (
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search posts..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              )}
+
               {showNewPost && isMember && (
                 <Card>
                   <CardHeader>
@@ -788,7 +801,14 @@ export default function Community() {
                 </Card>
               )}
 
-              {isMember && posts.map(post => (
+              {isMember && posts
+                .filter(post => {
+                  if (!searchQuery.trim()) return true;
+                  const query = searchQuery.toLowerCase();
+                  return post.title.toLowerCase().includes(query) || 
+                         post.content.toLowerCase().includes(query);
+                })
+                .map(post => (
                 <Card key={post.id}>
                   <CardHeader>
                     <CardTitle className="text-xl">{post.title}</CardTitle>
