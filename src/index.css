@@ -119,6 +119,30 @@ All colors MUST be HSL.
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold tracking-tight;
   }
+
+  /* Increase font weight in dark mode for better visibility */
+  .dark body {
+    @apply font-medium;
+  }
+
+  .dark p,
+  .dark span,
+  .dark div {
+    font-weight: 500;
+  }
+
+  .dark h1, 
+  .dark h2, 
+  .dark h3, 
+  .dark h4, 
+  .dark h5, 
+  .dark h6 {
+    @apply font-extrabold;
+  }
+
+  .dark button {
+    @apply font-semibold;
+  }
 }
 
 @layer utilities {
