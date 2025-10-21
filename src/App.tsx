@@ -5,9 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
-import { UsernameSetupDialog } from "./components/UsernameSetupDialog";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import SetupUsername from "./pages/SetupUsername";
 import Discover from "./pages/Discover";
 import MyGames from "./pages/MyGames";
 import HostGame from "./pages/HostGame";
@@ -27,11 +27,11 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <UsernameSetupDialog />
             <div className="min-h-screen">
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/setup-username" element={<SetupUsername />} />
                 <Route path="/discover" element={<Discover />} />
                 <Route path="/host-game" element={<HostGame />} />
                 <Route path="/community" element={<Community />} />
