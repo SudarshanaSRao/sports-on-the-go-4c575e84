@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const Index = () => {
   const features = [
@@ -157,11 +157,40 @@ const Index = () => {
     navigate(`/discover?sport=${encodeURIComponent(sportName)}`);
   };
 
+  // Create a tripled array for infinite loop effect
+  const infiniteSports = [...sports, ...sports, ...sports];
+
+  // Initialize scroll position to middle set on mount
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const cardWidth = 288;
+      const totalWidth = cardWidth * sports.length;
+      scrollContainerRef.current.scrollLeft = totalWidth;
+    }
+  }, []);
+
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
       const scrollAmount = 350;
-      const newScrollLeft = scrollContainerRef.current.scrollLeft + (direction === 'right' ? scrollAmount : -scrollAmount);
-      scrollContainerRef.current.scrollTo({ left: newScrollLeft, behavior: 'smooth' });
+      const cardWidth = 288; // 72 (w-72) * 4 = 288px
+      const totalWidth = cardWidth * sports.length;
+      
+      if (direction === 'right') {
+        container.scrollLeft += scrollAmount;
+        
+        // If we've scrolled past the second set, jump back to the first set
+        if (container.scrollLeft >= totalWidth * 2) {
+          container.scrollLeft = totalWidth;
+        }
+      } else {
+        container.scrollLeft -= scrollAmount;
+        
+        // If we've scrolled before the first set, jump to the second set
+        if (container.scrollLeft <= 0) {
+          container.scrollLeft = totalWidth;
+        }
+      }
     }
   };
 
@@ -321,10 +350,23 @@ const Index = () => {
 
             <div 
               ref={scrollContainerRef}
-              className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth pb-4"
+              className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+              style={{ scrollBehavior: 'auto' }}
+              onScroll={(e) => {
+                const container = e.currentTarget;
+                const cardWidth = 288;
+                const totalWidth = cardWidth * sports.length;
+                
+                // Seamlessly loop when reaching boundaries
+                if (container.scrollLeft >= totalWidth * 2 - container.clientWidth) {
+                  container.scrollLeft = totalWidth;
+                } else if (container.scrollLeft <= 0) {
+                  container.scrollLeft = totalWidth;
+                }
+              }}
             >
-              {sports.map((sport) => (
-                <Dialog key={sport.name}>
+              {infiniteSports.map((sport, index) => (
+                <Dialog key={`${sport.name}-${index}`}>
                   <DialogTrigger asChild>
                     <Card className="flex-shrink-0 w-72 hover:shadow-elevated transition-smooth cursor-pointer group/card">
                       <CardContent className="p-6">
