@@ -66,7 +66,7 @@ interface CommunityMember {
 }
 
 export default function Community() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -91,12 +91,14 @@ export default function Community() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       navigate("/auth");
       return;
     }
-    fetchCommunities();
-  }, [user]);
+    if (user) {
+      fetchCommunities();
+    }
+  }, [user, loading]);
 
   useEffect(() => {
     if (selectedCommunity) {

@@ -18,18 +18,20 @@ interface LeaderboardEntry {
 }
 
 export default function Leaderboard() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
+    if (!authLoading && !user) {
       navigate("/auth");
       return;
     }
-    fetchLeaderboard();
-  }, [user]);
+    if (user) {
+      fetchLeaderboard();
+    }
+  }, [user, authLoading]);
 
   const fetchLeaderboard = async () => {
     setLoading(true);
