@@ -46,6 +46,8 @@ interface Comment {
   content: string;
   created_at: string;
   user_id: string;
+  is_flagged?: boolean;
+  flag_reason?: string;
   profiles: {
     username: string | null;
     first_name: string;
@@ -388,17 +390,41 @@ export default function Community() {
   const handleAddComment = async (postId: string) => {
     if (!user || !newComment.trim()) return;
 
-    const { error } = await supabase.from("comments").insert({
-      post_id: postId,
-      user_id: user.id,
-      content: newComment
-    });
+    // Moderate content first
+    try {
+      const { data: moderationData, error: moderationError } = await supabase.functions.invoke('moderate-content', {
+        body: { content: newComment }
+      });
 
-    if (error) {
+      if (moderationError) {
+        console.error("Moderation error:", moderationError);
+      }
+
+      const { error } = await supabase.from("comments").insert({
+        post_id: postId,
+        user_id: user.id,
+        content: newComment
+      });
+
+      if (error) {
+        toast({ title: "Error", description: "Failed to add comment.", variant: "destructive" });
+      } else {
+        setNewComment("");
+        
+        // If content was flagged, show warning to admins
+        if (moderationData?.isFlagged && isAdmin) {
+          toast({
+            title: "⚠️ Flagged Content Detected",
+            description: `Reason: ${moderationData.reason}. Consider reviewing this user's activity.`,
+            variant: "destructive"
+          });
+        }
+        
+        fetchComments(postId);
+      }
+    } catch (error) {
+      console.error("Error adding comment:", error);
       toast({ title: "Error", description: "Failed to add comment.", variant: "destructive" });
-    } else {
-      setNewComment("");
-      fetchComments(postId);
     }
   };
 
@@ -486,6 +512,48 @@ export default function Community() {
       toast({ title: "Community deleted successfully!" });
       handleBackToCommunities();
       fetchCommunities();
+    }
+  };
+
+  const handleKickMember = async (memberId: string, memberUserId: string) => {
+    if (!user || !isAdmin) {
+      toast({
+        title: "Permission denied",
+        description: "Only admins can kick members.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Prevent kicking yourself
+    if (memberUserId === user.id) {
+      toast({
+        title: "Cannot kick yourself",
+        description: "You cannot remove yourself as an admin.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const confirmKick = window.confirm("Are you sure you want to kick this member?");
+    if (!confirmKick) return;
+
+    const { error } = await supabase
+      .from("community_members")
+      .delete()
+      .eq("id", memberId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to kick member.",
+        variant: "destructive"
+      });
+    } else {
+      toast({ title: "Member kicked successfully!" });
+      if (selectedCommunity) {
+        fetchCommunityMembers(selectedCommunity.id);
+      }
     }
   };
 
@@ -708,11 +776,20 @@ export default function Community() {
                             {communityMembers.map(member => (
                               <div key={member.id} className="flex items-center justify-between p-3 bg-muted rounded">
                                 <div>
-                                <p className="font-medium text-foreground">
-                                  {getDisplayName(member.profiles, member.user_id)}
-                                </p>
-                                <p className="text-xs text-muted-foreground">{member.role}</p>
-                              </div>
+                                  <p className="font-medium text-foreground">
+                                    {getDisplayName(member.profiles, member.user_id)}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">{member.role}</p>
+                                </div>
+                                {isAdmin && member.user_id !== user?.id && (
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => handleKickMember(member.id, member.user_id)}
+                                  >
+                                    Kick
+                                  </Button>
+                                )}
                               </div>
                             ))}
                           </div>
