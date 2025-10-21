@@ -706,9 +706,9 @@ export default function Community() {
                           </SheetHeader>
                           <div className="mt-6 space-y-3">
                             {communityMembers.map(member => (
-                              <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                              <div key={member.id} className="flex items-center justify-between p-3 bg-muted rounded">
                                 <div>
-                                <p className="font-medium">
+                                <p className="font-medium text-foreground">
                                   {getDisplayName(member.profiles, member.user_id)}
                                 </p>
                                 <p className="text-xs text-muted-foreground">{member.role}</p>
@@ -849,7 +849,7 @@ export default function Community() {
                     {selectedPost === post.id && (
                       <div className="mt-4 space-y-3">
                         {comments[post.id]?.map(comment => (
-                          <div key={comment.id} className="bg-gray-50 p-3 rounded relative group">
+                          <div key={comment.id} className="bg-muted p-3 rounded relative group">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                               <p className="text-sm font-semibold">
