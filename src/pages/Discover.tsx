@@ -354,6 +354,23 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
   // Get unique sports from games
   const availableSports = Array.from(new Set(games.map(g => g.sport))).sort();
 
+  // Sports with emojis for filter
+  const sportsWithEmojis: { [key: string]: string } = {
+    "Badminton": "🏸",
+    "Baseball": "⚾",
+    "Basketball": "🏀",
+    "Cricket": "🏏",
+    "Cycling": "🚴",
+    "Football": "🏈",
+    "Golf": "⛳",
+    "Pickleball": "🎾",
+    "Running": "🏃",
+    "Soccer": "⚽",
+    "Tennis": "🎾",
+    "Ultimate Frisbee": "🥏",
+    "Volleyball": "🏐"
+  };
+
   // Filter games based on selected sports
   const filteredGames = selectedSports.length === 0 
     ? games 
@@ -606,37 +623,38 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Your Game</h1>
           <p className="text-gray-600">Discover pickup games near you</p>
           
-          {/* Sports Filter Gallery */}
-          <div className="mt-4 relative">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-gray-700">Filter by Sport:</span>
-                {selectedSports.length > 0 && (
+          {/* Sports Filter */}
+          <div className="mt-6 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <h3 className="text-base font-semibold text-gray-900 mb-4">Filter by Sport:</h3>
+            
+            <div className="flex flex-wrap gap-3 mb-4">
+              {availableSports.map((sport) => {
+                const isSelected = selectedSports.includes(sport);
+                const emoji = sportsWithEmojis[sport] || "🏅";
+                
+                return (
                   <button
-                    onClick={() => setSelectedSports([])}
-                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                    key={sport}
+                    onClick={() => toggleSportFilter(sport)}
+                    className={`
+                      inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                      transition-all duration-200
+                      ${isSelected
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }
+                    `}
                   >
-                    Clear all ({selectedSports.length})
+                    <span className="text-base">{emoji}</span>
+                    <span>{sport}</span>
                   </button>
-                )}
-              </div>
-              <p className="text-xs text-gray-500">
-                Showing {filteredGames.length} of {games.length} games
-              </p>
+                );
+              })}
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              {availableSports.map((sport) => (
-                <Badge
-                  key={sport}
-                  variant={selectedSports.includes(sport) ? "default" : "outline"}
-                  className="cursor-pointer hover:scale-105 transition-smooth"
-                  onClick={() => toggleSportFilter(sport)}
-                >
-                  {sport}
-                </Badge>
-              ))}
-            </div>
+            <p className="text-sm text-gray-500">
+              Showing {filteredGames.length} of {games.length} games
+            </p>
           </div>
         </div>
 
