@@ -13,12 +13,15 @@ const SetupUsername = () => {
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkUsername = async () => {
+      if (loading) return; // Wait until auth state is resolved
+
       if (!user) {
+        // If not authenticated after loading, send to auth
         navigate('/auth');
         return;
       }
@@ -36,7 +39,7 @@ const SetupUsername = () => {
     };
 
     checkUsername();
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
