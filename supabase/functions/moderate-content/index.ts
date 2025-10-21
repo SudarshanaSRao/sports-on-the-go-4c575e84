@@ -60,15 +60,19 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const aiResponse = data.choices?.[0]?.message?.content || "";
+    let aiResponse = data.choices?.[0]?.message?.content || "";
     
     console.log("AI moderation response:", aiResponse);
+    
+    // Strip markdown code blocks if present
+    aiResponse = aiResponse.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
     
     // Try to parse the AI response as JSON
     let moderationResult;
     try {
       moderationResult = JSON.parse(aiResponse);
-    } catch {
+    } catch (parseError) {
+      console.error("Failed to parse moderation response:", parseError, "Raw response:", aiResponse);
       // If parsing fails, assume content is safe
       moderationResult = { isFlagged: false, reason: "" };
     }

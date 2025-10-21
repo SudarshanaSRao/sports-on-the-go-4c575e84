@@ -411,6 +411,17 @@ export default function Community() {
 
       if (moderationError) {
         console.error("Moderation error:", moderationError);
+        // Continue with adding comment if moderation fails
+      }
+
+      // Block the comment if flagged
+      if (moderationData?.isFlagged) {
+        toast({
+          title: "⚠️ Comment Blocked",
+          description: `Your comment was blocked: ${moderationData.reason}. Please keep the conversation respectful.`,
+          variant: "destructive"
+        });
+        return;
       }
 
       const { error } = await supabase.from("comments").insert({
@@ -423,16 +434,7 @@ export default function Community() {
         toast({ title: "Error", description: "Failed to add comment.", variant: "destructive" });
       } else {
         setNewComment("");
-        
-        // If content was flagged, show warning to admins
-        if (moderationData?.isFlagged && isAdmin) {
-          toast({
-            title: "⚠️ Flagged Content Detected",
-            description: `Reason: ${moderationData.reason}. Consider reviewing this user's activity.`,
-            variant: "destructive"
-          });
-        }
-        
+        toast({ title: "Comment added successfully!" });
         fetchComments(postId);
       }
     } catch (error) {
@@ -783,7 +785,12 @@ export default function Community() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Sheet open={showMembersPanel} onOpenChange={setShowMembersPanel}>
+                      <Sheet open={showMembersPanel} onOpenChange={(open) => {
+                        setShowMembersPanel(open);
+                        if (open && selectedCommunity) {
+                          fetchCommunityMembers(selectedCommunity.id);
+                        }
+                      }}>
                         <SheetTrigger asChild>
                           <Button variant="outline">
                             <Users className="w-4 h-4 mr-2" />
