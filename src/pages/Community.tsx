@@ -91,6 +91,7 @@ export default function Community() {
   const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [communitySearchQuery, setCommunitySearchQuery] = useState("");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -126,12 +127,24 @@ export default function Community() {
   };
 
   useEffect(() => {
-    if (sportFilter === "ALL") {
-      setFilteredCommunities(communities);
-    } else {
-      setFilteredCommunities(communities.filter(c => c.sport === sportFilter));
+    let filtered = communities;
+    
+    // Filter by sport
+    if (sportFilter !== "ALL") {
+      filtered = filtered.filter(c => c.sport === sportFilter);
     }
-  }, [sportFilter, communities]);
+    
+    // Filter by search query
+    if (communitySearchQuery.trim()) {
+      const query = communitySearchQuery.toLowerCase();
+      filtered = filtered.filter(c => 
+        c.name.toLowerCase().includes(query) || 
+        c.description?.toLowerCase().includes(query)
+      );
+    }
+    
+    setFilteredCommunities(filtered);
+  }, [sportFilter, communitySearchQuery, communities]);
 
   const fetchPosts = async (communityId: string) => {
     const { data: postsData, error: postsError } = await supabase
@@ -598,9 +611,9 @@ export default function Community() {
                 <h1 className="text-3xl font-bold text-foreground mb-2">Communities</h1>
                 <p className="text-muted-foreground">Join communities and connect with players</p>
               </div>
-              <div className="flex justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-muted-foreground" />
+              <div className="flex justify-between items-center mb-4 gap-4">
+                <div className="flex items-center gap-2 flex-1 max-w-2xl">
+                  <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   <Select value={sportFilter} onValueChange={setSportFilter}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Filter by sport" />
@@ -633,6 +646,15 @@ export default function Community() {
                       <SelectItem value="OTHER">Other</SelectItem>
                     </SelectContent>
                   </Select>
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search communities..."
+                      value={communitySearchQuery}
+                      onChange={(e) => setCommunitySearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
                 </div>
                 <Button onClick={() => setShowNewCommunity(!showNewCommunity)}>
                   <Plus className="w-4 h-4 mr-2" />
@@ -826,18 +848,6 @@ export default function Community() {
                 </CardHeader>
               </Card>
 
-              {isMember && !selectedPost && (
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search posts..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              )}
-
               {showNewPost && isMember && (
                 <Card>
                   <CardHeader>
@@ -880,14 +890,7 @@ export default function Community() {
                 </Card>
               )}
 
-              {isMember && posts
-                .filter(post => {
-                  if (!searchQuery.trim()) return true;
-                  const query = searchQuery.toLowerCase();
-                  return post.title.toLowerCase().includes(query) || 
-                         post.content.toLowerCase().includes(query);
-                })
-                .map(post => (
+              {isMember && posts.map(post => (
                 <Card key={post.id}>
                   <CardHeader>
                     <CardTitle className="text-xl">{post.title}</CardTitle>
