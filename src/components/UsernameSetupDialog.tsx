@@ -85,38 +85,46 @@ export const UsernameSetupDialog = () => {
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
-        <DialogHeader>
-          <DialogTitle>Choose Your Username</DialogTitle>
-          <DialogDescription>
+      <DialogContent 
+        className="sm:max-w-md bg-card border-2 shadow-elevated" 
+        onInteractOutside={(e) => e.preventDefault()}
+      >
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="text-2xl font-bold text-foreground">Choose Your Username</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
             Please choose a unique username to complete your profile setup.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+          <div className="space-y-3">
+            <Label htmlFor="username" className="text-sm font-medium text-foreground">
+              Username
+            </Label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
               <Input
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="johndoe123"
-                className="pl-10"
+                className="pl-10 h-11 bg-background border-input text-foreground placeholder:text-muted-foreground"
                 pattern="[a-zA-Z0-9_]+"
                 minLength={3}
                 maxLength={20}
                 required
+                autoFocus
               />
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && (
+              <p className="text-sm font-medium text-destructive">{error}</p>
+            )}
             <p className="text-xs text-muted-foreground">
               3-20 characters, letters, numbers, and underscores only
             </p>
           </div>
           <Button 
             type="submit" 
-            className="w-full gradient-primary text-white shadow-primary hover:opacity-90"
+            className="w-full h-11 gradient-primary text-white shadow-primary hover:opacity-90 font-semibold"
             disabled={isLoading}
           >
             {isLoading ? "Setting username..." : "Continue"}
