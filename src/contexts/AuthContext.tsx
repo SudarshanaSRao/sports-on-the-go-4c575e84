@@ -15,8 +15,7 @@ interface AuthContextType {
 }
 
 interface SignUpData {
-  firstName: string;
-  lastName: string;
+  username: string;
   dateOfBirth: string;
   city: string;
   zipCode: string;
@@ -59,8 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
-            first_name: userData.firstName,
-            last_name: userData.lastName,
+            username: userData.username,
             date_of_birth: userData.dateOfBirth,
             city: userData.city,
             zip_code: userData.zipCode,

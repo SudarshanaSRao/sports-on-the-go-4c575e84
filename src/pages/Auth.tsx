@@ -15,8 +15,10 @@ const signInSchema = z.object({
 });
 
 const signUpSchema = z.object({
-  firstName: z.string().min(1, "First name is required").max(100),
-  lastName: z.string().min(1, "Last name is required").max(100),
+  username: z.string()
+    .min(3, "Username must be at least 3 characters")
+    .max(20, "Username must be less than 20 characters")
+    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
   email: z.string().email("Invalid email address"),
   password: z.string()
     .min(8, "Password must be at least 8 characters")
@@ -77,8 +79,7 @@ const Auth = () => {
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      firstName: formData.get('firstname') as string,
-      lastName: formData.get('lastname') as string,
+      username: formData.get('username') as string,
       email: formData.get('signup-email') as string,
       password: formData.get('signup-password') as string,
       dateOfBirth: formData.get('dob') as string,
@@ -89,8 +90,7 @@ const Auth = () => {
     try {
       signUpSchema.parse(data);
       await signUp(data.email, data.password, {
-        firstName: data.firstName,
-        lastName: data.lastName,
+        username: data.username,
         dateOfBirth: data.dateOfBirth,
         city: data.city,
         zipCode: data.zipCode,
@@ -236,33 +236,24 @@ const Auth = () => {
                 </div>
               </div>
               <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstname">First Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="firstname"
-                        name="firstname"
-                        type="text"
-                        placeholder="John"
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                    {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastname">Last Name</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      id="lastname"
-                      name="lastname"
+                      id="username"
+                      name="username"
                       type="text"
-                      placeholder="Doe"
+                      placeholder="johndoe123"
+                      className="pl-10"
+                      pattern="[a-zA-Z0-9_]+"
+                      minLength={3}
+                      maxLength={20}
                       required
                     />
-                    {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
                   </div>
+                  {errors.username && <p className="text-sm text-destructive">{errors.username}</p>}
+                  <p className="text-xs text-muted-foreground">3-20 characters, letters, numbers, and underscores only</p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
