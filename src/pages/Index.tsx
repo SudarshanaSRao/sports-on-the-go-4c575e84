@@ -78,6 +78,20 @@ const Index = () => {
       equipment: "Ball, goals, field"
     },
     { 
+      name: "Cricket", 
+      emoji: "🏏",
+      description: "Strategic bat-and-ball sport popular worldwide. Tests patience and skill.",
+      rules: [
+        "Two teams of 11 players each",
+        "Batting team scores runs by hitting ball and running between wickets",
+        "Bowling team tries to dismiss batsmen (10 ways to get out)",
+        "Game formats: Test (5 days), ODI (50 overs), T20 (20 overs)",
+        "Fielding positions are strategic and change based on batsman"
+      ],
+      skillLevels: "Beginner to Advanced",
+      equipment: "Bat, ball, wickets, pads"
+    },
+    { 
       name: "Volleyball", 
       emoji: "🏐",
       description: "Dynamic team sport played over a net. Excellent for agility and reflexes.",
@@ -274,7 +288,7 @@ const Index = () => {
 
           <div className="text-center mb-12">
             <h3 className="text-2xl sm:text-3xl font-black mb-4">Play Your Favorite Sports</h3>
-            <p className="text-muted-foreground">From basketball to volleyball, find games for every sport</p>
+            <p className="text-muted-foreground">From basketball to cricket, find games for every sport</p>
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">

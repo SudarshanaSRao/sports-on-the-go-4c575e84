@@ -14,6 +14,7 @@ import { Navbar } from "@/components/Navbar";
 const SPORTS = [
   "Basketball",
   "Soccer",
+  "Cricket",
   "Tennis",
   "Volleyball",
   "Football",

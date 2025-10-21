@@ -164,6 +164,7 @@ const MyGames = () => {
     const emojiMap: { [key: string]: string } = {
       'BASKETBALL': '🏀',
       'SOCCER': '⚽',
+      'CRICKET': '🏏',
       'VOLLEYBALL': '🏐',
       'TENNIS': '🎾',
       'BASEBALL': '⚾',

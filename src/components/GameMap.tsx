@@ -226,6 +226,10 @@ export default function GameMap({ games = sampleGames, center = [37.7749, -122.4
                 <span>Soccer</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+                <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">🏏</span>
+                <span>Cricket</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
                 <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">🎾</span>
                 <span>Tennis</span>
               </div>
