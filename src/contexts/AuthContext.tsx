@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   const signUp = async (email: string, password: string, userData: SignUpData) => {
     try {
@@ -70,6 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (data.user) {
         toast.success("Account created successfully! Welcome to SquadUp.");
+        navigate('/discover');
       }
     } catch (error: any) {
       console.error("Sign up error:", error);
@@ -92,6 +93,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
 
       if (data.user) {
+        // Check if user has a username
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', data.user.id)
+          .single();
+
         // Update last login
         await supabase
           .from('profiles')
@@ -99,6 +107,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           .eq('id', data.user.id);
         
         toast.success("Welcome back!");
+        
+        // Redirect based on username presence
+        if (!profile?.username) {
+          navigate('/setup-username');
+        } else {
+          navigate('/discover');
+        }
       }
     } catch (error: any) {
       console.error("Sign in error:", error);
