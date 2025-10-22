@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
+import { getSportEmoji, toDisplaySportName } from "@/utils/sportsUtils";
 
 interface Game {
   id: string;
@@ -160,20 +161,6 @@ const MyGames = () => {
     }
   };
 
-  const getSportEmoji = (sport: string) => {
-    const emojiMap: { [key: string]: string } = {
-      'BASKETBALL': '🏀',
-      'SOCCER': '⚽',
-      'CRICKET': '🏏',
-      'VOLLEYBALL': '🏐',
-      'TENNIS': '🎾',
-      'BASEBALL': '⚾',
-      'FOOTBALL': '🏈',
-      'default': '🏃'
-    };
-    return emojiMap[sport] || emojiMap.default;
-  };
-
   const allUpcomingGames = [...upcomingGames, ...hostedGames];
 
   if (loading) {
@@ -287,7 +274,7 @@ const MyGames = () => {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 mb-3">
                               <div>
-                                <h3 className="text-xl font-bold mb-1">{game.sport}</h3>
+                                <h3 className="text-xl font-bold mb-1">{toDisplaySportName(game.sport)}</h3>
                                 <div className="flex items-center text-muted-foreground text-sm">
                                   <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
                                   <span className="truncate">{game.location_name}</span>
@@ -402,7 +389,7 @@ const MyGames = () => {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 mb-3">
                               <div>
-                                <h3 className="text-xl font-bold mb-1">{game.sport}</h3>
+                                <h3 className="text-xl font-bold mb-1">{toDisplaySportName(game.sport)}</h3>
                                 <div className="flex items-center text-muted-foreground text-sm">
                                   <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
                                   <span className="truncate">{game.location_name}</span>

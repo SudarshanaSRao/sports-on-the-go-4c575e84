@@ -10,27 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/Navbar";
+import { getAllSportsDisplayNames, toDbSportValue } from "@/utils/sportsUtils";
 
-const SPORTS = [
-  "Basketball",
-  "Soccer",
-  "Cricket",
-  "Tennis",
-  "Volleyball",
-  "Football",
-  "Baseball",
-  "Pickleball",
-  "Ultimate Frisbee",
-  "Running",
-  "Cycling",
-  "Badminton",
-  "Golf",
-];
-
-// Convert frontend sport names to database enum values
-const convertSportToEnum = (sport: string): string => {
-  return sport.toUpperCase().replace(/\s+/g, '_');
-};
+const SPORTS = getAllSportsDisplayNames();
 
 const SKILL_LEVELS = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "ALL_LEVELS"];
 
@@ -166,7 +148,7 @@ export default function HostGame() {
       console.log('🎮 [HostGame] Step 3: Creating game in database...');
       const gamePayload = {
         host_id: user.id,
-        sport: convertSportToEnum(formData.sport) as any,
+        sport: toDbSportValue(formData.sport) as any,
         skill_level: formData.skillLevel as any,
         game_date: formData.gameDate,
         start_time: startTime24,
@@ -214,7 +196,7 @@ export default function HostGame() {
         game_id: gameData.id,
         created_by: user.id,
         type: 'game',
-        sport: convertSportToEnum(formData.sport) as any
+        sport: toDbSportValue(formData.sport) as any
       };
       console.log('Community payload:', communityPayload);
       

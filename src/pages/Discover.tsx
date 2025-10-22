@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
+import { toDisplaySportName, getSportEmoji } from "@/utils/sportsUtils";
 
 interface Game {
   id: number;
@@ -351,25 +352,10 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Get unique sports from games
-  const availableSports = Array.from(new Set(games.map(g => g.sport))).sort();
-
-  // Sports with emojis for filter
-  const sportsWithEmojis: { [key: string]: string } = {
-    "Badminton": "🏸",
-    "Baseball": "⚾",
-    "Basketball": "🏀",
-    "Cricket": "🏏",
-    "Cycling": "🚴",
-    "Football": "🏈",
-    "Golf": "⛳",
-    "Pickleball": "🎾",
-    "Running": "🏃",
-    "Soccer": "⚽",
-    "Tennis": "🎾",
-    "Ultimate Frisbee": "🥏",
-    "Volleyball": "🏐"
-  };
+  // Get unique sports from games (using DB enum values)
+  const availableSports = useMemo(() => {
+    return Array.from(new Set(games.map(g => g.sport))).sort();
+  }, [games]);
 
   // Filter games based on selected sports
   const filteredGames = selectedSports.length === 0 
@@ -630,7 +616,8 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
             <div className="flex flex-wrap gap-3 mb-4">
               {availableSports.map((sport) => {
                 const isSelected = selectedSports.includes(sport);
-                const emoji = sportsWithEmojis[sport] || "🏅";
+                const emoji = getSportEmoji(sport);
+                const displayName = toDisplaySportName(sport);
                 
                 return (
                   <button
@@ -646,7 +633,7 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
                     `}
                   >
                     <span className="text-base">{emoji}</span>
-                    <span>{sport}</span>
+                    <span>{displayName}</span>
                   </button>
                 );
               })}

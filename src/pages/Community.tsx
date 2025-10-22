@@ -12,6 +12,7 @@ import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filt
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
+import { getAllSportsDbValues, toDisplaySportName } from "@/utils/sportsUtils";
 
 interface Community {
   id: string;
@@ -622,30 +623,11 @@ export default function Community() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="ALL">All Sports</SelectItem>
-                      <SelectItem value="BASKETBALL">Basketball</SelectItem>
-                      <SelectItem value="SOCCER">Soccer</SelectItem>
-                      <SelectItem value="TENNIS">Tennis</SelectItem>
-                      <SelectItem value="VOLLEYBALL">Volleyball</SelectItem>
-                      <SelectItem value="FOOTBALL">Football</SelectItem>
-                      <SelectItem value="BASEBALL">Baseball</SelectItem>
-                      <SelectItem value="CRICKET">Cricket</SelectItem>
-                      <SelectItem value="RUGBY">Rugby</SelectItem>
-                      <SelectItem value="HOCKEY">Hockey</SelectItem>
-                      <SelectItem value="BADMINTON">Badminton</SelectItem>
-                      <SelectItem value="TABLE_TENNIS">Table Tennis</SelectItem>
-                      <SelectItem value="GOLF">Golf</SelectItem>
-                      <SelectItem value="SWIMMING">Swimming</SelectItem>
-                      <SelectItem value="RUNNING">Running</SelectItem>
-                      <SelectItem value="CYCLING">Cycling</SelectItem>
-                      <SelectItem value="GYM">Gym</SelectItem>
-                      <SelectItem value="YOGA">Yoga</SelectItem>
-                      <SelectItem value="MARTIAL_ARTS">Martial Arts</SelectItem>
-                      <SelectItem value="BOXING">Boxing</SelectItem>
-                      <SelectItem value="CLIMBING">Climbing</SelectItem>
-                      <SelectItem value="SKATING">Skating</SelectItem>
-                      <SelectItem value="SKIING">Skiing</SelectItem>
-                      <SelectItem value="SURFING">Surfing</SelectItem>
-                      <SelectItem value="OTHER">Other</SelectItem>
+                      {getAllSportsDbValues().map((sport) => (
+                        <SelectItem key={sport} value={sport}>
+                          {toDisplaySportName(sport)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <div className="relative flex-1">
