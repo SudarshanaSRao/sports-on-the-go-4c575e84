@@ -27,6 +27,11 @@ const SPORTS = [
   "Golf",
 ];
 
+// Convert frontend sport names to database enum values
+const convertSportToEnum = (sport: string): string => {
+  return sport.toUpperCase().replace(/\s+/g, '_');
+};
+
 const SKILL_LEVELS = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "ALL_LEVELS"];
 
 const US_STATE_MAP = {
@@ -161,7 +166,7 @@ export default function HostGame() {
       console.log('🎮 [HostGame] Step 3: Creating game in database...');
       const gamePayload = {
         host_id: user.id,
-        sport: formData.sport as any,
+        sport: convertSportToEnum(formData.sport) as any,
         skill_level: formData.skillLevel as any,
         game_date: formData.gameDate,
         start_time: startTime24,
@@ -209,7 +214,7 @@ export default function HostGame() {
         game_id: gameData.id,
         created_by: user.id,
         type: 'game',
-        sport: formData.sport as any
+        sport: convertSportToEnum(formData.sport) as any
       };
       console.log('Community payload:', communityPayload);
       

@@ -592,6 +592,11 @@ export type Database = {
         | "RUGBY"
         | "HOCKEY"
         | "OTHER"
+        | "PICKLEBALL"
+        | "RUNNING"
+        | "CYCLING"
+        | "BADMINTON"
+        | "GOLF"
       user_role: "USER" | "ADMIN"
     }
     CompositeTypes: {
@@ -744,6 +749,11 @@ export const Constants = {
         "RUGBY",
         "HOCKEY",
         "OTHER",
+        "PICKLEBALL",
+        "RUNNING",
+        "CYCLING",
+        "BADMINTON",
+        "GOLF",
       ],
       user_role: ["USER", "ADMIN"],
     },
