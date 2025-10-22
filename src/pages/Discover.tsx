@@ -340,17 +340,101 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   return `${distance.toFixed(1)} mi`;
 };
 
-export default function GameMap({ games = sampleGames, center = [39.8283, -98.5795], zoom = 4 }: GameMapProps) {
+export default function GameMap({ games: propGames, center: propCenter, zoom = 4 }: GameMapProps) {
   const [map, setMap] = useState<any>(null);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [joiningGameId, setJoiningGameId] = useState<number | null>(null);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [markerMap, setMarkerMap] = useState<Map<number, any>>(new Map());
+  const [dbGames, setDbGames] = useState<Game[]>([]);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Fetch games from database
+  useEffect(() => {
+    const fetchGames = async () => {
+      console.log('🎮 [Discover] Fetching games from database...');
+      setLoading(true);
+      
+      try {
+        const { data: gamesData, error } = await supabase
+          .from('games')
+          .select(`
+            id,
+            sport,
+            location_name,
+            address,
+            city,
+            game_date,
+            start_time,
+            max_players,
+            current_players,
+            cost_per_person,
+            skill_level,
+            latitude,
+            longitude,
+            host_id,
+            profiles!games_host_id_fkey(username)
+          `)
+          .eq('status', 'UPCOMING')
+          .order('game_date', { ascending: true });
+
+        if (error) {
+          console.error('❌ [Discover] Error fetching games:', error);
+          throw error;
+        }
+
+        console.log('✅ [Discover] Games fetched:', gamesData?.length || 0);
+        console.log('Games data:', gamesData);
+
+        // Transform database games to match Game interface
+        const transformedGames: Game[] = (gamesData || []).map((game: any) => ({
+          id: game.id,
+          sport: toDisplaySportName(game.sport),
+          emoji: getSportEmoji(game.sport),
+          location: game.location_name,
+          address: `${game.address}, ${game.city}`,
+          date: new Date(game.game_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          time: new Date(`2000-01-01T${game.start_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+          distance: '0 mi', // Will calculate based on user location
+          players: { current: game.current_players, max: game.max_players },
+          skillLevel: game.skill_level.replace('_', ' '),
+          hostName: game.profiles?.username || 'Unknown',
+          hostRating: 4.5, // Placeholder
+          price: game.cost_per_person > 0 ? `$${game.cost_per_person}` : 'Free',
+          lat: parseFloat(game.latitude),
+          lng: parseFloat(game.longitude),
+        }));
+
+        setDbGames(transformedGames);
+      } catch (error) {
+        console.error('❌ [Discover] Error:', error);
+        toast({
+          title: 'Error loading games',
+          description: 'Could not load games from database',
+          variant: 'destructive',
+        });
+        // Fallback to sample games if fetch fails
+        setDbGames(sampleGames);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGames();
+  }, [toast]);
+
+  // Use propGames if provided, otherwise use fetched DB games
+  const games = propGames || dbGames;
+  
+  // Auto-center map on first real game with coordinates
+  const center = propCenter || (games.length > 0 && games[0].lat && games[0].lng 
+    ? [games[0].lat, games[0].lng] as [number, number]
+    : [39.8283, -98.5795] as [number, number]);
 
   // Get unique sports from games (using DB enum values)
   const availableSports = useMemo(() => {
@@ -387,8 +471,11 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
     }
   }, []);
 
-  // Initialize map and create all markers once
+  // Initialize map and create all markers once games are loaded
   useEffect(() => {
+    // Don't initialize map until games are loaded
+    if (loading || games.length === 0) return;
+    
     if (typeof window !== "undefined") {
       import("leaflet").then((L) => {
         // Fix default marker icon
@@ -408,9 +495,13 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
           maxZoom: 19,
         }).addTo(mapInstance);
 
+        console.log(`🗺️ [Discover] Creating markers for ${games.length} games`);
+        
         // Create markers for all games
         const newMarkerMap = new Map();
         games.forEach((game) => {
+          console.log(`📍 [Discover] Adding marker for ${game.sport} at ${game.location} (${game.lat}, ${game.lng})`);
+          
           const icon = L.divIcon({
             className: "custom-marker",
             html: `
@@ -444,6 +535,7 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
           newMarkerMap.set(game.id, marker);
         });
 
+        console.log(`✅ [Discover] Created ${newMarkerMap.size} markers`);
         setMarkerMap(newMarkerMap);
         setMap(mapInstance);
 
@@ -453,7 +545,7 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
         };
       });
     }
-  }, []);
+  }, [loading, games, center, zoom]);
 
   // Show/hide markers based on filter
   useEffect(() => {
@@ -649,6 +741,29 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
           {/* Map Section */}
           <div className="lg:col-span-2 relative">
             <div id="map" className="w-full h-full rounded-xl shadow-lg border-2 border-gray-200"></div>
+            
+            {/* Loading Overlay */}
+            {loading && (
+              <div className="absolute inset-0 bg-white/90 rounded-xl flex items-center justify-center z-[2000]">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 font-medium">Loading games...</p>
+                </div>
+              </div>
+            )}
+            
+            {/* No Games Message */}
+            {!loading && games.length === 0 && (
+              <div className="absolute inset-0 bg-white rounded-xl flex items-center justify-center z-[2000]">
+                <div className="text-center p-6">
+                  <p className="text-xl font-semibold text-gray-900 mb-2">No games found</p>
+                  <p className="text-gray-600 mb-4">Be the first to host a game in your area!</p>
+                  <Button onClick={() => navigate('/host-game')} className="bg-blue-600 hover:bg-blue-700">
+                    Host a Game
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Locate Me Button */}
             <button
@@ -660,16 +775,18 @@ export default function GameMap({ games = sampleGames, center = [39.8283, -98.57
             </button>
 
             {/* Map Legend */}
-            <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-3 border border-gray-200 max-h-[300px] overflow-y-auto">
-              <div className="text-xs font-semibold text-gray-700 mb-2">Sports on Map</div>
-              {Array.from(new Set(filteredGames.map(g => ({ sport: g.sport, emoji: g.emoji }))))
-                .map((item, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 mt-1">
-                    <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">{item.emoji}</span>
-                    <span>{item.sport}</span>
-                  </div>
-                ))}
-            </div>
+            {!loading && games.length > 0 && (
+              <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-3 border border-gray-200 max-h-[300px] overflow-y-auto">
+                <div className="text-xs font-semibold text-gray-700 mb-2">Sports on Map</div>
+                {Array.from(new Set(filteredGames.map(g => ({ sport: g.sport, emoji: g.emoji }))))
+                  .map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+                      <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">{item.emoji}</span>
+                      <span>{item.sport}</span>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
 
           {/* Game Details Panel */}
