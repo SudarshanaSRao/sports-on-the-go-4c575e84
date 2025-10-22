@@ -596,12 +596,12 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     }
   }, []);
 
-  // Initialize map and create all markers once games are loaded
+  // Initialize map once when component mounts
   useEffect(() => {
     // Don't initialize map until games are loaded
-    if (loading || games.length === 0) return;
+    if (loading) return;
     
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !map) {
       import("leaflet").then((L) => {
         // Fix default marker icon
         delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -620,48 +620,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
           maxZoom: 19,
         }).addTo(mapInstance);
 
-        console.log(`🗺️ [Discover] Creating markers for ${games.length} games`);
-        
-        // Create markers for all games
-        const newMarkerMap = new Map();
-        games.forEach((game) => {
-          console.log(`📍 [Discover] Adding marker for ${game.sport} at ${game.location} (${game.lat}, ${game.lng})`);
-          
-          const icon = L.divIcon({
-            className: "custom-marker",
-            html: `
-              <div style="
-                width: 40px;
-                height: 40px;
-                background: #3b82f6;
-                border: 3px solid #1e40af;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 20px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                cursor: pointer;
-              ">
-                ${game.emoji}
-              </div>
-            `,
-            iconSize: [40, 40],
-            iconAnchor: [20, 40],
-          });
-
-          const marker = L.marker([game.lat, game.lng], { icon }).addTo(mapInstance);
-
-          marker.on("click", () => {
-            setSelectedGame(game);
-            mapInstance.setView([game.lat, game.lng], 14);
-          });
-
-          newMarkerMap.set(game.id, marker);
-        });
-
-        console.log(`✅ [Discover] Created ${newMarkerMap.size} markers`);
-        setMarkerMap(newMarkerMap);
+        console.log('🗺️ [Discover] Map initialized');
         setMap(mapInstance);
 
         // Cleanup
@@ -670,7 +629,61 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
         };
       });
     }
-  }, [loading, games, center, zoom]);
+  }, [loading]);
+
+  // Update markers when games change
+  useEffect(() => {
+    if (!map || loading) return;
+
+    console.log(`🔄 [Discover] Updating markers for ${games.length} games`);
+
+    // Remove all existing markers
+    markerMap.forEach((marker) => marker.remove());
+
+    // Create new markers
+    import("leaflet").then((L) => {
+      const newMarkerMap = new Map();
+      
+      games.forEach((game) => {
+        console.log(`📍 [Discover] Adding marker for ${game.sport} at ${game.location} (${game.lat}, ${game.lng})`);
+        
+        const icon = L.divIcon({
+          className: "custom-marker",
+          html: `
+            <div style="
+              width: 40px;
+              height: 40px;
+              background: #3b82f6;
+              border: 3px solid #1e40af;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 20px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+              cursor: pointer;
+            ">
+              ${game.emoji}
+            </div>
+          `,
+          iconSize: [40, 40],
+          iconAnchor: [20, 40],
+        });
+
+        const marker = L.marker([game.lat, game.lng], { icon }).addTo(map);
+
+        marker.on("click", () => {
+          setSelectedGame(game);
+          map.setView([game.lat, game.lng], 14);
+        });
+
+        newMarkerMap.set(game.id, marker);
+      });
+
+      console.log(`✅ [Discover] Updated ${newMarkerMap.size} markers`);
+      setMarkerMap(newMarkerMap);
+    });
+  }, [map, games, loading]);
 
   // Show/hide markers based on filter
   useEffect(() => {
