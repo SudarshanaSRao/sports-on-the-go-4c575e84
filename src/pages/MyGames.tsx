@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Users, Plus, Star, X } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Star, X, Pencil } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,6 +18,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Game {
   id: string;
@@ -50,6 +53,16 @@ const MyGames = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isManageOpen, setIsManageOpen] = useState(false);
   const [participants, setParticipants] = useState<any[]>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editForm, setEditForm] = useState({
+    location_name: '',
+    address: '',
+    city: '',
+    game_date: '',
+    start_time: '',
+    max_players: 0,
+    description: '',
+  });
 
   useEffect(() => {
     if (user) {
@@ -121,6 +134,16 @@ const MyGames = () => {
     const game = hostedGames.find(g => g.id === gameId);
     if (game) {
       setSelectedGame(game);
+      setEditForm({
+        location_name: game.location_name,
+        address: game.address,
+        city: game.city,
+        game_date: game.game_date,
+        start_time: game.start_time,
+        max_players: game.max_players,
+        description: game.description || '',
+      });
+      setIsEditMode(false);
       // Fetch participants
       try {
         const { data, error } = await supabase
@@ -144,6 +167,36 @@ const MyGames = () => {
         console.error('Error fetching participants:', error);
         toast.error('Failed to load participants');
       }
+    }
+  };
+
+  const handleSaveGameDetails = async () => {
+    if (!selectedGame) return;
+
+    try {
+      const { error } = await supabase
+        .from('games')
+        .update({
+          location_name: editForm.location_name,
+          address: editForm.address,
+          city: editForm.city,
+          game_date: editForm.game_date,
+          start_time: editForm.start_time,
+          max_players: editForm.max_players,
+          description: editForm.description,
+        })
+        .eq('id', selectedGame.id)
+        .eq('host_id', user?.id);
+
+      if (error) throw error;
+
+      toast.success('Game details updated successfully');
+      setIsEditMode(false);
+      fetchGames();
+      setIsManageOpen(false);
+    } catch (error: any) {
+      console.error('Error updating game:', error);
+      toast.error('Failed to update game details');
     }
   };
 
@@ -310,81 +363,187 @@ const MyGames = () => {
   );
 
   const renderManageDialog = () => (
-    <Dialog open={isManageOpen} onOpenChange={setIsManageOpen}>
+    <Dialog open={isManageOpen} onOpenChange={(open) => {
+      setIsManageOpen(open);
+      if (!open) setIsEditMode(false);
+    }}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">Manage Game</DialogTitle>
+          <DialogTitle className="text-2xl flex items-center justify-between">
+            <span>Manage Game</span>
+            {!isEditMode && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditMode(true)}
+                className="gap-2"
+              >
+                <Pencil className="w-4 h-4" />
+                Edit Details
+              </Button>
+            )}
+          </DialogTitle>
           <DialogDescription>
-            {selectedGame && toDisplaySportName(selectedGame.sport)} at {selectedGame?.location_name}
+            {selectedGame && toDisplaySportName(selectedGame.sport)} at {isEditMode ? editForm.location_name : selectedGame?.location_name}
           </DialogDescription>
         </DialogHeader>
         {selectedGame && (
           <div className="space-y-6">
-            {/* Game Stats */}
-            <div className="grid grid-cols-3 gap-4">
-              <Card className="p-4 text-center">
-                <p className="text-2xl font-bold">{selectedGame.current_players}</p>
-                <p className="text-sm text-muted-foreground">Players</p>
-              </Card>
-              <Card className="p-4 text-center">
-                <p className="text-2xl font-bold">{selectedGame.max_players}</p>
-                <p className="text-sm text-muted-foreground">Max</p>
-              </Card>
-              <Card className="p-4 text-center">
-                <p className="text-2xl font-bold">{selectedGame.max_players - selectedGame.current_players}</p>
-                <p className="text-sm text-muted-foreground">Spots Left</p>
-              </Card>
-            </div>
+            {isEditMode ? (
+              /* Edit Mode */
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="location_name">Location Name</Label>
+                  <Input
+                    id="location_name"
+                    value={editForm.location_name}
+                    onChange={(e) => setEditForm({ ...editForm, location_name: e.target.value })}
+                  />
+                </div>
 
-            {/* Participants List */}
-            <div>
-              <h3 className="font-semibold mb-3">Participants ({participants.length})</h3>
-              <div className="space-y-2">
-                {participants.length === 0 ? (
-                  <p className="text-center py-8 text-muted-foreground">No participants yet</p>
-                ) : (
-                  participants.map((participant) => (
-                    <Card key={participant.id} className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
-                            {participant.profiles?.first_name?.[0]}{participant.profiles?.last_name?.[0]}
-                          </div>
-                          <div>
-                            <p className="font-medium">
-                              {participant.profiles?.first_name} {participant.profiles?.last_name}
-                            </p>
-                            <div className="flex items-center gap-1">
-                              <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                              <span className="text-sm text-muted-foreground">
-                                {participant.profiles?.overall_rating?.toFixed(1) || 'N/A'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <Badge variant="outline">{participant.status}</Badge>
-                      </div>
-                    </Card>
-                  ))
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Input
+                    id="address"
+                    value={editForm.address}
+                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={editForm.city}
+                    onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="game_date">Date</Label>
+                    <Input
+                      id="game_date"
+                      type="date"
+                      value={editForm.game_date}
+                      onChange={(e) => setEditForm({ ...editForm, game_date: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="start_time">Time</Label>
+                    <Input
+                      id="start_time"
+                      type="time"
+                      value={editForm.start_time}
+                      onChange={(e) => setEditForm({ ...editForm, start_time: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="max_players">Max Players</Label>
+                  <Input
+                    id="max_players"
+                    type="number"
+                    min={selectedGame.current_players}
+                    value={editForm.max_players}
+                    onChange={(e) => setEditForm({ ...editForm, max_players: parseInt(e.target.value) || 0 })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Must be at least {selectedGame.current_players} (current players)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                    rows={4}
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setIsEditMode(false)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={handleSaveGameDetails}>
+                    Save Changes
+                  </Button>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* View Mode */
+              <>
+                {/* Game Stats */}
+                <div className="grid grid-cols-3 gap-4">
+                  <Card className="p-4 text-center">
+                    <p className="text-2xl font-bold">{selectedGame.current_players}</p>
+                    <p className="text-sm text-muted-foreground">Players</p>
+                  </Card>
+                  <Card className="p-4 text-center">
+                    <p className="text-2xl font-bold">{selectedGame.max_players}</p>
+                    <p className="text-sm text-muted-foreground">Max</p>
+                  </Card>
+                  <Card className="p-4 text-center">
+                    <p className="text-2xl font-bold">{selectedGame.max_players - selectedGame.current_players}</p>
+                    <p className="text-sm text-muted-foreground">Spots Left</p>
+                  </Card>
+                </div>
 
-            {/* Actions */}
-            <div className="flex gap-2 pt-4">
-              <Button variant="outline" className="flex-1" onClick={() => setIsManageOpen(false)}>
-                Close
-              </Button>
-              <Button 
-                variant="destructive" 
-                onClick={() => {
-                  setIsManageOpen(false);
-                  handleCancelGame(selectedGame.id, toDisplaySportName(selectedGame.sport));
-                }}
-              >
-                Cancel Game
-              </Button>
-            </div>
+                {/* Participants List */}
+                <div>
+                  <h3 className="font-semibold mb-3">Participants ({participants.length})</h3>
+                  <div className="space-y-2">
+                    {participants.length === 0 ? (
+                      <p className="text-center py-8 text-muted-foreground">No participants yet</p>
+                    ) : (
+                      participants.map((participant) => (
+                        <Card key={participant.id} className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
+                                {participant.profiles?.first_name?.[0]}{participant.profiles?.last_name?.[0]}
+                              </div>
+                              <div>
+                                <p className="font-medium">
+                                  {participant.profiles?.first_name} {participant.profiles?.last_name}
+                                </p>
+                                <div className="flex items-center gap-1">
+                                  <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                                  <span className="text-sm text-muted-foreground">
+                                    {participant.profiles?.overall_rating?.toFixed(1) || 'N/A'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <Badge variant="outline">{participant.status}</Badge>
+                          </div>
+                        </Card>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setIsManageOpen(false)}>
+                    Close
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={() => {
+                      setIsManageOpen(false);
+                      handleCancelGame(selectedGame.id, toDisplaySportName(selectedGame.sport));
+                    }}
+                  >
+                    Cancel Game
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         )}
       </DialogContent>
