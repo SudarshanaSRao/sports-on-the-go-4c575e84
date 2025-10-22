@@ -354,7 +354,26 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Fetch games from database
+  // Transform a single game from database format to UI format
+  const transformGame = (game: any): Game => ({
+    id: game.id,
+    sport: toDisplaySportName(game.sport),
+    emoji: getSportEmoji(game.sport),
+    location: game.location_name,
+    address: `${game.address}, ${game.city}`,
+    date: new Date(game.game_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    time: new Date(`2000-01-01T${game.start_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+    distance: '0 mi',
+    players: { current: game.current_players, max: game.max_players },
+    skillLevel: game.skill_level.replace('_', ' '),
+    hostName: game.profiles?.username || 'Unknown',
+    hostRating: 4.5,
+    price: game.cost_per_person > 0 ? `$${game.cost_per_person}` : 'Free',
+    lat: parseFloat(game.latitude),
+    lng: parseFloat(game.longitude),
+  });
+
+  // Fetch games from database and set up realtime subscription
   useEffect(() => {
     const fetchGames = async () => {
       console.log('🎮 [Discover] Fetching games from database...');
@@ -389,27 +408,8 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
         }
 
         console.log('✅ [Discover] Games fetched:', gamesData?.length || 0);
-        console.log('Games data:', gamesData);
 
-        // Transform database games to match Game interface
-        const transformedGames: Game[] = (gamesData || []).map((game: any) => ({
-          id: game.id,
-          sport: toDisplaySportName(game.sport),
-          emoji: getSportEmoji(game.sport),
-          location: game.location_name,
-          address: `${game.address}, ${game.city}`,
-          date: new Date(game.game_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          time: new Date(`2000-01-01T${game.start_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-          distance: '0 mi', // Will calculate based on user location
-          players: { current: game.current_players, max: game.max_players },
-          skillLevel: game.skill_level.replace('_', ' '),
-          hostName: game.profiles?.username || 'Unknown',
-          hostRating: 4.5, // Placeholder
-          price: game.cost_per_person > 0 ? `$${game.cost_per_person}` : 'Free',
-          lat: parseFloat(game.latitude),
-          lng: parseFloat(game.longitude),
-        }));
-
+        const transformedGames: Game[] = (gamesData || []).map(transformGame);
         setDbGames(transformedGames);
       } catch (error) {
         console.error('❌ [Discover] Error:', error);
@@ -418,7 +418,6 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
           description: 'Could not load games from database',
           variant: 'destructive',
         });
-        // Fallback to sample games if fetch fails
         setDbGames(sampleGames);
       } finally {
         setLoading(false);
@@ -426,6 +425,62 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     };
 
     fetchGames();
+
+    // Set up realtime subscription for new games
+    console.log('🔴 [Discover] Setting up realtime subscription...');
+    const channel = supabase
+      .channel('games-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'games'
+        },
+        async (payload) => {
+          console.log('🆕 [Discover] New game detected:', payload);
+          
+          // Fetch the complete game data including profile
+          const { data: newGameData, error } = await supabase
+            .from('games')
+            .select(`
+              id,
+              sport,
+              location_name,
+              address,
+              city,
+              game_date,
+              start_time,
+              max_players,
+              current_players,
+              cost_per_person,
+              skill_level,
+              latitude,
+              longitude,
+              host_id,
+              profiles!games_host_id_fkey(username)
+            `)
+            .eq('id', payload.new.id)
+            .single();
+
+          if (!error && newGameData) {
+            const transformedGame = transformGame(newGameData);
+            console.log('✅ [Discover] Adding new game to map:', transformedGame);
+            setDbGames(prev => [...prev, transformedGame]);
+            
+            toast({
+              title: '🎮 New game available!',
+              description: `${transformedGame.sport} at ${transformedGame.location}`,
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('🔴 [Discover] Cleaning up realtime subscription');
+      supabase.removeChannel(channel);
+    };
   }, [toast]);
 
   // Use propGames if provided, otherwise use fetched DB games
