@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { getSportEmoji, toDisplaySportName } from "@/utils/sportsUtils";
+import { getSportEmoji, toDisplaySportName, getAllSportsDisplayNames, toDbSportValue } from "@/utils/sportsUtils";
 import {
   Dialog,
   DialogContent,
@@ -21,21 +21,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Game {
   id: string;
   sport: string;
+  skill_level: string;
   location_name: string;
   address: string;
   city: string;
+  state?: string;
+  zip_code?: string;
   game_date: string;
   start_time: string;
+  duration_minutes: number;
   current_players: number;
   max_players: number;
+  cost_per_person: number;
+  visibility: string;
   host_id: string;
   latitude: number;
   longitude: number;
   description?: string;
+  equipment_requirements?: string;
+  game_rules?: string;
   profiles?: {
     first_name: string;
     last_name: string;
@@ -55,13 +70,22 @@ const MyGames = () => {
   const [participants, setParticipants] = useState<any[]>([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editForm, setEditForm] = useState({
+    sport: '',
+    skill_level: '',
     location_name: '',
     address: '',
     city: '',
+    state: '',
+    zip_code: '',
     game_date: '',
     start_time: '',
+    duration_minutes: 0,
     max_players: 0,
+    cost_per_person: 0,
+    visibility: '',
     description: '',
+    equipment_requirements: '',
+    game_rules: '',
   });
 
   useEffect(() => {
@@ -135,13 +159,22 @@ const MyGames = () => {
     if (game) {
       setSelectedGame(game);
       setEditForm({
+        sport: game.sport,
+        skill_level: game.skill_level,
         location_name: game.location_name,
         address: game.address,
         city: game.city,
+        state: game.state || '',
+        zip_code: game.zip_code || '',
         game_date: game.game_date,
         start_time: game.start_time,
+        duration_minutes: game.duration_minutes,
         max_players: game.max_players,
+        cost_per_person: game.cost_per_person,
+        visibility: game.visibility,
         description: game.description || '',
+        equipment_requirements: game.equipment_requirements || '',
+        game_rules: game.game_rules || '',
       });
       setIsEditMode(false);
       // Fetch participants
@@ -183,13 +216,22 @@ const MyGames = () => {
       const { error } = await supabase
         .from('games')
         .update({
+          sport: toDbSportValue(editForm.sport) as any,
+          skill_level: editForm.skill_level as any,
           location_name: editForm.location_name,
           address: editForm.address,
           city: editForm.city,
+          state: editForm.state,
+          zip_code: editForm.zip_code,
           game_date: editForm.game_date,
           start_time: editForm.start_time,
+          duration_minutes: editForm.duration_minutes,
           max_players: editForm.max_players,
+          cost_per_person: editForm.cost_per_person,
+          visibility: editForm.visibility as any,
           description: editForm.description,
+          equipment_requirements: editForm.equipment_requirements,
+          game_rules: editForm.game_rules,
         })
         .eq('id', selectedGame.id)
         .eq('host_id', user?.id);
@@ -425,6 +467,40 @@ const MyGames = () => {
             {isEditMode ? (
               /* Edit Mode */
               <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="sport">Sport</Label>
+                    <Select value={editForm.sport} onValueChange={(value) => setEditForm({ ...editForm, sport: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select sport" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAllSportsDisplayNames().map((sport) => (
+                          <SelectItem key={sport} value={sport}>
+                            {getSportEmoji(sport)} {sport}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="skill_level">Skill Level</Label>
+                    <Select value={editForm.skill_level} onValueChange={(value) => setEditForm({ ...editForm, skill_level: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select skill level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BEGINNER">Beginner</SelectItem>
+                        <SelectItem value="INTERMEDIATE">Intermediate</SelectItem>
+                        <SelectItem value="ADVANCED">Advanced</SelectItem>
+                        <SelectItem value="EXPERT">Expert</SelectItem>
+                        <SelectItem value="ALL_LEVELS">All Levels</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="location_name">Location Name</Label>
                   <Input
@@ -443,12 +519,33 @@ const MyGames = () => {
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City</Label>
+                    <Input
+                      id="city"
+                      value={editForm.city}
+                      onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="state">State</Label>
+                    <Input
+                      id="state"
+                      value={editForm.state}
+                      onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
+                      placeholder="e.g., CA"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
+                  <Label htmlFor="zip_code">Zip Code</Label>
                   <Input
-                    id="city"
-                    value={editForm.city}
-                    onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                    id="zip_code"
+                    value={editForm.zip_code}
+                    onChange={(e) => setEditForm({ ...editForm, zip_code: e.target.value })}
                   />
                 </div>
 
@@ -474,18 +571,60 @@ const MyGames = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="max_players">Max Players</Label>
-                  <Input
-                    id="max_players"
-                    type="number"
-                    min={selectedGame.current_players}
-                    value={editForm.max_players}
-                    onChange={(e) => setEditForm({ ...editForm, max_players: parseInt(e.target.value) || 0 })}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Must be at least {selectedGame.current_players} (current players)
-                  </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="duration_minutes">Duration (minutes)</Label>
+                    <Input
+                      id="duration_minutes"
+                      type="number"
+                      min={15}
+                      step={15}
+                      value={editForm.duration_minutes}
+                      onChange={(e) => setEditForm({ ...editForm, duration_minutes: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="max_players">Max Players</Label>
+                    <Input
+                      id="max_players"
+                      type="number"
+                      min={selectedGame.current_players}
+                      value={editForm.max_players}
+                      onChange={(e) => setEditForm({ ...editForm, max_players: parseInt(e.target.value) || 0 })}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Min: {selectedGame.current_players} (current)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="cost_per_person">Cost Per Person ($)</Label>
+                    <Input
+                      id="cost_per_person"
+                      type="number"
+                      min={0}
+                      step={0.01}
+                      value={editForm.cost_per_person}
+                      onChange={(e) => setEditForm({ ...editForm, cost_per_person: parseFloat(e.target.value) || 0 })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="visibility">Visibility</Label>
+                    <Select value={editForm.visibility} onValueChange={(value) => setEditForm({ ...editForm, visibility: value })}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select visibility" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="PUBLIC">Public</SelectItem>
+                        <SelectItem value="FRIENDS_ONLY">Friends Only</SelectItem>
+                        <SelectItem value="INVITE_ONLY">Invite Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -494,7 +633,29 @@ const MyGames = () => {
                     id="description"
                     value={editForm.description}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                    rows={4}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="equipment_requirements">Equipment Requirements</Label>
+                  <Textarea
+                    id="equipment_requirements"
+                    value={editForm.equipment_requirements}
+                    onChange={(e) => setEditForm({ ...editForm, equipment_requirements: e.target.value })}
+                    rows={2}
+                    placeholder="What equipment should players bring?"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="game_rules">Game Rules</Label>
+                  <Textarea
+                    id="game_rules"
+                    value={editForm.game_rules}
+                    onChange={(e) => setEditForm({ ...editForm, game_rules: e.target.value })}
+                    rows={3}
+                    placeholder="Special rules or instructions for this game"
                   />
                 </div>
 
