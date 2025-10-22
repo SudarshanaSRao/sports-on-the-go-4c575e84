@@ -173,6 +173,12 @@ const MyGames = () => {
   const handleSaveGameDetails = async () => {
     if (!selectedGame) return;
 
+    // Validate max_players is not less than current_players
+    if (editForm.max_players < selectedGame.current_players) {
+      toast.error(`Max players cannot be less than current players (${selectedGame.current_players})`);
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('games')
@@ -190,10 +196,16 @@ const MyGames = () => {
 
       if (error) throw error;
 
+      // Update the selected game with new data
+      const updatedGame = {
+        ...selectedGame,
+        ...editForm,
+      };
+      setSelectedGame(updatedGame);
+
       toast.success('Game details updated successfully');
       setIsEditMode(false);
       fetchGames();
-      setIsManageOpen(false);
     } catch (error: any) {
       console.error('Error updating game:', error);
       toast.error('Failed to update game details');
@@ -201,18 +213,39 @@ const MyGames = () => {
   };
 
   const handleCancelGame = async (gameId: string, gameName: string) => {
-    if (!confirm(`Are you sure you want to cancel the ${gameName} game?`)) {
+    if (!confirm(`Are you sure you want to cancel the ${gameName} game? This will notify all participants and delete the game community.`)) {
       return;
     }
 
     try {
-      const { error } = await supabase
+      // 1. Delete associated community if exists
+      const { error: communityError } = await supabase
+        .from('communities')
+        .delete()
+        .eq('game_id', gameId);
+
+      if (communityError) {
+        console.error('Error deleting community:', communityError);
+      }
+
+      // 2. Delete all RSVPs for this game
+      const { error: rsvpError } = await supabase
+        .from('rsvps')
+        .delete()
+        .eq('game_id', gameId);
+
+      if (rsvpError) {
+        console.error('Error deleting RSVPs:', rsvpError);
+      }
+
+      // 3. Delete the game itself
+      const { error: gameError } = await supabase
         .from('games')
-        .update({ status: 'CANCELLED' })
+        .delete()
         .eq('id', gameId)
         .eq('host_id', user?.id);
 
-      if (error) throw error;
+      if (gameError) throw gameError;
 
       toast.success("Game cancelled successfully");
       fetchGames(); // Refresh the list

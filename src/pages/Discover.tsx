@@ -426,7 +426,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
 
     fetchGames();
 
-    // Set up realtime subscription for new games
+    // Set up realtime subscription for game changes
     console.log('🔴 [Discover] Setting up realtime subscription...');
     const channel = supabase
       .channel('games-changes')
@@ -473,6 +473,76 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
               description: `${transformedGame.sport} at ${transformedGame.location}`,
             });
           }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'games'
+        },
+        async (payload) => {
+          console.log('📝 [Discover] Game updated:', payload);
+          
+          // Fetch the updated game data
+          const { data: updatedGameData, error } = await supabase
+            .from('games')
+            .select(`
+              id,
+              sport,
+              location_name,
+              address,
+              city,
+              game_date,
+              start_time,
+              max_players,
+              current_players,
+              cost_per_person,
+              skill_level,
+              latitude,
+              longitude,
+              host_id,
+              profiles!games_host_id_fkey(username)
+            `)
+            .eq('id', payload.new.id)
+            .single();
+
+          if (!error && updatedGameData) {
+            const transformedGame = transformGame(updatedGameData);
+            console.log('✅ [Discover] Updating game on map:', transformedGame);
+            setDbGames(prev => prev.map(game => 
+              game.id === transformedGame.id ? transformedGame : game
+            ));
+            
+            toast({
+              title: '📝 Game updated',
+              description: `${transformedGame.sport} at ${transformedGame.location}`,
+            });
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'games'
+        },
+        (payload) => {
+          console.log('🗑️ [Discover] Game deleted:', payload);
+          const gameId = payload.old.id;
+          
+          setDbGames(prev => {
+            const deletedGame = prev.find(g => g.id === gameId);
+            if (deletedGame) {
+              toast({
+                title: '🗑️ Game cancelled',
+                description: `${deletedGame.sport} at ${deletedGame.location} has been cancelled`,
+              });
+            }
+            return prev.filter(game => game.id !== gameId);
+          });
         }
       )
       .subscribe();
