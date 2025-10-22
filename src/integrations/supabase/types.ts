@@ -307,13 +307,13 @@ export type Database = {
           city: string
           created_at: string
           date_of_birth: string
-          first_name: string
+          first_name: string | null
           games_attended: number | null
           games_hosted: number | null
           id: string
           id_verified: boolean | null
           last_login_at: string | null
-          last_name: string
+          last_name: string | null
           latitude: number | null
           longitude: number | null
           no_show_count: number | null
@@ -334,13 +334,13 @@ export type Database = {
           city: string
           created_at?: string
           date_of_birth: string
-          first_name: string
+          first_name?: string | null
           games_attended?: number | null
           games_hosted?: number | null
           id: string
           id_verified?: boolean | null
           last_login_at?: string | null
-          last_name: string
+          last_name?: string | null
           latitude?: number | null
           longitude?: number | null
           no_show_count?: number | null
@@ -361,13 +361,13 @@ export type Database = {
           city?: string
           created_at?: string
           date_of_birth?: string
-          first_name?: string
+          first_name?: string | null
           games_attended?: number | null
           games_hosted?: number | null
           id?: string
           id_verified?: boolean | null
           last_login_at?: string | null
-          last_name?: string
+          last_name?: string | null
           latitude?: number | null
           longitude?: number | null
           no_show_count?: number | null
