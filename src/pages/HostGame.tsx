@@ -77,90 +77,34 @@ export default function HostGame() {
   };
 
   const geocodeAddress = async () => {
-    console.log('🗺️ [Geocoding] Starting geocoding process...');
+    console.log('🗺️ [Geocoding] Starting geocoding via edge function...');
     const { address, city, state, zipCode } = formData;
     console.log('Address details:', { address, city, state, zipCode });
-    
-    const stateName = US_STATE_MAP[state.toUpperCase() as keyof typeof US_STATE_MAP] || state;
-    console.log('State mapping:', state, '->', stateName);
 
     try {
-      // Try structured query first
-      console.log('📍 [Geocoding] Attempting structured query...');
-      const structuredUrl = `https://nominatim.openstreetmap.org/search?` +
-        `street=${encodeURIComponent(address)}&` +
-        `city=${encodeURIComponent(city)}&` +
-        `state=${encodeURIComponent(stateName)}&` +
-        `postalcode=${encodeURIComponent(zipCode)}&` +
-        `country=USA&format=json&limit=1`;
-      console.log('Structured URL:', structuredUrl);
-
-      let response = await fetch(structuredUrl, {
-        headers: { 
-          "User-Agent": "SquadUp-App",
-          "Accept": "application/json"
-        },
+      console.log('📍 [Geocoding] Calling geocode edge function...');
+      const { data, error } = await supabase.functions.invoke('geocode', {
+        body: { address, city, state, zipCode }
       });
 
-      console.log('API Response status:', response.status);
-      
-      if (response.status === 429) {
-        console.error('❌ [Geocoding] Rate limit exceeded');
-        throw new Error("Rate limit exceeded. Please try again in a minute.");
+      if (error) {
+        console.error('❌ [Geocoding] Edge function error:', error);
+        throw new Error(error.message || 'Geocoding service error');
       }
 
-      if (!response.ok) {
-        console.error('❌ [Geocoding] API response not OK:', response.status);
-        throw new Error(`Geocoding service unavailable (${response.status}). Please try again later.`);
+      if (data.error) {
+        console.error('❌ [Geocoding] API error:', data.error);
+        throw new Error(data.error);
       }
 
-      let data = await response.json();
-      console.log('Structured query response:', data);
-
-      // If structured query fails, try full-text search
-      if (!data || data.length === 0) {
-        console.log('⚠️ [Geocoding] Structured query returned no results, trying full-text search...');
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Add delay between requests
-        
-        const fullAddress = `${address}, ${city}, ${stateName} ${zipCode}, USA`;
-        const fullTextUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(fullAddress)}&format=json&limit=1`;
-        console.log('Full-text URL:', fullTextUrl);
-
-        response = await fetch(fullTextUrl, {
-          headers: { 
-            "User-Agent": "SquadUp-App",
-            "Accept": "application/json"
-          },
-        });
-
-        console.log('Full-text API Response status:', response.status);
-
-        if (!response.ok) {
-          console.error('❌ [Geocoding] Full-text API response not OK:', response.status);
-          throw new Error(`Geocoding service unavailable (${response.status}). Please try again later.`);
-        }
-
-        data = await response.json();
-        console.log('Full-text query response:', data);
-      }
-
-      if (!data || data.length === 0) {
-        console.error('❌ [Geocoding] No coordinates found for address');
-        throw new Error("Could not find coordinates for this address. Please verify the address is correct.");
-      }
-
-      const result = {
-        latitude: parseFloat(data[0].lat),
-        longitude: parseFloat(data[0].lon),
-      };
-      console.log('✅ [Geocoding] Success:', result);
-      return result;
+      console.log('✅ [Geocoding] Success:', data);
+      return data;
     } catch (error: any) {
       console.error('❌ [Geocoding] Error:', error);
       console.error('Error type:', error.constructor.name);
       console.error('Error message:', error.message);
       
-      if (error.message.includes("Failed to fetch")) {
+      if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
         throw new Error("Network error. Please check your internet connection and try again.");
       }
       throw error;
