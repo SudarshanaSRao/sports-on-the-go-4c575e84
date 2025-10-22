@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Users, Plus, Star } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Star, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,6 +11,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { getSportEmoji, toDisplaySportName } from "@/utils/sportsUtils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface Game {
   id: string;
@@ -39,6 +46,10 @@ const MyGames = () => {
   const [upcomingGames, setUpcomingGames] = useState<Game[]>([]);
   const [hostedGames, setHostedGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isManageOpen, setIsManageOpen] = useState(false);
+  const [participants, setParticipants] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -99,16 +110,41 @@ const MyGames = () => {
   };
 
   const handleViewDetails = (gameId: string) => {
-    // For now, show game details in toast - can be expanded to modal or page
-    toast.info("Viewing game details");
-    // TODO: Navigate to game details page
-    // navigate(`/game/${gameId}`);
+    const game = [...upcomingGames, ...hostedGames].find(g => g.id === gameId);
+    if (game) {
+      setSelectedGame(game);
+      setIsDetailsOpen(true);
+    }
   };
 
-  const handleManageGame = (gameId: string) => {
-    toast.info("Game management coming soon!");
-    // TODO: Navigate to game management page with participant list
-    // navigate(`/manage-game/${gameId}`);
+  const handleManageGame = async (gameId: string) => {
+    const game = hostedGames.find(g => g.id === gameId);
+    if (game) {
+      setSelectedGame(game);
+      // Fetch participants
+      try {
+        const { data, error } = await supabase
+          .from('rsvps')
+          .select(`
+            *,
+            profiles:user_id (
+              first_name,
+              last_name,
+              username,
+              overall_rating
+            )
+          `)
+          .eq('game_id', gameId)
+          .eq('status', 'CONFIRMED');
+        
+        if (error) throw error;
+        setParticipants(data || []);
+        setIsManageOpen(true);
+      } catch (error) {
+        console.error('Error fetching participants:', error);
+        toast.error('Failed to load participants');
+      }
+    }
   };
 
   const handleCancelGame = async (gameId: string, gameName: string) => {
@@ -163,6 +199,198 @@ const MyGames = () => {
 
   const allUpcomingGames = [...upcomingGames, ...hostedGames];
 
+  const renderDetailsDialog = () => (
+    <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl flex items-center gap-2">
+            <span className="text-3xl">{selectedGame && getSportEmoji(selectedGame.sport)}</span>
+            {selectedGame && toDisplaySportName(selectedGame.sport)}
+          </DialogTitle>
+        </DialogHeader>
+        {selectedGame && (
+          <div className="space-y-6">
+            {/* Basic Info */}
+            <div className="grid gap-4">
+              <div className="flex items-start gap-2">
+                <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <p className="font-semibold">{selectedGame.location_name}</p>
+                  <p className="text-sm text-muted-foreground">{selectedGame.address}</p>
+                  <p className="text-sm text-muted-foreground">{selectedGame.city}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Date</p>
+                    <p className="font-semibold">{format(new Date(selectedGame.game_date), 'EEEE, MMM dd, yyyy')}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Time</p>
+                    <p className="font-semibold">{selectedGame.start_time}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Players</p>
+                  <p className="font-semibold">{selectedGame.current_players}/{selectedGame.max_players}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            {selectedGame.description && (
+              <div>
+                <h3 className="font-semibold mb-2">Description</h3>
+                <p className="text-muted-foreground">{selectedGame.description}</p>
+              </div>
+            )}
+
+            {/* Host Info */}
+            {selectedGame.profiles && (
+              <div>
+                <h3 className="font-semibold mb-2">Host</h3>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
+                    {selectedGame.profiles.first_name?.[0]}{selectedGame.profiles.last_name?.[0]}
+                  </div>
+                  <div>
+                    <p className="font-medium">
+                      {selectedGame.profiles.first_name} {selectedGame.profiles.last_name}
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                      <span className="text-sm text-muted-foreground">
+                        {selectedGame.profiles.overall_rating?.toFixed(1) || 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex gap-2 pt-4">
+              {selectedGame.host_id === user?.id ? (
+                <Button 
+                  className="flex-1"
+                  onClick={() => {
+                    setIsDetailsOpen(false);
+                    handleManageGame(selectedGame.id);
+                  }}
+                >
+                  Manage Game
+                </Button>
+              ) : (
+                <Button 
+                  className="flex-1"
+                  onClick={() => handleMessageHost(selectedGame.id, 
+                    selectedGame.profiles ? `${selectedGame.profiles.first_name} ${selectedGame.profiles.last_name}` : 'Host'
+                  )}
+                >
+                  Message Host
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>Close</Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+
+  const renderManageDialog = () => (
+    <Dialog open={isManageOpen} onOpenChange={setIsManageOpen}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl">Manage Game</DialogTitle>
+          <DialogDescription>
+            {selectedGame && toDisplaySportName(selectedGame.sport)} at {selectedGame?.location_name}
+          </DialogDescription>
+        </DialogHeader>
+        {selectedGame && (
+          <div className="space-y-6">
+            {/* Game Stats */}
+            <div className="grid grid-cols-3 gap-4">
+              <Card className="p-4 text-center">
+                <p className="text-2xl font-bold">{selectedGame.current_players}</p>
+                <p className="text-sm text-muted-foreground">Players</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-2xl font-bold">{selectedGame.max_players}</p>
+                <p className="text-sm text-muted-foreground">Max</p>
+              </Card>
+              <Card className="p-4 text-center">
+                <p className="text-2xl font-bold">{selectedGame.max_players - selectedGame.current_players}</p>
+                <p className="text-sm text-muted-foreground">Spots Left</p>
+              </Card>
+            </div>
+
+            {/* Participants List */}
+            <div>
+              <h3 className="font-semibold mb-3">Participants ({participants.length})</h3>
+              <div className="space-y-2">
+                {participants.length === 0 ? (
+                  <p className="text-center py-8 text-muted-foreground">No participants yet</p>
+                ) : (
+                  participants.map((participant) => (
+                    <Card key={participant.id} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
+                            {participant.profiles?.first_name?.[0]}{participant.profiles?.last_name?.[0]}
+                          </div>
+                          <div>
+                            <p className="font-medium">
+                              {participant.profiles?.first_name} {participant.profiles?.last_name}
+                            </p>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                              <span className="text-sm text-muted-foreground">
+                                {participant.profiles?.overall_rating?.toFixed(1) || 'N/A'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <Badge variant="outline">{participant.status}</Badge>
+                      </div>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setIsManageOpen(false)}>
+                Close
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  setIsManageOpen(false);
+                  handleCancelGame(selectedGame.id, toDisplaySportName(selectedGame.sport));
+                }}
+              >
+                Cancel Game
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -208,6 +436,8 @@ const MyGames = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+      {renderDetailsDialog()}
+      {renderManageDialog()}
       
       <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-5xl">
