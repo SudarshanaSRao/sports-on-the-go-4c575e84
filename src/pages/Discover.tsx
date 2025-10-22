@@ -349,6 +349,9 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   const [markerMap, setMarkerMap] = useState<Map<number, any>>(new Map());
   const [dbGames, setDbGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hideMyGames, setHideMyGames] = useState(false);
+  const [userRSVPs, setUserRSVPs] = useState<Set<number>>(new Set());
+  const [userHostedGames, setUserHostedGames] = useState<Set<number>>(new Set());
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -372,6 +375,38 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     lat: parseFloat(game.latitude),
     lng: parseFloat(game.longitude),
   });
+
+  // Fetch user's games (RSVPs and hosted games)
+  useEffect(() => {
+    const fetchUserGames = async () => {
+      if (!user) return;
+      
+      // Fetch RSVPs
+      const { data: rsvpData } = await supabase
+        .from('rsvps')
+        .select('game_id')
+        .eq('user_id', user.id)
+        .eq('status', 'CONFIRMED');
+      
+      if (rsvpData) {
+        const gameIds = new Set(rsvpData.map(rsvp => Number(rsvp.game_id)));
+        setUserRSVPs(gameIds);
+      }
+
+      // Fetch hosted games
+      const { data: hostedData } = await supabase
+        .from('games')
+        .select('id')
+        .eq('host_id', user.id);
+      
+      if (hostedData) {
+        const gameIds = new Set(hostedData.map(game => Number(game.id)));
+        setUserHostedGames(gameIds);
+      }
+    };
+
+    fetchUserGames();
+  }, [user]);
 
   // Fetch games from database and set up realtime subscription
   useEffect(() => {
@@ -567,9 +602,25 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   }, [games]);
 
   // Filter games based on selected sports
-  const filteredGames = selectedSports.length === 0 
-    ? games 
-    : games.filter(game => selectedSports.includes(game.sport));
+  const filteredGames = useMemo(() => {
+    let filtered = games;
+    
+    // Filter by selected sports
+    if (selectedSports.length > 0) {
+      filtered = filtered.filter(game => selectedSports.includes(game.sport));
+    }
+    
+    // Filter out user's games if hideMyGames is true
+    if (hideMyGames && user) {
+      filtered = filtered.filter(game => {
+        const isHost = userHostedGames.has(game.id);
+        const hasRSVP = userRSVPs.has(game.id);
+        return !isHost && !hasRSVP;
+      });
+    }
+    
+    return filtered;
+  }, [games, selectedSports, hideMyGames, user, userRSVPs, userHostedGames]);
 
   // Apply sport filter from URL on mount
   useEffect(() => {
@@ -835,24 +886,25 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
       <Navbar />
       <div className="pt-20 px-4 pb-4 flex justify-center">
         <div className="w-full max-w-7xl">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Your Game</h1>
-          <p className="text-gray-600">Discover pickup games near you</p>
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Your Game</h1>
+            <p className="text-gray-600">Discover pickup games near you</p>
           
           {/* Sports Filter */}
           <div className="mt-6 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
             <h3 className="text-base font-semibold text-gray-900 mb-4">Filter by Sport:</h3>
             
-            <div className="flex flex-wrap gap-3 mb-4">
-              {availableSports.map((sport) => {
-                const isSelected = selectedSports.includes(sport);
-                const emoji = getSportEmoji(sport);
-                const displayName = toDisplaySportName(sport);
-                
-                return (
-                  <button
-                    key={sport}
-                    onClick={() => toggleSportFilter(sport)}
+            <div className="space-y-3 mb-4">
+              <div className="flex flex-wrap gap-3">
+                {availableSports.map((sport) => {
+                  const isSelected = selectedSports.includes(sport);
+                  const emoji = getSportEmoji(sport);
+                  const displayName = toDisplaySportName(sport);
+                  
+                  return (
+                    <button
+                      key={sport}
+                      onClick={() => toggleSportFilter(sport)}
                     className={`
                       inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
                       transition-all duration-200
@@ -868,8 +920,21 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                 );
               })}
             </div>
+            
+            <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+              <input
+                type="checkbox"
+                id="hideMyGames"
+                checked={hideMyGames}
+                onChange={(e) => setHideMyGames(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300"
+              />
+              <label htmlFor="hideMyGames" className="text-sm text-gray-600 cursor-pointer">
+                Hide My Games (hosting or RSVPed)
+              </label>
+            </div>
 
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 mt-3">
               Showing {filteredGames.length} of {games.length} games
             </p>
           </div>
@@ -1085,6 +1150,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
               </div>
             )}
           </div>
+        </div>
         </div>
         </div>
       </div>

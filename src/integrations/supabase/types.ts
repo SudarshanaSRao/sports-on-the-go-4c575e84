@@ -57,6 +57,7 @@ export type Database = {
           name: string
           sport: Database["public"]["Enums"]["sport_type"] | null
           type: string
+          visibility: Database["public"]["Enums"]["community_visibility"] | null
         }
         Insert: {
           created_at?: string | null
@@ -68,6 +69,9 @@ export type Database = {
           name: string
           sport?: Database["public"]["Enums"]["sport_type"] | null
           type?: string
+          visibility?:
+            | Database["public"]["Enums"]["community_visibility"]
+            | null
         }
         Update: {
           created_at?: string | null
@@ -79,6 +83,9 @@ export type Database = {
           name?: string
           sport?: Database["public"]["Enums"]["sport_type"] | null
           type?: string
+          visibility?:
+            | Database["public"]["Enums"]["community_visibility"]
+            | null
         }
         Relationships: [
           {
@@ -571,6 +578,7 @@ export type Database = {
     Enums: {
       account_status: "ACTIVE" | "SUSPENDED" | "BANNED"
       app_role: "admin" | "moderator" | "user"
+      community_visibility: "PUBLIC" | "FRIENDS_ONLY" | "INVITE_ONLY"
       game_status: "UPCOMING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
       game_visibility: "PUBLIC" | "FRIENDS_ONLY" | "INVITE_ONLY"
       rsvp_status: "CONFIRMED" | "WAITLISTED" | "CANCELLED"
@@ -727,6 +735,7 @@ export const Constants = {
     Enums: {
       account_status: ["ACTIVE", "SUSPENDED", "BANNED"],
       app_role: ["admin", "moderator", "user"],
+      community_visibility: ["PUBLIC", "FRIENDS_ONLY", "INVITE_ONLY"],
       game_status: ["UPCOMING", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
       game_visibility: ["PUBLIC", "FRIENDS_ONLY", "INVITE_ONLY"],
       rsvp_status: ["CONFIRMED", "WAITLISTED", "CANCELLED"],

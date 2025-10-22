@@ -24,6 +24,7 @@ interface Community {
   created_at: string;
   game_id: string | null;
   created_by: string;
+  visibility: 'PUBLIC' | 'FRIENDS_ONLY' | 'INVITE_ONLY';
 }
 
 interface Post {
@@ -93,6 +94,8 @@ export default function Community() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [communitySearchQuery, setCommunitySearchQuery] = useState("");
+  const [editingVisibility, setEditingVisibility] = useState(false);
+  const [selectedVisibility, setSelectedVisibility] = useState<'PUBLIC' | 'FRIENDS_ONLY' | 'INVITE_ONLY'>('PUBLIC');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -110,6 +113,7 @@ export default function Community() {
       checkMembership(selectedCommunity.id);
       fetchUserVotes();
       fetchCommunityMembers(selectedCommunity.id);
+      setSelectedVisibility(selectedCommunity.visibility);
     }
   }, [selectedCommunity]);
 
@@ -603,6 +607,28 @@ export default function Community() {
     }
   };
 
+  const handleUpdateVisibility = async () => {
+    if (!selectedCommunity || !isAdmin) return;
+
+    const { error } = await supabase
+      .from("communities")
+      .update({ visibility: selectedVisibility })
+      .eq("id", selectedCommunity.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update visibility.",
+        variant: "destructive"
+      });
+    } else {
+      toast({ title: "Community visibility updated!" });
+      setEditingVisibility(false);
+      setSelectedCommunity({ ...selectedCommunity, visibility: selectedVisibility });
+      fetchCommunities();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -754,7 +780,7 @@ export default function Community() {
                       <CardDescription className="mt-2">
                         {selectedCommunity?.description}
                       </CardDescription>
-                      <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground flex-wrap">
                         <div className="flex items-center">
                           <Users className="w-4 h-4 mr-1" />
                           {selectedCommunity?.member_count} members
@@ -764,7 +790,41 @@ export default function Community() {
                             {selectedCommunity.sport.replace(/_/g, ' ')}
                           </Badge>
                         )}
+                        {selectedCommunity?.visibility && (
+                          <Badge variant={selectedCommunity.visibility === 'PUBLIC' ? 'secondary' : 'outline'}>
+                            {selectedCommunity.visibility.replace(/_/g, ' ')}
+                          </Badge>
+                        )}
+                        {isAdmin && !editingVisibility && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setEditingVisibility(true)}
+                            className="text-xs h-7"
+                          >
+                            Change Privacy
+                          </Button>
+                        )}
                       </div>
+                      {isAdmin && editingVisibility && (
+                        <div className="flex items-center gap-2 mt-3">
+                          <Select value={selectedVisibility} onValueChange={(value: any) => setSelectedVisibility(value)}>
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="PUBLIC">Public</SelectItem>
+                              <SelectItem value="FRIENDS_ONLY">Friends Only</SelectItem>
+                              <SelectItem value="INVITE_ONLY">Invite Only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button size="sm" onClick={handleUpdateVisibility}>Save</Button>
+                          <Button size="sm" variant="outline" onClick={() => {
+                            setEditingVisibility(false);
+                            setSelectedVisibility(selectedCommunity?.visibility || 'PUBLIC');
+                          }}>Cancel</Button>
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       <Sheet open={showMembersPanel} onOpenChange={(open) => {
