@@ -213,6 +213,39 @@ const MyGames = () => {
     }
 
     try {
+      // Detect what changed
+      const changes: string[] = [];
+      if (toDbSportValue(editForm.sport) !== selectedGame.sport) {
+        changes.push(`Sport changed to ${toDisplaySportName(editForm.sport)}`);
+      }
+      if (editForm.skill_level !== selectedGame.skill_level) {
+        changes.push(`Skill level changed to ${editForm.skill_level.replace('_', ' ')}`);
+      }
+      if (editForm.location_name !== selectedGame.location_name) {
+        changes.push(`Location changed to ${editForm.location_name}`);
+      }
+      if (editForm.address !== selectedGame.address) {
+        changes.push(`Address changed to ${editForm.address}`);
+      }
+      if (editForm.city !== selectedGame.city) {
+        changes.push(`City changed to ${editForm.city}`);
+      }
+      if (editForm.game_date !== selectedGame.game_date) {
+        changes.push(`Date changed to ${format(new Date(editForm.game_date), 'EEEE, MMM dd, yyyy')}`);
+      }
+      if (editForm.start_time !== selectedGame.start_time) {
+        changes.push(`Time changed to ${editForm.start_time}`);
+      }
+      if (editForm.duration_minutes !== selectedGame.duration_minutes) {
+        changes.push(`Duration changed to ${editForm.duration_minutes} minutes`);
+      }
+      if (editForm.max_players !== selectedGame.max_players) {
+        changes.push(`Max players changed to ${editForm.max_players}`);
+      }
+      if (editForm.cost_per_person !== selectedGame.cost_per_person) {
+        changes.push(`Cost changed to $${editForm.cost_per_person}`);
+      }
+
       const { error } = await supabase
         .from('games')
         .update({
@@ -237,6 +270,39 @@ const MyGames = () => {
         .eq('host_id', user?.id);
 
       if (error) throw error;
+
+      // Post announcement to community if there were changes
+      if (changes.length > 0) {
+        try {
+          // Find the community associated with this game
+          const { data: communityData } = await supabase
+            .from('communities')
+            .select('id')
+            .eq('game_id', selectedGame.id)
+            .eq('type', 'game')
+            .single();
+
+          if (communityData) {
+            // Create announcement post
+            const announcementContent = `🔔 **Game Update Alert**\n\nThe host has updated the game details:\n\n${changes.map(change => `• ${change}`).join('\n')}\n\nPlease review the updated information!`;
+            
+            await supabase
+              .from('posts')
+              .insert({
+                title: 'Game Details Updated',
+                content: announcementContent,
+                community_id: communityData.id,
+                user_id: user?.id,
+                sport: toDbSportValue(editForm.sport),
+              });
+
+            console.log('Community announcement posted');
+          }
+        } catch (announcementError) {
+          console.error('Error posting community announcement:', announcementError);
+          // Don't fail the whole update if announcement fails
+        }
+      }
 
       // Update the selected game with new data
       const updatedGame = {
