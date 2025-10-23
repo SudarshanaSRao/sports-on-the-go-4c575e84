@@ -377,19 +377,8 @@ export default function HostGame() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="state">State *</Label>
-                      <Select name="state" value={formData.state} onValueChange={(value) => handleSelectChange("state", value)} required>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a state" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(US_STATE_MAP).map(([code, name]) => (
-                            <SelectItem key={code} value={code}>
-                              {name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="state">State/Province *</Label>
+                      <Input type="text" id="state" name="state" placeholder="e.g., California, Ontario" value={formData.state} onChange={handleInputChange} required />
                     </div>
 
                     <div className="space-y-2">
