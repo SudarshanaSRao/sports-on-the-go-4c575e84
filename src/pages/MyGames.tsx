@@ -942,9 +942,20 @@ const MyGames = () => {
                                   <span className="truncate">{game.location_name}</span>
                                 </div>
                               </div>
-                              {isHost && (
-                                <Badge className="gradient-secondary text-white">Host</Badge>
-                              )}
+                              <div className="flex gap-2">
+                                {isHost && (
+                                  <Badge className="gradient-secondary text-white">Host</Badge>
+                                )}
+                                {game.visibility === 'PUBLIC' && (
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Public</Badge>
+                                )}
+                                {game.visibility === 'FRIENDS_ONLY' && (
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Friends Only</Badge>
+                                )}
+                                {game.visibility === 'INVITE_ONLY' && (
+                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Invite Only</Badge>
+                                )}
+                              </div>
                             </div>
 
                             {/* Details */}
@@ -1057,7 +1068,18 @@ const MyGames = () => {
                                   <span className="truncate">{game.location_name}</span>
                                 </div>
                               </div>
-                              <Badge className="gradient-secondary text-white">Host</Badge>
+                              <div className="flex gap-2">
+                                <Badge className="gradient-secondary text-white">Host</Badge>
+                                {game.visibility === 'PUBLIC' && (
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Public</Badge>
+                                )}
+                                {game.visibility === 'FRIENDS_ONLY' && (
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Friends Only</Badge>
+                                )}
+                                {game.visibility === 'INVITE_ONLY' && (
+                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Invite Only</Badge>
+                                )}
+                              </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-4">

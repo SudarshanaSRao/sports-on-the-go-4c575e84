@@ -26,6 +26,8 @@ interface Game {
   price: string;
   lat: number;
   lng: number;
+  visibility: string;
+  hostId: string;
 }
 
 interface GameMapProps {
@@ -52,6 +54,8 @@ const sampleGames: Game[] = [
     price: "Free",
     lat: 37.7599,
     lng: -122.4219,
+    visibility: "PUBLIC",
+    hostId: "sample-host-1",
   },
   {
     id: 2,
@@ -69,6 +73,8 @@ const sampleGames: Game[] = [
     price: "$5",
     lat: 40.7829,
     lng: -73.9654,
+    visibility: "PUBLIC",
+    hostId: "sample-host-2",
   },
   {
     id: 3,
@@ -86,6 +92,8 @@ const sampleGames: Game[] = [
     price: "Free",
     lat: 34.1365,
     lng: -118.2942,
+    visibility: "PUBLIC",
+    hostId: "sample-host-3",
   },
   {
     id: 4,
@@ -103,6 +111,8 @@ const sampleGames: Game[] = [
     price: "Free",
     lat: 25.7617,
     lng: -80.1918,
+    visibility: "PUBLIC",
+    hostId: "sample-host-4",
   },
   {
     id: 5,
@@ -120,6 +130,8 @@ const sampleGames: Game[] = [
     price: "$10",
     lat: 41.8756,
     lng: -87.6244,
+    visibility: "PUBLIC",
+    hostId: "sample-host-5",
   },
   {
     id: 6,
@@ -137,6 +149,8 @@ const sampleGames: Game[] = [
     price: "Free",
     lat: 47.6456,
     lng: -122.3344,
+    visibility: "PUBLIC",
+    hostId: "sample-host-6",
   },
   {
     id: 16,
@@ -154,6 +168,8 @@ const sampleGames: Game[] = [
     price: "Free",
     lat: 37.7694,
     lng: -122.4862,
+    visibility: "PUBLIC",
+    hostId: "sample-host-16",
   },
   {
     id: 17,
@@ -171,6 +187,8 @@ const sampleGames: Game[] = [
     price: "$5",
     lat: 40.7498,
     lng: -73.8447,
+    visibility: "PUBLIC",
+    hostId: "sample-host-17",
   },
   {
     id: 7,
@@ -188,6 +206,8 @@ const sampleGames: Game[] = [
     price: "$5",
     lat: 30.2672,
     lng: -97.7431,
+    visibility: "PUBLIC",
+    hostId: "sample-host-7",
   },
   {
     id: 8,
@@ -205,6 +225,8 @@ const sampleGames: Game[] = [
     price: "Free",
     lat: 42.3551,
     lng: -71.0656,
+    visibility: "PUBLIC",
+    hostId: "sample-host-8",
   },
   {
     id: 9,
@@ -222,6 +244,8 @@ const sampleGames: Game[] = [
     price: "Free",
     lat: 39.7476,
     lng: -104.9528,
+    visibility: "PUBLIC",
+    hostId: "sample-host-9",
   },
   {
     id: 10,
@@ -239,6 +263,8 @@ const sampleGames: Game[] = [
     price: "Free",
     lat: 39.9526,
     lng: -75.1652,
+    visibility: "PUBLIC",
+    hostId: "sample-host-10",
   },
   {
     id: 11,
@@ -256,6 +282,8 @@ const sampleGames: Game[] = [
     price: "$3",
     lat: 33.7869,
     lng: -84.3722,
+    visibility: "PUBLIC",
+    hostId: "sample-host-11",
   },
   {
     id: 12,
@@ -273,6 +301,8 @@ const sampleGames: Game[] = [
     price: "$25",
     lat: 47.6597,
     lng: -122.4043,
+    visibility: "PUBLIC",
+    hostId: "sample-host-12",
   },
   {
     id: 13,
@@ -290,6 +320,8 @@ const sampleGames: Game[] = [
     price: "Free",
     lat: 45.5234,
     lng: -122.6762,
+    visibility: "PUBLIC",
+    hostId: "sample-host-13",
   },
   {
     id: 14,
@@ -307,6 +339,8 @@ const sampleGames: Game[] = [
     price: "$7",
     lat: 29.7520,
     lng: -95.3585,
+    visibility: "PUBLIC",
+    hostId: "sample-host-14",
   },
   {
     id: 15,
@@ -324,6 +358,8 @@ const sampleGames: Game[] = [
     price: "Free",
     lat: 32.7661,
     lng: -117.2269,
+    visibility: "PUBLIC",
+    hostId: "sample-host-15",
   },
 ];
 
@@ -375,6 +411,8 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     price: game.cost_per_person > 0 ? `$${game.cost_per_person}` : 'Free',
     lat: parseFloat(game.latitude),
     lng: parseFloat(game.longitude),
+    visibility: game.visibility,
+    hostId: game.host_id,
   });
 
   // Fetch user's games (RSVPs and hosted games)
@@ -433,6 +471,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
             latitude,
             longitude,
             host_id,
+            visibility,
             profiles!games_host_id_fkey(username)
           `)
           .eq('status', 'UPCOMING')
@@ -494,6 +533,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
               latitude,
               longitude,
               host_id,
+              visibility,
               profiles!games_host_id_fkey(username)
             `)
             .eq('id', payload.new.id)
@@ -539,6 +579,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
               latitude,
               longitude,
               host_id,
+              visibility,
               profiles!games_host_id_fkey(username)
             `)
             .eq('id', payload.new.id)
@@ -602,7 +643,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     return Array.from(new Set(games.map(g => g.sport))).sort();
   }, [games]);
 
-  // Filter games based on selected sports
+  // Filter games based on selected sports and visibility
   const filteredGames = useMemo(() => {
     let filtered = games;
     
@@ -610,6 +651,26 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     if (selectedSports.length > 0) {
       filtered = filtered.filter(game => selectedSports.includes(game.sport));
     }
+    
+    // Filter by visibility rules
+    filtered = filtered.filter(game => {
+      // Public games are visible to everyone
+      if (game.visibility === 'PUBLIC') {
+        return true;
+      }
+      
+      // For FRIENDS_ONLY and INVITE_ONLY games, only show to users in RSVP list or host
+      if (game.visibility === 'FRIENDS_ONLY' || game.visibility === 'INVITE_ONLY') {
+        if (!user) return false; // Not visible if user is not logged in
+        
+        const isHost = game.hostId === user.id;
+        const hasRSVP = userRSVPs.has(game.id);
+        
+        return isHost || hasRSVP;
+      }
+      
+      return true;
+    });
     
     // Filter out user's games if hideMyGames is true
     if (hideMyGames && user) {
