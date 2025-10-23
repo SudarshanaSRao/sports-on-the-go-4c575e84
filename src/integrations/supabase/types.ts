@@ -129,6 +129,33 @@ export type Database = {
           },
         ]
       }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["friendship_status"]
+          updated_at: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       games: {
         Row: {
           address: string
@@ -567,6 +594,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_friendship_status: {
+        Args: { user_id_1: string; user_id_2: string }
+        Returns: Database["public"]["Enums"]["friendship_status"]
+      }
+      get_mutual_friends_count: {
+        Args: { user_id_1: string; user_id_2: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -579,6 +614,7 @@ export type Database = {
       account_status: "ACTIVE" | "SUSPENDED" | "BANNED"
       app_role: "admin" | "moderator" | "user"
       community_visibility: "PUBLIC" | "FRIENDS_ONLY" | "INVITE_ONLY"
+      friendship_status: "PENDING" | "ACCEPTED" | "DECLINED" | "BLOCKED"
       game_status: "UPCOMING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
       game_visibility: "PUBLIC" | "FRIENDS_ONLY" | "INVITE_ONLY"
       rsvp_status: "CONFIRMED" | "WAITLISTED" | "CANCELLED"
@@ -736,6 +772,7 @@ export const Constants = {
       account_status: ["ACTIVE", "SUSPENDED", "BANNED"],
       app_role: ["admin", "moderator", "user"],
       community_visibility: ["PUBLIC", "FRIENDS_ONLY", "INVITE_ONLY"],
+      friendship_status: ["PENDING", "ACCEPTED", "DECLINED", "BLOCKED"],
       game_status: ["UPCOMING", "IN_PROGRESS", "COMPLETED", "CANCELLED"],
       game_visibility: ["PUBLIC", "FRIENDS_ONLY", "INVITE_ONLY"],
       rsvp_status: ["CONFIRMED", "WAITLISTED", "CANCELLED"],

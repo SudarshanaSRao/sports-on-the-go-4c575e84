@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MapPin, User, Calendar, LogOut, Search, MessageSquare, Trophy, Grid3x3, Activity } from "lucide-react";
+import { MapPin, User, Calendar, LogOut, Search, MessageSquare, Trophy, Grid3x3, Activity, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { FriendRequestNotification } from "@/components/FriendRequestNotification";
+import { useFriends } from "@/hooks/useFriends";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +16,7 @@ import {
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
+  const { pendingRequests } = useFriends();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
@@ -107,6 +110,13 @@ export const Navbar = () => {
                       <Link to="/my-games" className="cursor-pointer">
                         <Calendar className="w-4 h-4 mr-2" />
                         My Games
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/friends" className="cursor-pointer flex items-center">
+                        <Users className="w-4 h-4 mr-2" />
+                        Friends
+                        <FriendRequestNotification count={pendingRequests.length} />
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
