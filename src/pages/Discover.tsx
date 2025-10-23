@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ShareGameButton } from "@/components/ShareGameButton";
 import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -1091,13 +1092,20 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                   </div>
                 </div>
 
-                <Button 
-                  onClick={() => selectedGame && handleJoinGame(selectedGame.id)}
-                  disabled={joiningGameId === selectedGame?.id}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
-                >
-                  {joiningGameId === selectedGame?.id ? "Joining..." : "Join Game"}
-                </Button>
+                <div className="flex gap-2 mb-4">
+                  <Button 
+                    onClick={() => selectedGame && handleJoinGame(selectedGame.id)}
+                    disabled={joiningGameId === selectedGame?.id}
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
+                  >
+                    {joiningGameId === selectedGame?.id ? "Joining..." : "Join Game"}
+                  </Button>
+                  <ShareGameButton 
+                    gameId={selectedGame.id.toString()}
+                    gameName={`${selectedGame.sport} Game`}
+                    size="lg"
+                  />
+                </div>
 
                 <button
                   onClick={() => setSelectedGame(null)}

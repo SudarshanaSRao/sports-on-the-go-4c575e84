@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { ShareGameButton } from "@/components/ShareGameButton";
 import { Calendar, Clock, MapPin, Users, Plus, Star, X, Pencil } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -476,24 +477,36 @@ const MyGames = () => {
             {/* Actions */}
             <div className="flex gap-2 pt-4">
               {selectedGame.host_id === user?.id ? (
-                <Button 
-                  className="flex-1"
-                  onClick={() => {
-                    setIsDetailsOpen(false);
-                    handleManageGame(selectedGame.id);
-                  }}
-                >
-                  Manage Game
-                </Button>
+                <>
+                  <Button 
+                    className="flex-1"
+                    onClick={() => {
+                      setIsDetailsOpen(false);
+                      handleManageGame(selectedGame.id);
+                    }}
+                  >
+                    Manage Game
+                  </Button>
+                  <ShareGameButton 
+                    gameId={selectedGame.id}
+                    gameName={`${toDisplaySportName(selectedGame.sport)} Game`}
+                  />
+                </>
               ) : (
-                <Button 
-                  className="flex-1"
-                  onClick={() => handleMessageHost(selectedGame.id, 
-                    selectedGame.profiles ? `${selectedGame.profiles.first_name} ${selectedGame.profiles.last_name}` : 'Host'
-                  )}
-                >
-                  Message Host
-                </Button>
+                <>
+                  <Button 
+                    className="flex-1"
+                    onClick={() => handleMessageHost(selectedGame.id, 
+                      selectedGame.profiles ? `${selectedGame.profiles.first_name} ${selectedGame.profiles.last_name}` : 'Host'
+                    )}
+                  >
+                    Message Host
+                  </Button>
+                  <ShareGameButton 
+                    gameId={selectedGame.id}
+                    gameName={`${toDisplaySportName(selectedGame.sport)} Game`}
+                  />
+                </>
               )}
               <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>Close</Button>
             </div>

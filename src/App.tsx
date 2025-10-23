@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SetupUsername from "./pages/SetupUsername";
 import Discover from "./pages/Discover";
+import GameDetails from "./pages/GameDetails";
 import MyGames from "./pages/MyGames";
 import HostGame from "./pages/HostGame";
 import Community from "./pages/Community";
@@ -34,6 +35,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/setup-username" element={<SetupUsername />} />
                 <Route path="/discover" element={<Discover />} />
+                <Route path="/game/:id" element={<GameDetails />} />
                 <Route path="/host-game" element={<HostGame />} />
                 <Route path="/community" element={<Community />} />
                 <Route path="/leaderboard" element={<Leaderboard />} />
