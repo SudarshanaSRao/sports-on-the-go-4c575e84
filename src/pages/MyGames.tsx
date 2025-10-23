@@ -160,7 +160,7 @@ const MyGames = () => {
     if (game) {
       setSelectedGame(game);
       setEditForm({
-        sport: game.sport,
+        sport: toDisplaySportName(game.sport),
         skill_level: game.skill_level,
         location_name: game.location_name,
         address: game.address,
@@ -217,7 +217,7 @@ const MyGames = () => {
       // Detect what changed
       const changes: string[] = [];
       if (toDbSportValue(editForm.sport) !== selectedGame.sport) {
-        changes.push(`Sport changed to ${toDisplaySportName(editForm.sport)}`);
+        changes.push(`Sport changed to ${editForm.sport}`);
       }
       if (editForm.skill_level !== selectedGame.skill_level) {
         changes.push(`Skill level changed to ${editForm.skill_level.replace('_', ' ')}`);
