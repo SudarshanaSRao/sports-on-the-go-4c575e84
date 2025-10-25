@@ -11,7 +11,7 @@ import { Navbar } from "@/components/Navbar";
 import { toDisplaySportName, getSportEmoji } from "@/utils/sportsUtils";
 
 interface Game {
-  id: number;
+  id: string;
   sport: string;
   emoji: string;
   location: string;
@@ -39,7 +39,7 @@ interface GameMapProps {
 // Sample games data for demo - across America
 const sampleGames: Game[] = [
   {
-    id: 1,
+    id: "1",
     sport: "Basketball",
     emoji: "🏀",
     location: "Mission Playground",
@@ -58,7 +58,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-1",
   },
   {
-    id: 2,
+    id: "2",
     sport: "Soccer",
     emoji: "⚽",
     location: "Central Park",
@@ -77,7 +77,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-2",
   },
   {
-    id: 3,
+    id: "3",
     sport: "Tennis",
     emoji: "🎾",
     location: "Griffith Park",
@@ -96,7 +96,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-3",
   },
   {
-    id: 4,
+    id: "4",
     sport: "Volleyball",
     emoji: "🏐",
     location: "South Beach",
@@ -115,7 +115,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-4",
   },
   {
-    id: 5,
+    id: "5",
     sport: "Football",
     emoji: "🏈",
     location: "Grant Park",
@@ -134,7 +134,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-5",
   },
   {
-    id: 6,
+    id: "6",
     sport: "Baseball",
     emoji: "⚾",
     location: "Gas Works Park",
@@ -153,7 +153,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-6",
   },
   {
-    id: 16,
+    id: "16",
     sport: "Cricket",
     emoji: "🏏",
     location: "Golden Gate Park",
@@ -172,7 +172,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-16",
   },
   {
-    id: 17,
+    id: "17",
     sport: "Cricket",
     emoji: "🏏",
     location: "Flushing Meadows Park",
@@ -191,7 +191,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-17",
   },
   {
-    id: 7,
+    id: "7",
     sport: "Pickleball",
     emoji: "🎾",
     location: "Zilker Park",
@@ -210,7 +210,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-7",
   },
   {
-    id: 8,
+    id: "8",
     sport: "Ultimate Frisbee",
     emoji: "🥏",
     location: "Boston Common",
@@ -229,7 +229,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-8",
   },
   {
-    id: 9,
+    id: "9",
     sport: "Running",
     emoji: "🏃",
     location: "City Park",
@@ -248,7 +248,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-9",
   },
   {
-    id: 10,
+    id: "10",
     sport: "Cycling",
     emoji: "🚴",
     location: "Schuylkill River Trail",
@@ -267,7 +267,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-10",
   },
   {
-    id: 11,
+    id: "11",
     sport: "Badminton",
     emoji: "🏸",
     location: "Piedmont Park",
@@ -286,7 +286,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-11",
   },
   {
-    id: 12,
+    id: "12",
     sport: "Golf",
     emoji: "⛳",
     location: "Discovery Park",
@@ -305,7 +305,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-12",
   },
   {
-    id: 13,
+    id: "13",
     sport: "Basketball",
     emoji: "🏀",
     location: "Waterfront Park",
@@ -324,7 +324,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-13",
   },
   {
-    id: 14,
+    id: "14",
     sport: "Soccer",
     emoji: "⚽",
     location: "Discovery Green",
@@ -343,7 +343,7 @@ const sampleGames: Game[] = [
     hostId: "sample-host-14",
   },
   {
-    id: 15,
+    id: "15",
     sport: "Volleyball",
     emoji: "🏐",
     location: "Mission Bay Park",
@@ -381,14 +381,14 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   const [map, setMap] = useState<any>(null);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [joiningGameId, setJoiningGameId] = useState<number | null>(null);
+  const [joiningGameId, setJoiningGameId] = useState<string | null>(null);
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
-  const [markerMap, setMarkerMap] = useState<Map<number, any>>(new Map());
+  const [markerMap, setMarkerMap] = useState<Map<string, any>>(new Map());
   const [dbGames, setDbGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [hideMyGames, setHideMyGames] = useState(false);
-  const [userRSVPs, setUserRSVPs] = useState<Set<number>>(new Set());
-  const [userHostedGames, setUserHostedGames] = useState<Set<number>>(new Set());
+  const [userRSVPs, setUserRSVPs] = useState<Set<string>>(new Set());
+  const [userHostedGames, setUserHostedGames] = useState<Set<string>>(new Set());
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -428,7 +428,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
         .eq('status', 'CONFIRMED');
       
       if (rsvpData) {
-        const gameIds = new Set(rsvpData.map(rsvp => Number(rsvp.game_id)));
+        const gameIds = new Set(rsvpData.map(rsvp => rsvp.game_id));
         setUserRSVPs(gameIds);
       }
 
@@ -439,7 +439,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
         .eq('host_id', user.id);
       
       if (hostedData) {
-        const gameIds = new Set(hostedData.map(game => Number(game.id)));
+        const gameIds = new Set(hostedData.map(game => game.id));
         setUserHostedGames(gameIds);
       }
     };
@@ -831,7 +831,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     window.open(url, '_blank');
   };
 
-  const handleJoinGame = async (gameId: number) => {
+  const handleJoinGame = async (gameId: string) => {
     if (!user) {
       toast({
         title: "Authentication required",
@@ -846,7 +846,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
 
     try {
       const { error } = await supabase.from("rsvps").insert({
-        game_id: gameId.toString(),
+        game_id: gameId,
         user_id: user.id,
         status: "CONFIRMED",
       });
@@ -866,7 +866,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
         const { data: communityData } = await supabase
           .from("communities")
           .select("id")
-          .eq("game_id", gameId.toString())
+          .eq("game_id", gameId)
           .eq("type", "game")
           .single();
 
