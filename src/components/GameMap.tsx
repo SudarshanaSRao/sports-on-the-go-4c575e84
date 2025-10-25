@@ -285,10 +285,6 @@ export default function GameMap({ games = sampleGames, center = [37.7749, -122.4
                     <div className="text-xs text-gray-500 mb-1">Skill Level</div>
                     <Badge className="bg-green-100 text-green-700 border-green-300">{selectedGame.skillLevel}</Badge>
                   </div>
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500 mb-1">Cost</div>
-                    <div className="text-xl font-bold text-blue-600">{selectedGame.price}</div>
-                  </div>
                 </div>
 
                 <div className="mb-6">

@@ -160,7 +160,6 @@ export type Database = {
         Row: {
           address: string
           city: string
-          cost_per_person: number | null
           created_at: string
           current_players: number | null
           description: string | null
@@ -187,7 +186,6 @@ export type Database = {
         Insert: {
           address: string
           city: string
-          cost_per_person?: number | null
           created_at?: string
           current_players?: number | null
           description?: string | null
@@ -214,7 +212,6 @@ export type Database = {
         Update: {
           address?: string
           city?: string
-          cost_per_person?: number | null
           created_at?: string
           current_players?: number | null
           description?: string | null

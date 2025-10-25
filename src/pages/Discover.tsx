@@ -408,7 +408,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     skillLevel: game.skill_level.replace('_', ' '),
     hostName: game.profiles?.username || 'Unknown',
     hostRating: 4.5,
-    price: game.cost_per_person > 0 ? `$${game.cost_per_person}` : 'Free',
+    price: 'Free',
     lat: parseFloat(game.latitude),
     lng: parseFloat(game.longitude),
     visibility: game.visibility,
@@ -466,7 +466,6 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
             start_time,
             max_players,
             current_players,
-            cost_per_person,
             skill_level,
             latitude,
             longitude,
@@ -528,7 +527,6 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
               start_time,
               max_players,
               current_players,
-              cost_per_person,
               skill_level,
               latitude,
               longitude,
@@ -574,7 +572,6 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
               start_time,
               max_players,
               current_players,
-              cost_per_person,
               skill_level,
               latitude,
               longitude,
@@ -1107,10 +1104,6 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                   <div>
                     <div className="text-xs text-gray-500 mb-1">Skill Level</div>
                     <Badge className="bg-green-100 text-green-700 border-green-300">{selectedGame.skillLevel}</Badge>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500 mb-1">Cost</div>
-                    <div className="text-xl font-bold text-blue-600">{selectedGame.price}</div>
                   </div>
                 </div>
 

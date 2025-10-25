@@ -44,7 +44,6 @@ interface Game {
   duration_minutes: number;
   current_players: number;
   max_players: number;
-  cost_per_person: number;
   visibility: string;
   host_id: string;
   latitude: number;
@@ -82,7 +81,6 @@ const MyGames = () => {
     start_time: '',
     duration_minutes: 0,
     max_players: 0,
-    cost_per_person: 0,
     visibility: '',
     description: '',
     equipment_requirements: '',
@@ -171,7 +169,6 @@ const MyGames = () => {
         start_time: game.start_time,
         duration_minutes: game.duration_minutes,
         max_players: game.max_players,
-        cost_per_person: game.cost_per_person,
         visibility: game.visibility,
         description: game.description || '',
         equipment_requirements: game.equipment_requirements || '',
@@ -243,9 +240,6 @@ const MyGames = () => {
       if (editForm.max_players !== selectedGame.max_players) {
         changes.push(`Max players changed to ${editForm.max_players}`);
       }
-      if (editForm.cost_per_person !== selectedGame.cost_per_person) {
-        changes.push(`Cost changed to $${editForm.cost_per_person}`);
-      }
 
       const { error } = await supabase
         .from('games')
@@ -261,7 +255,6 @@ const MyGames = () => {
           start_time: editForm.start_time,
           duration_minutes: editForm.duration_minutes,
           max_players: editForm.max_players,
-          cost_per_person: editForm.cost_per_person,
           visibility: editForm.visibility as any,
           description: editForm.description,
           equipment_requirements: editForm.equipment_requirements,
@@ -679,17 +672,6 @@ const MyGames = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="cost_per_person">Cost Per Person ($)</Label>
-                    <Input
-                      id="cost_per_person"
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      value={editForm.cost_per_person}
-                      onChange={(e) => setEditForm({ ...editForm, cost_per_person: parseFloat(e.target.value) || 0 })}
-                    />
-                  </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="visibility">Visibility</Label>

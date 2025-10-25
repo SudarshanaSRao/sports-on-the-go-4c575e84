@@ -43,7 +43,6 @@ export default function HostGame() {
     timePeriod: "PM",
     durationMinutes: "",
     maxPlayers: "",
-    costPerPerson: "",
     locationName: "",
     address: "",
     city: "",
@@ -154,7 +153,6 @@ export default function HostGame() {
         start_time: startTime24,
         duration_minutes: parseInt(formData.durationMinutes),
         max_players: parseInt(formData.maxPlayers),
-        cost_per_person: parseFloat(formData.costPerPerson) || 0,
         location_name: formData.locationName,
         address: formData.address,
         city: formData.city,
@@ -345,17 +343,10 @@ export default function HostGame() {
                   </div>
                 </div>
 
-                {/* Players & Cost */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="maxPlayers">Max Players *</Label>
-                    <Input type="number" id="maxPlayers" name="maxPlayers" placeholder="Enter a number" value={formData.maxPlayers} onChange={handleInputChange} min="1" required />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="costPerPerson">Cost per Person ($)</Label>
-                    <Input type="number" id="costPerPerson" name="costPerPerson" placeholder="0.00" value={formData.costPerPerson} onChange={handleInputChange} min="0" step="0.01" />
-                  </div>
+                {/* Players */}
+                <div className="space-y-2">
+                  <Label htmlFor="maxPlayers">Max Players</Label>
+                  <Input type="number" id="maxPlayers" name="maxPlayers" placeholder="10" value={formData.maxPlayers} onChange={handleInputChange} min="2" required />
                 </div>
 
                 {/* Location */}

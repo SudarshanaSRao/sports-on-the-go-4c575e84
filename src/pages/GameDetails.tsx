@@ -38,7 +38,6 @@ interface GameDetails {
   duration_minutes: number;
   max_players: number;
   current_players: number;
-  cost_per_person: number;
   description: string | null;
   equipment_requirements: string | null;
   game_rules: string | null;
@@ -265,11 +264,6 @@ const GameDetails = () => {
 
                 <div className="flex items-center gap-3">
                   <DollarSign className="w-5 h-5 text-muted-foreground shrink-0" />
-                  <p>
-                    {game.cost_per_person === 0
-                      ? "Free"
-                      : `$${game.cost_per_person} per person`}
-                  </p>
                 </div>
 
                 <div className="flex items-center gap-3">
