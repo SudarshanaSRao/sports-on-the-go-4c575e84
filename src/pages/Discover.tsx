@@ -943,18 +943,18 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <Navbar />
-      <div className="pt-20 px-4 pb-4 flex justify-center">
+      <div className="pt-20 px-2 sm:px-4 pb-4 flex justify-center">
         <div className="w-full max-w-7xl">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Find Your Game</h1>
-            <p className="text-gray-600">Discover pickup games near you</p>
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Find Your Game</h1>
+            <p className="text-sm sm:text-base text-gray-600">Discover pickup games near you</p>
           
-          {/* Sports Filter */}
-          <div className="mt-6 bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <h3 className="text-base font-semibold text-gray-900 mb-4">Filter by Sport:</h3>
+          {/* Sports Filter - Responsive padding */}
+          <div className="mt-4 sm:mt-6 bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-200">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900 mb-3 sm:mb-4">Filter by Sport:</h3>
             
             <div className="space-y-3 mb-4">
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 {availableSports.map((sport) => {
                   const isSelected = selectedSports.includes(sport);
                   const emoji = getSportEmoji(sport);
@@ -965,7 +965,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                       key={sport}
                       onClick={() => toggleSportFilter(sport)}
                     className={`
-                      inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                      inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium
                       transition-all duration-200
                       ${isSelected
                         ? 'bg-primary text-primary-foreground shadow-sm'
@@ -973,7 +973,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                       }
                     `}
                   >
-                    <span className="text-base">{emoji}</span>
+                    <span className="text-sm sm:text-base">{emoji}</span>
                     <span>{displayName}</span>
                   </button>
                 );
@@ -999,9 +999,9 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-200px)]">
-          {/* Map Section */}
-          <div className="lg:col-span-2 relative">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-[calc(100vh-200px)]">
+          {/* Map Section - Full height on desktop, fixed height on mobile */}
+          <div className="lg:col-span-2 relative h-[400px] lg:h-[calc(100vh-200px)]">
             <div id="map" className="w-full h-full rounded-xl shadow-lg border-2 border-gray-200"></div>
             
             {/* Loading Overlay */}
@@ -1027,26 +1027,26 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
               </div>
             )}
 
-            {/* Locate Me Button */}
+            {/* Locate Me Button - Responsive size */}
             <button
               onClick={handleLocateMe}
-              className="absolute bottom-4 right-4 z-[1000] w-12 h-12 rounded-full bg-white shadow-lg border-2 border-blue-500 flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110"
+              className="absolute bottom-4 right-4 z-[1000] w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white shadow-lg border-2 border-blue-500 flex items-center justify-center hover:bg-blue-50 transition-all hover:scale-110"
               title="Locate Me"
             >
-              <Navigation className="w-5 h-5 text-blue-600" />
+              <Navigation className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
             </button>
 
-            {/* Map Legend */}
+            {/* Map Legend - Responsive positioning */}
             {!loading && games.length > 0 && (
-              <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-3 border border-gray-200 max-h-[300px] overflow-y-auto">
+              <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-2 sm:p-3 border border-gray-200 max-h-[200px] sm:max-h-[300px] overflow-y-auto max-w-[150px] sm:max-w-none">
                 <div className="text-xs font-semibold text-gray-700 mb-2">Sports on Map</div>
                 {Array.from(new Set(filteredGames.map(g => g.sport)))
                   .map((sport) => {
                     const game = filteredGames.find(g => g.sport === sport);
                     return (
-                      <div key={sport} className="flex items-center gap-2 text-xs text-gray-600 mt-1">
-                        <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">{game?.emoji}</span>
-                        <span>{sport}</span>
+                      <div key={sport} className="flex items-center gap-1 sm:gap-2 text-xs text-gray-600 mt-1">
+                        <span className="w-5 h-5 sm:w-6 sm:h-6 bg-blue-500 rounded-full flex items-center justify-center text-xs sm:text-base">{game?.emoji}</span>
+                        <span className="hidden sm:inline">{sport}</span>
                       </div>
                     );
                   })}
@@ -1054,8 +1054,8 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
             )}
           </div>
 
-          {/* Game Details Panel */}
-          <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-6 overflow-y-auto">
+          {/* Game Details Panel - Scrollable on mobile and desktop */}
+          <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-4 sm:p-6 overflow-y-auto max-h-[600px] lg:max-h-[calc(100vh-200px)]">
             {selectedGame ? (
               <div>
                 <div className="flex items-start justify-between mb-4">
