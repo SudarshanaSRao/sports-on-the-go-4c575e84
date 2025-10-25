@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ShareGameButton } from "@/components/ShareGameButton";
-import { Calendar, Clock, MapPin, Users, Plus, Star, X, Pencil } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Star, X, Pencil, MessageSquare } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { getSportEmoji, toDisplaySportName, getAllSportsDisplayNames, toDbSportValue } from "@/utils/sportsUtils";
+import { ReviewPlayerDialog } from "@/components/ReviewPlayerDialog";
 import {
   Dialog,
   DialogContent,
@@ -52,23 +53,238 @@ interface Game {
   equipment_requirements?: string;
   game_rules?: string;
   profiles?: {
+    id?: string;
     first_name: string;
     last_name: string;
+    username?: string;
     overall_rating: number;
   };
 }
+
+// Past Game Card Component
+const PastGameCard = ({ game, userId, onReviewSubmitted }: { game: Game; userId: string; onReviewSubmitted: () => void }) => {
+  const [attendees, setAttendees] = useState<any[]>([]);
+  const [myReviews, setMyReviews] = useState<Set<string>>(new Set());
+  const [loadingAttendees, setLoadingAttendees] = useState(false);
+  const [showAttendees, setShowAttendees] = useState(false);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedReviewee, setSelectedReviewee] = useState<{ id: string; name: string } | null>(null);
+
+  const fetchAttendees = async () => {
+    if (loadingAttendees || attendees.length > 0) return;
+    
+    setLoadingAttendees(true);
+    try {
+      // Fetch all RSVPs for this game
+      const { data: rsvpData, error: rsvpError } = await supabase
+        .from('rsvps')
+        .select(`
+          user_id,
+          attended,
+          profiles:user_id (
+            id,
+            first_name,
+            last_name,
+            username,
+            overall_rating
+          )
+        `)
+        .eq('game_id', game.id)
+        .eq('status', 'CONFIRMED');
+
+      if (rsvpError) throw rsvpError;
+
+      // Fetch my reviews for this game
+      const { data: reviewData } = await supabase
+        .from('reviews')
+        .select('reviewee_id')
+        .eq('game_id', game.id)
+        .eq('reviewer_id', userId);
+
+      const reviewedIds = new Set(reviewData?.map(r => r.reviewee_id) || []);
+      setMyReviews(reviewedIds);
+
+      // Filter out current user and add host if they're not already in list
+      const filteredAttendees = rsvpData?.filter(r => r.user_id !== userId) || [];
+      
+      // Add host if not already in attendees
+      if (game.host_id !== userId) {
+        const isHostInList = filteredAttendees.some(a => a.user_id === game.host_id);
+        if (!isHostInList && game.profiles) {
+          filteredAttendees.push({
+            user_id: game.host_id,
+            attended: true,
+            profiles: {
+              id: game.host_id,
+              first_name: game.profiles.first_name || '',
+              last_name: game.profiles.last_name || '',
+              username: game.profiles.username || '',
+              overall_rating: game.profiles.overall_rating || 0
+            }
+          });
+        }
+      }
+
+      setAttendees(filteredAttendees);
+    } catch (error) {
+      console.error('Error fetching attendees:', error);
+    } finally {
+      setLoadingAttendees(false);
+    }
+  };
+
+  const handleReviewClick = (attendeeId: string, attendeeName: string) => {
+    setSelectedReviewee({ id: attendeeId, name: attendeeName });
+    setReviewDialogOpen(true);
+  };
+
+  const handleShowAttendees = () => {
+    if (!showAttendees) {
+      fetchAttendees();
+    }
+    setShowAttendees(!showAttendees);
+  };
+
+  return (
+    <>
+      <Card className="border-2">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-start gap-4">
+            <div className="flex items-start space-x-4 flex-1">
+              <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center text-2xl shadow-primary flex-shrink-0">
+                {getSportEmoji(game.sport)}
+              </div>
+              
+              <div className="flex-1 min-w-0">
+                <h3 className="text-xl font-bold mb-1">{toDisplaySportName(game.sport)}</h3>
+                <div className="flex items-center text-muted-foreground text-sm mb-3">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  <span className="truncate">{game.location_name}</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-medium">
+                      {format(new Date(game.game_date), 'MMM dd, yyyy')}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-sm">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <span className="font-medium">{game.start_time}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col space-y-2 md:min-w-[160px]">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={handleShowAttendees}
+              >
+                <Users className="w-4 h-4 mr-2" />
+                {showAttendees ? 'Hide' : 'Review'} Players
+              </Button>
+            </div>
+          </div>
+
+          {/* Attendees List */}
+          {showAttendees && (
+            <div className="mt-4 pt-4 border-t">
+              <h4 className="font-semibold mb-3 flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Players ({attendees.length})
+              </h4>
+              
+              {loadingAttendees ? (
+                <p className="text-sm text-muted-foreground">Loading players...</p>
+              ) : attendees.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No other players attended this game.</p>
+              ) : (
+                <div className="space-y-2">
+                  {attendees.map((attendee) => {
+                    const profile = attendee.profiles;
+                    if (!profile) return null;
+
+                    const name = profile.username || `${profile.first_name} ${profile.last_name}`;
+                    const hasReviewed = myReviews.has(attendee.user_id);
+
+                    return (
+                      <div key={attendee.user_id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-semibold">
+                            {name[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-medium">{name}</p>
+                            {profile.overall_rating > 0 && (
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                <span>{profile.overall_rating.toFixed(1)}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {hasReviewed ? (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                            Reviewed
+                          </Badge>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={() => handleReviewClick(attendee.user_id, name)}
+                          >
+                            <MessageSquare className="w-3 h-3 mr-1" />
+                            Review
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {selectedReviewee && (
+        <ReviewPlayerDialog
+          isOpen={reviewDialogOpen}
+          onClose={() => {
+            setReviewDialogOpen(false);
+            setSelectedReviewee(null);
+          }}
+          gameId={game.id}
+          revieweeId={selectedReviewee.id}
+          revieweeName={selectedReviewee.name}
+          reviewerId={userId}
+          onReviewSubmitted={() => {
+            fetchAttendees();
+            onReviewSubmitted();
+          }}
+        />
+      )}
+    </>
+  );
+};
 
 const MyGames = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [upcomingGames, setUpcomingGames] = useState<Game[]>([]);
   const [hostedGames, setHostedGames] = useState<Game[]>([]);
+  const [pastGames, setPastGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isManageOpen, setIsManageOpen] = useState(false);
   const [participants, setParticipants] = useState<any[]>([]);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedReviewee, setSelectedReviewee] = useState<{ id: string; name: string } | null>(null);
   const [editForm, setEditForm] = useState({
     sport: '',
     skill_level: '',
@@ -99,7 +315,9 @@ const MyGames = () => {
     try {
       setLoading(true);
 
-      // Fetch games user has RSVP'd to
+      const today = new Date().toISOString().split('T')[0];
+
+      // Fetch upcoming games user has RSVP'd to
       const { data: rsvpData, error: rsvpError } = await supabase
         .from('rsvps')
         .select(`
@@ -118,6 +336,25 @@ const MyGames = () => {
 
       if (rsvpError) throw rsvpError;
 
+      // Fetch past games user attended
+      const { data: pastRsvpData, error: pastRsvpError } = await supabase
+        .from('rsvps')
+        .select(`
+          game_id,
+          games (
+            *,
+            profiles:host_id (
+              first_name,
+              last_name,
+              overall_rating
+            )
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'CONFIRMED');
+
+      if (pastRsvpError) throw pastRsvpError;
+
       // Fetch games user is hosting
       const { data: hostData, error: hostError } = await supabase
         .from('games')
@@ -129,14 +366,21 @@ const MyGames = () => {
             overall_rating
           )
         `)
-        .eq('host_id', user.id)
-        .gte('game_date', new Date().toISOString().split('T')[0]);
+        .eq('host_id', user.id);
 
       if (hostError) throw hostError;
 
-      const attendingGames = rsvpData?.map(r => r.games).filter(Boolean) as Game[] || [];
-      setUpcomingGames(attendingGames);
-      setHostedGames(hostData || []);
+      const allAttendedGames = rsvpData?.map(r => r.games).filter(Boolean) as Game[] || [];
+      const allHostedGames = hostData || [];
+      
+      // Split into upcoming and past
+      const upcoming = allAttendedGames.filter(g => g.game_date >= today);
+      const past = [...allAttendedGames, ...allHostedGames].filter(g => g.game_date < today);
+      const hosted = allHostedGames.filter(g => g.game_date >= today);
+
+      setUpcomingGames(upcoming);
+      setPastGames(past);
+      setHostedGames(hosted);
     } catch (error: any) {
       console.error('Error fetching games:', error);
       toast.error('Failed to load games');
@@ -879,7 +1123,7 @@ const MyGames = () => {
                 Hosting ({hostedGames.length})
               </TabsTrigger>
               <TabsTrigger value="past">
-                Past (0)
+                Past ({pastGames.length})
               </TabsTrigger>
             </TabsList>
 
@@ -1116,19 +1360,30 @@ const MyGames = () => {
             </TabsContent>
 
             {/* Past Games Tab */}
-            <TabsContent value="past">
-              <div className="text-center py-12">
-                <div className="w-16 h-16 rounded-xl bg-muted mx-auto mb-4 flex items-center justify-center">
-                  <Star className="w-8 h-8 text-muted-foreground" />
+            <TabsContent value="past" className="space-y-4">
+              {pastGames.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 rounded-xl bg-muted mx-auto mb-4 flex items-center justify-center">
+                    <Star className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">No Past Games Yet</h3>
+                  <p className="text-muted-foreground mb-6">Join or host games to build your history and reputation</p>
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
+                    <Link to="/discover">
+                      Browse Games
+                    </Link>
+                  </Button>
                 </div>
-                <h3 className="text-xl font-bold mb-2">No Past Games Yet</h3>
-                <p className="text-muted-foreground mb-6">Join or host games to build your history and reputation</p>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
-                  <Link to="/discover">
-                    Browse Games
-                  </Link>
-                </Button>
-              </div>
+              ) : (
+                pastGames.map((game) => (
+                  <PastGameCard 
+                    key={game.id} 
+                    game={game} 
+                    userId={user?.id!}
+                    onReviewSubmitted={fetchGames}
+                  />
+                ))
+              )}
             </TabsContent>
           </Tabs>
         </div>
