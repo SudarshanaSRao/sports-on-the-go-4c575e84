@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -270,6 +271,12 @@ export default function HostGame() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      <SEO
+        title="Host a Pickup Game"
+        description="Create and host your own pickup game. Set the date, time, location, and skill level. Connect with athletes in your area looking for games to join."
+        keywords="host game, create pickup game, organize sports game, host basketball, host soccer, schedule game, find players, game organizer"
+        canonicalUrl="https://squadup.app/host-game"
+      />
       <Navbar />
       <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-3xl">

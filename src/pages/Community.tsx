@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SEO } from "@/components/SEO";
 import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filter, Trash2, Search } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate } from "react-router-dom";
@@ -631,6 +632,12 @@ export default function Community() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Sports Communities & Discussion Forums"
+        description="Join sport-specific communities, connect with fellow athletes, share tips and strategies. Participate in discussions about games, training, and local sports events."
+        keywords="sports community, athletic forums, sports discussion, basketball community, soccer forum, connect with athletes, sports groups, game communities"
+        canonicalUrl="https://squadup.app/community"
+      />
       <Navbar />
       <div className="pt-20 px-4 pb-4">
         <div className="max-w-7xl mx-auto">

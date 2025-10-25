@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShareGameButton } from "@/components/ShareGameButton";
+import { SEO } from "@/components/SEO";
 import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -942,6 +943,12 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      <SEO
+        title="Discover Pickup Games Near You"
+        description="Browse and join pickup games in your area. Find basketball, soccer, volleyball, tennis, cricket and more sports games nearby. Filter by sport, skill level, and location to find the perfect game for you."
+        keywords="discover games, find sports near me, local pickup games, basketball near me, soccer games, volleyball games, tennis matches, sports map, game finder, join sports games"
+        canonicalUrl="https://squadup.app/discover"
+      />
       <Navbar />
       <div className="pt-20 px-2 sm:px-4 pb-4 flex justify-center">
         <div className="w-full max-w-7xl">

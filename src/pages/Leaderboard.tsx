@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { SEO } from "@/components/SEO";
 import { Trophy, Star, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
@@ -66,6 +67,12 @@ export default function Leaderboard() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Player Rankings & Leaderboard"
+        description="View top-rated players in your area. See player rankings based on ratings, games hosted, and attendance. Compete to climb the leaderboard and earn your reputation."
+        keywords="player rankings, sports leaderboard, top players, athlete ratings, player stats, best players, community rankings, sports reputation"
+        canonicalUrl="https://squadup.app/leaderboard"
+      />
       <Navbar />
       <div className="pt-20 px-4 pb-4">
         <div className="max-w-4xl mx-auto">

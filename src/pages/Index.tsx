@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
+import { SEO } from "@/components/SEO";
 import { MapPin, Users, Star, Calendar, Trophy, Shield, Zap, MessageSquare, Medal, CalendarCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import heroImage from "@/assets/hero-sports.jpg";
 import {
@@ -196,6 +197,24 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="SquadUp - Find Pickup Games & Connect with Athletes Near You"
+        description="Join thousands of athletes discovering pickup games in their area. Find basketball, soccer, volleyball, tennis, cricket games and more. Build trust through our reputation system and never play alone again."
+        keywords="pickup games, find sports games, basketball games near me, soccer pickup, volleyball games, local sports, athletic community, sports networking, game finder, join sports teams, recreational sports, weekend sports, casual games"
+        canonicalUrl="https://squadup.app/"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "SquadUp",
+          "url": "https://squadup.app",
+          "description": "Connect with athletes and discover pickup games in your area",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://squadup.app/discover?sport={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }}
+      />
       <Navbar />
       
       {/* Hero Section */}
@@ -205,8 +224,9 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/50 to-background z-10" />
           <img 
             src={heroImage} 
-            alt="People playing sports" 
+            alt="Athletes playing various sports including basketball, soccer, and volleyball in outdoor recreational settings - SquadUp community in action"
             className="w-full h-full object-cover opacity-20"
+            loading="eager"
           />
         </div>
         
