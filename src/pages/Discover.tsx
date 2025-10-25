@@ -1040,13 +1040,16 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
             {!loading && games.length > 0 && (
               <div className="absolute top-4 left-4 z-[1000] bg-white rounded-lg shadow-lg p-3 border border-gray-200 max-h-[300px] overflow-y-auto">
                 <div className="text-xs font-semibold text-gray-700 mb-2">Sports on Map</div>
-                {Array.from(new Set(filteredGames.map(g => ({ sport: g.sport, emoji: g.emoji }))))
-                  .map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 mt-1">
-                      <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">{item.emoji}</span>
-                      <span>{item.sport}</span>
-                    </div>
-                  ))}
+                {Array.from(new Set(filteredGames.map(g => g.sport)))
+                  .map((sport) => {
+                    const game = filteredGames.find(g => g.sport === sport);
+                    return (
+                      <div key={sport} className="flex items-center gap-2 text-xs text-gray-600 mt-1">
+                        <span className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">{game?.emoji}</span>
+                        <span>{sport}</span>
+                      </div>
+                    );
+                  })}
               </div>
             )}
           </div>
