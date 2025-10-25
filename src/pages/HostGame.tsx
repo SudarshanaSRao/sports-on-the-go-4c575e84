@@ -114,6 +114,21 @@ export default function HostGame() {
     }
 
     console.log('✅ [HostGame] User authenticated:', user.id);
+
+    // Validate that the game date is not in the past
+    const selectedDate = new Date(formData.gameDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day for accurate comparison
+    
+    if (selectedDate < today) {
+      toast({
+        title: "Invalid date",
+        description: "Cannot create games with past dates. Please select today or a future date.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
