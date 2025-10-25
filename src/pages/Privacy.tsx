@@ -26,12 +26,16 @@ const Privacy = () => {
                 <h2 className="text-2xl font-bold mb-3">2. Information We Collect</h2>
                 <p className="text-muted-foreground mb-2">We collect only essential information:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                  <li><strong>Account Information:</strong> Email address, name, date of birth, city, and zip code (provided during registration)</li>
+                  <li><strong>Account Information:</strong> Email address, username, name, and date of birth (provided during registration)</li>
                   <li><strong>Profile Data:</strong> Optional profile photo, bio, and sports preferences</li>
-                  <li><strong>Game Data:</strong> Games you create, join, or attend</li>
+                  <li><strong>Game Location Data:</strong> Addresses of games you create (NOT your personal location)</li>
+                  <li><strong>Game Participation:</strong> Games you join or attend</li>
                   <li><strong>Usage Data:</strong> Basic logs for security and bot prevention</li>
                   <li><strong>Authentication Data:</strong> Login credentials and session information</li>
                 </ul>
+                <p className="text-muted-foreground mt-3 font-semibold">
+                  <strong>IMPORTANT:</strong> We do NOT track or store your real-time location. We do NOT store your personal home address, city, or zip code. Only public game event addresses are stored for coordination purposes.
+                </p>
               </section>
 
               <section>
@@ -53,11 +57,15 @@ const Privacy = () => {
                 <ul className="list-disc pl-6 text-muted-foreground space-y-2">
                   <li>Authenticate your account and manage sessions</li>
                   <li>Display your profile to other users</li>
-                  <li>Connect you with nearby sports activities</li>
+                  <li>Enable you to discover and participate in sports activities</li>
+                  <li>Coordinate game locations (only for games you create or join)</li>
                   <li>Send important service notifications</li>
                   <li>Prevent fraudulent or abusive behavior</li>
                   <li>Maintain and improve the Service</li>
                 </ul>
+                <p className="text-muted-foreground mt-3">
+                  We do NOT use your information for location tracking, targeted advertising, or selling to third parties.
+                </p>
               </section>
 
               <section>

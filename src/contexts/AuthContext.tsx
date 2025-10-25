@@ -17,8 +17,6 @@ interface AuthContextType {
 interface SignUpData {
   username: string;
   dateOfBirth: string;
-  city: string;
-  zipCode: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -60,8 +58,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           data: {
             username: userData.username,
             date_of_birth: userData.dateOfBirth,
-            city: userData.city,
-            zip_code: userData.zipCode,
           },
         },
       });

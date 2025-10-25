@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Mail, Lock, User, ArrowLeft, Calendar, MapPinIcon } from "lucide-react";
+import { MapPin, Mail, Lock, User, ArrowLeft, Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { z } from "zod";
 
@@ -26,8 +26,6 @@ const signUpSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
-  city: z.string().min(1, "City is required"),
-  zipCode: z.string().min(5, "Valid zip code required"),
 });
 
 const Auth = () => {
@@ -76,8 +74,6 @@ const Auth = () => {
       email: formData.get('signup-email') as string,
       password: formData.get('signup-password') as string,
       dateOfBirth: formData.get('dob') as string,
-      city: formData.get('city') as string,
-      zipCode: formData.get('zipcode') as string,
     };
 
     try {
@@ -85,8 +81,6 @@ const Auth = () => {
       await signUp(data.email, data.password, {
         username: data.username,
         dateOfBirth: data.dateOfBirth,
-        city: data.city,
-        zipCode: data.zipCode,
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -292,35 +286,6 @@ const Auth = () => {
                     />
                   </div>
                   {errors.dateOfBirth && <p className="text-xs text-destructive">{errors.dateOfBirth}</p>}
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <div className="relative">
-                      <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="city"
-                        name="city"
-                        type="text"
-                        placeholder="New York"
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                    {errors.city && <p className="text-xs text-destructive">{errors.city}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="zipcode">Zip Code</Label>
-                    <Input
-                      id="zipcode"
-                      name="zipcode"
-                      type="text"
-                      placeholder="10001"
-                      pattern="[0-9]{5}"
-                      required
-                    />
-                    {errors.zipCode && <p className="text-xs text-destructive">{errors.zipCode}</p>}
-                  </div>
                 </div>
                 <Button 
                   type="submit" 

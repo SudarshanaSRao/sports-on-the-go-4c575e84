@@ -335,7 +335,7 @@ export type Database = {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"] | null
           bio: string | null
-          city: string
+          city: string | null
           created_at: string
           date_of_birth: string
           first_name: string | null
@@ -357,12 +357,12 @@ export type Database = {
           total_reviews: number | null
           updated_at: string
           username: string | null
-          zip_code: string
+          zip_code: string | null
         }
         Insert: {
           account_status?: Database["public"]["Enums"]["account_status"] | null
           bio?: string | null
-          city: string
+          city?: string | null
           created_at?: string
           date_of_birth: string
           first_name?: string | null
@@ -384,12 +384,12 @@ export type Database = {
           total_reviews?: number | null
           updated_at?: string
           username?: string | null
-          zip_code: string
+          zip_code?: string | null
         }
         Update: {
           account_status?: Database["public"]["Enums"]["account_status"] | null
           bio?: string | null
-          city?: string
+          city?: string | null
           created_at?: string
           date_of_birth?: string
           first_name?: string | null
@@ -411,7 +411,7 @@ export type Database = {
           total_reviews?: number | null
           updated_at?: string
           username?: string | null
-          zip_code?: string
+          zip_code?: string | null
         }
         Relationships: []
       }
