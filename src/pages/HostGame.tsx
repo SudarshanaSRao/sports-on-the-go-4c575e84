@@ -49,6 +49,7 @@ export default function HostGame() {
     city: "",
     state: "",
     zipCode: "",
+    country: "United States",
     description: "",
     equipmentRequirements: "",
     gameRules: "",
@@ -65,13 +66,13 @@ export default function HostGame() {
 
   const geocodeAddress = async () => {
     console.log('🗺️ [Geocoding] Starting geocoding via edge function...');
-    const { address, city, state, zipCode } = formData;
-    console.log('Address details:', { address, city, state, zipCode });
+    const { address, city, state, zipCode, country } = formData;
+    console.log('Address details:', { address, city, state, zipCode, country });
 
     try {
       console.log('📍 [Geocoding] Calling geocode edge function...');
       const { data, error } = await supabase.functions.invoke('geocode', {
-        body: { address, city, state, zipCode }
+        body: { address, city, state, zipCode, country }
       });
 
       if (error) {
@@ -172,8 +173,9 @@ export default function HostGame() {
         location_name: formData.locationName,
         address: formData.address,
         city: formData.city,
-        state: formData.state,
-        zip_code: formData.zipCode,
+        state: formData.state || null,
+        zip_code: formData.zipCode || null,
+        country: formData.country,
         latitude,
         longitude,
         description: formData.description || null,
@@ -383,6 +385,44 @@ export default function HostGame() {
                     <Input type="text" id="address" name="address" placeholder="123 Main St" value={formData.address} onChange={handleInputChange} required />
                   </div>
 
+                  <div className="space-y-2">
+                    <Label htmlFor="country">Country *</Label>
+                    <Select name="country" value={formData.country} onValueChange={(value) => handleSelectChange("country", value)} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="United States">United States</SelectItem>
+                        <SelectItem value="Canada">Canada</SelectItem>
+                        <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                        <SelectItem value="India">India</SelectItem>
+                        <SelectItem value="Australia">Australia</SelectItem>
+                        <SelectItem value="Germany">Germany</SelectItem>
+                        <SelectItem value="France">France</SelectItem>
+                        <SelectItem value="Spain">Spain</SelectItem>
+                        <SelectItem value="Italy">Italy</SelectItem>
+                        <SelectItem value="Brazil">Brazil</SelectItem>
+                        <SelectItem value="Mexico">Mexico</SelectItem>
+                        <SelectItem value="Japan">Japan</SelectItem>
+                        <SelectItem value="China">China</SelectItem>
+                        <SelectItem value="South Korea">South Korea</SelectItem>
+                        <SelectItem value="Netherlands">Netherlands</SelectItem>
+                        <SelectItem value="Belgium">Belgium</SelectItem>
+                        <SelectItem value="Switzerland">Switzerland</SelectItem>
+                        <SelectItem value="Austria">Austria</SelectItem>
+                        <SelectItem value="Sweden">Sweden</SelectItem>
+                        <SelectItem value="Norway">Norway</SelectItem>
+                        <SelectItem value="Denmark">Denmark</SelectItem>
+                        <SelectItem value="Finland">Finland</SelectItem>
+                        <SelectItem value="Ireland">Ireland</SelectItem>
+                        <SelectItem value="New Zealand">New Zealand</SelectItem>
+                        <SelectItem value="Singapore">Singapore</SelectItem>
+                        <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
+                        <SelectItem value="South Africa">South Africa</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <div className="grid md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="city">City *</Label>
@@ -390,13 +430,13 @@ export default function HostGame() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="state">State/Province *</Label>
-                      <Input type="text" id="state" name="state" placeholder="e.g., California, Ontario" value={formData.state} onChange={handleInputChange} required />
+                      <Label htmlFor="state">State/Province</Label>
+                      <Input type="text" id="state" name="state" placeholder="e.g., California, Maharashtra" value={formData.state} onChange={handleInputChange} />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="zipCode">ZIP Code *</Label>
-                      <Input type="text" id="zipCode" name="zipCode" placeholder="Enter a zip code" value={formData.zipCode} onChange={handleInputChange} required />
+                      <Label htmlFor="zipCode">ZIP/Postal Code</Label>
+                      <Input type="text" id="zipCode" name="zipCode" placeholder="Enter postal code" value={formData.zipCode} onChange={handleInputChange} />
                     </div>
                   </div>
                 </div>

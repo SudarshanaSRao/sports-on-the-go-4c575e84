@@ -25,25 +25,36 @@ serve(async (req) => {
   }
 
   try {
-    const { address, city, state, zipCode } = await req.json();
+    const { address, city, state, zipCode, country } = await req.json();
     
-    console.log('Geocoding request:', { address, city, state, zipCode });
+    console.log('Geocoding request:', { address, city, state, zipCode, country });
 
-    if (!address || !city || !state || !zipCode) {
-      throw new Error('Missing required fields: address, city, state, zipCode');
+    if (!address || !city || !country) {
+      throw new Error('Missing required fields: address, city, country');
     }
 
-    // Get full state name
-    const stateName = US_STATE_MAP[state.toUpperCase()] || state;
-    console.log('State mapping:', state, '->', stateName);
+    // Get full state name for US addresses
+    const stateName = state && US_STATE_MAP[state.toUpperCase()] ? US_STATE_MAP[state.toUpperCase()] : state;
+    if (state) {
+      console.log('State mapping:', state, '->', stateName);
+    }
 
-    // Try structured query first
-    const structuredUrl = `https://nominatim.openstreetmap.org/search?` +
+    // Build structured query URL based on available fields
+    let structuredUrl = `https://nominatim.openstreetmap.org/search?` +
       `street=${encodeURIComponent(address)}&` +
       `city=${encodeURIComponent(city)}&` +
-      `state=${encodeURIComponent(stateName)}&` +
-      `postalcode=${encodeURIComponent(zipCode)}&` +
-      `country=USA&format=json&limit=1`;
+      `country=${encodeURIComponent(country)}&` +
+      `format=json&limit=1`;
+    
+    // Add state if provided
+    if (state && stateName) {
+      structuredUrl += `&state=${encodeURIComponent(stateName)}`;
+    }
+    
+    // Add postal code if provided
+    if (zipCode) {
+      structuredUrl += `&postalcode=${encodeURIComponent(zipCode)}`;
+    }
 
     console.log('Structured query URL:', structuredUrl);
 
@@ -73,7 +84,13 @@ serve(async (req) => {
       console.log('Structured query failed, trying full-text search...');
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const fullAddress = `${address}, ${city}, ${stateName} ${zipCode}, USA`;
+      // Build full address with available fields
+      let fullAddressParts = [address, city];
+      if (state && stateName) fullAddressParts.push(stateName);
+      if (zipCode) fullAddressParts.push(zipCode);
+      fullAddressParts.push(country);
+      
+      const fullAddress = fullAddressParts.join(', ');
       const fullTextUrl = `https://nominatim.openstreetmap.org/search?` +
         `q=${encodeURIComponent(fullAddress)}&format=json&limit=1`;
 
