@@ -114,6 +114,32 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    /* Prevent horizontal scroll */
+    overflow-x: hidden;
+    /* Disable pull-to-refresh on mobile */
+    overscroll-behavior-y: contain;
+  }
+  
+  html {
+    /* Prevent horizontal scroll */
+    overflow-x: hidden;
+    /* Better tap handling */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Fix iOS input zoom - prevents zoom when focusing inputs */
+  @supports (-webkit-touch-callout: none) {
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    input[type="password"],
+    textarea,
+    select {
+      font-size: max(16px, 1rem) !important;
+    }
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -190,6 +216,59 @@ All colors MUST be HSL.
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  
+  /* Mobile-specific optimizations */
+  @media (max-width: 768px) {
+    /* Improve scrolling performance */
+    * {
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Better touch targets for buttons and links */
+    button,
+    a,
+    [role="button"] {
+      min-height: 44px;
+    }
+    
+    /* Prevent text size adjust on orientation change */
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+  }
+
+  /* Better focus styles for accessibility */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+
+  /* Safe area insets for notched devices (iPhone X and newer) */
+  @supports (padding: max(0px)) {
+    body {
+      padding-left: max(0px, env(safe-area-inset-left));
+      padding-right: max(0px, env(safe-area-inset-right));
+    }
+  }
+
+  /* Prevent horizontal scroll on all elements */
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Animation for smooth page transitions */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-in-out;
   }
 }
 

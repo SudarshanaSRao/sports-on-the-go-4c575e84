@@ -69,7 +69,6 @@ export default function HostGame() {
     skillLevel: "",
     gameDate: "",
     timeInput: "12:00",
-    timePeriod: "PM",
     durationMinutes: "",
     maxPlayers: "",
     locationName: "",
@@ -165,28 +164,14 @@ export default function HostGame() {
 
     try {
       // Step 1: Convert time to 24-hour format for database
-      console.log('⏰ [HostGame] Step 1: Converting time format...');
+      console.log('⏰ [HostGame] Step 1: Processing time...');
       console.log('Input time:', formData.timeInput);
       
-      // The native time input already provides time in HH:mm format
-      // We just need to ensure it's in 24-hour format
-      let startTime24 = formData.timeInput;
+      // The native time input already provides time in 24-hour format (HH:mm)
+      // regardless of how it's displayed to the user (12h or 24h based on device settings)
+      const startTime24 = formData.timeInput;
       
-      // If for some reason we still have the timePeriod, handle that
-      if (formData.timePeriod) {
-        const [hours, minutes] = formData.timeInput.split(':');
-        let hour24 = parseInt(hours);
-        
-        if (formData.timePeriod === "PM" && hour24 !== 12) {
-          hour24 += 12;
-        } else if (formData.timePeriod === "AM" && hour24 === 12) {
-          hour24 = 0;
-        }
-        
-        startTime24 = `${hour24.toString().padStart(2, '0')}:${minutes}`;
-      }
-      
-      console.log('✅ [HostGame] Time converted to 24h format:', startTime24);
+      console.log('✅ [HostGame] Time format (24h):', startTime24);
 
       // Step 2: Geocode the address
       console.log('🗺️ [HostGame] Step 2: Starting geocoding...');
@@ -376,27 +361,12 @@ export default function HostGame() {
                       id="timeInput"
                       name="timeInput"
                       value={formData.timeInput}
-                      onChange={(e) => {
-                        // Convert to 12-hour format for display consistency
-                        const time = e.target.value;
-                        if (time) {
-                          const [hours, minutes] = time.split(':');
-                          const hour = parseInt(hours);
-                          const period = hour >= 12 ? 'PM' : 'AM';
-                          const hour12 = hour % 12 || 12;
-                          
-                          setFormData(prev => ({
-                            ...prev,
-                            timeInput: time,
-                            timePeriod: period
-                          }));
-                        }
-                      }}
+                      onChange={handleInputChange}
                       required
                       className="w-full"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Use your device's native time picker
+                      Time shown in your device's format (12/24 hour)
                     </p>
                   </div>
 
