@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
 import SetupUsername from "./pages/SetupUsername";
 import Discover from "./pages/Discover";
 import GameDetails from "./pages/GameDetails";
@@ -35,6 +36,7 @@ const App = () => (
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/auth-callback" element={<AuthCallback />} />
                   <Route path="/setup-username" element={<SetupUsername />} />
                   <Route path="/discover" element={<Discover />} />
                   <Route path="/game/:id" element={<GameDetails />} />

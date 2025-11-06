@@ -32,9 +32,15 @@ const SetupUsername = () => {
         .eq("id", user.id)
         .single();
 
-      // If username already exists, redirect to discover
+      // If username already exists, redirect to return URL or discover
       if (profile?.username) {
-        navigate('/discover');
+        const returnUrl = sessionStorage.getItem('authReturnUrl');
+        if (returnUrl) {
+          sessionStorage.removeItem('authReturnUrl');
+          navigate(returnUrl);
+        } else {
+          navigate('/discover');
+        }
       }
     };
 
@@ -82,7 +88,15 @@ const SetupUsername = () => {
       if (updateError) throw updateError;
 
       toast.success("Username set successfully!");
-      navigate('/discover');
+      
+      // Check for return URL from auth flow
+      const returnUrl = sessionStorage.getItem('authReturnUrl');
+      if (returnUrl) {
+        sessionStorage.removeItem('authReturnUrl');
+        navigate(returnUrl);
+      } else {
+        navigate('/discover');
+      }
     } catch (err: any) {
       console.error("Error setting username:", err);
       toast.error("Failed to set username. Please try again.");

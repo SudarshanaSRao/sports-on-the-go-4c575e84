@@ -109,6 +109,8 @@ const GameDetails = () => {
 
   const handleJoinGame = async () => {
     if (!user) {
+      // Store current game URL before redirecting to auth
+      sessionStorage.setItem('authReturnUrl', window.location.pathname);
       navigate("/auth");
       return;
     }
@@ -309,7 +311,10 @@ const GameDetails = () => {
               {!user && (
                 <Button
                   className="gradient-primary text-white flex-1"
-                  onClick={() => navigate("/auth")}
+                  onClick={() => {
+                    sessionStorage.setItem('authReturnUrl', window.location.pathname);
+                    navigate("/auth");
+                  }}
                 >
                   <UserPlus className="w-4 h-4 mr-2" />
                   Sign In to Join
