@@ -140,6 +140,16 @@ const GameDetails = () => {
     }
   };
 
+  const handleBack = () => {
+    // Check if there's history to go back to
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      // No history, go to discover page
+      navigate('/discover');
+    }
+  };
+
   const openInMaps = () => {
     if (!game) return;
     const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${game.latitude},${game.longitude}`;
@@ -194,7 +204,7 @@ const GameDetails = () => {
         <div className="max-w-4xl mx-auto">
           <Button
             variant="ghost"
-            onClick={() => navigate(-1)}
+            onClick={handleBack}
             className="mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
