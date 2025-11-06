@@ -115,6 +115,26 @@ const GameDetails = () => {
       return;
     }
 
+    // Defensive check: Prevent hosts from joining their own games
+    if (game && user.id === game.host_id) {
+      toast({
+        title: "Cannot join",
+        description: "You cannot join a game you are hosting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if game is full
+    if (game && game.current_players >= game.max_players) {
+      toast({
+        title: "Game is full",
+        description: "This game has reached maximum capacity.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase.from("rsvps").insert({
         game_id: game!.id,
@@ -122,7 +142,18 @@ const GameDetails = () => {
         status: "CONFIRMED",
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error for host trying to join own game
+        if (error.message.includes("policy")) {
+          toast({
+            title: "Cannot join",
+            description: "You cannot join a game you are hosting.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Success!",
@@ -132,9 +163,10 @@ const GameDetails = () => {
       setHasRSVP(true);
       fetchGameDetails();
     } catch (error: any) {
+      console.error("Error joining game:", error);
       toast({
         title: "Error joining game",
-        description: error.message,
+        description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     }
@@ -195,7 +227,10 @@ const GameDetails = () => {
 
   const spotsLeft = game.max_players - game.current_players;
   const isFull = spotsLeft <= 0;
-  const isHost = user?.id === game.host_id;
+  // Strict check to ensure host cannot join their own game
+  const isHost = Boolean(user && game && user.id === game.host_id);
+  // Additional safety: Check if user already has RSVP or is the host
+  const canJoin = Boolean(user && !isHost && !hasRSVP && !isFull);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -331,7 +366,7 @@ const GameDetails = () => {
                 </Button>
               )}
 
-              {user && !isHost && !hasRSVP && !isFull && (
+              {canJoin && (
                 <Button
                   className="gradient-primary text-white flex-1"
                   onClick={handleJoinGame}
