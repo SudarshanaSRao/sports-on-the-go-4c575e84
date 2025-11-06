@@ -14,8 +14,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState, useRef, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
+  const { user } = useAuth();
   const features = [
     {
       icon: MapPin,
@@ -268,16 +270,18 @@ const Index = () => {
                   Discover Games
                 </Link>
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="w-full sm:w-auto text-lg px-8 py-6 border-2 hover:bg-accent hover:text-accent-foreground transition-smooth"
-                asChild
-              >
-                <Link to="/auth">
-                  Get Started For Free
-                </Link>
-              </Button>
+              {!user && (
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="w-full sm:w-auto text-lg px-8 py-6 border-2 hover:bg-accent hover:text-accent-foreground transition-smooth"
+                  asChild
+                >
+                  <Link to="/auth">
+                    Get Started For Free
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>
