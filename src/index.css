@@ -141,6 +141,49 @@ All colors MUST be HSL.
       font-size: max(16px, 1rem) !important;
     }
   }
+
+  /* Fix Android input zoom and Chrome autofill issues */
+  @media screen and (-webkit-min-device-pixel-ratio:0) {
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    input[type="password"],
+    textarea,
+    select {
+      font-size: max(16px, 1rem) !important;
+    }
+    
+    /* Prevent Chrome autofill from changing background color */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 30px hsl(var(--background)) inset !important;
+      -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    }
+  }
+
+  /* Android-specific optimizations */
+  @media (pointer: coarse) {
+    /* Better touch targets for Android */
+    button,
+    a,
+    [role="button"],
+    input[type="submit"],
+    input[type="button"] {
+      min-height: 48px; /* Android recommendation is 48dp */
+      padding: 12px 16px;
+    }
+    
+    /* Larger tap targets for select dropdowns */
+    select {
+      min-height: 48px;
+      padding: 12px;
+    }
+  }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold tracking-tight;
@@ -235,6 +278,21 @@ All colors MUST be HSL.
     /* Prevent text size adjust on orientation change */
     html {
       -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    
+    /* Android: Remove tap delay */
+    a, button, input, textarea {
+      touch-action: manipulation;
+    }
+  }
+
+  /* Android Material Design ripple effect simulation */
+  @media (pointer: coarse) and (hover: none) {
+    button:active,
+    [role="button"]:active {
+      transform: scale(0.98);
+      transition: transform 0.1s ease;
     }
   }
 
