@@ -12,6 +12,27 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { getAllSportsDisplayNames, toDbSportValue } from "@/utils/sportsUtils";
+import { z } from "zod";
+
+// Field validation limits
+const FIELD_LIMITS = {
+  description: 1000,
+  equipmentRequirements: 500,
+  gameRules: 500,
+};
+
+// Validation schema for text fields
+const textFieldSchema = z.object({
+  description: z.string().trim().max(FIELD_LIMITS.description, {
+    message: `Description must be ${FIELD_LIMITS.description} characters or less`,
+  }).optional(),
+  equipmentRequirements: z.string().trim().max(FIELD_LIMITS.equipmentRequirements, {
+    message: `Equipment requirements must be ${FIELD_LIMITS.equipmentRequirements} characters or less`,
+  }).optional(),
+  gameRules: z.string().trim().max(FIELD_LIMITS.gameRules, {
+    message: `Game rules must be ${FIELD_LIMITS.gameRules} characters or less`,
+  }).optional(),
+});
 
 const SPORTS = getAllSportsDisplayNames();
 
@@ -63,6 +84,11 @@ export default function HostGame() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<{
+    description?: string;
+    equipmentRequirements?: string;
+    gameRules?: string;
+  }>({});
 
   const [formData, setFormData] = useState({
     sport: "",
@@ -85,6 +111,27 @@ export default function HostGame() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Real-time validation for text fields
+    if (name === 'description' || name === 'equipmentRequirements' || name === 'gameRules') {
+      try {
+        const fieldLimit = FIELD_LIMITS[name as keyof typeof FIELD_LIMITS];
+        if (value.trim().length > fieldLimit) {
+          setValidationErrors((prev) => ({
+            ...prev,
+            [name]: `Must be ${fieldLimit} characters or less (current: ${value.trim().length})`,
+          }));
+        } else {
+          setValidationErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors[name as keyof typeof validationErrors];
+            return newErrors;
+          });
+        }
+      } catch (error) {
+        console.error('Validation error:', error);
+      }
+    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -146,6 +193,31 @@ export default function HostGame() {
 
     console.log('✅ [HostGame] User authenticated:', user.id);
 
+    // Validate text fields before submission
+    try {
+      textFieldSchema.parse({
+        description: formData.description,
+        equipmentRequirements: formData.equipmentRequirements,
+        gameRules: formData.gameRules,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: typeof validationErrors = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            errors[err.path[0] as keyof typeof validationErrors] = err.message;
+          }
+        });
+        setValidationErrors(errors);
+        toast({
+          title: "Validation Error",
+          description: "Please check the form for errors.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     // Validate that the game date is not in the past
     const selectedDate = new Date(formData.gameDate);
     const today = new Date();
@@ -193,17 +265,17 @@ export default function HostGame() {
         start_time: startTime24,
         duration_minutes: parseInt(formData.durationMinutes),
         max_players: parseInt(formData.maxPlayers),
-        location_name: formData.locationName,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state || null,
-        zip_code: formData.zipCode || null,
+        location_name: formData.locationName.trim(),
+        address: formData.address.trim(),
+        city: formData.city.trim(),
+        state: formData.state?.trim() || null,
+        zip_code: formData.zipCode?.trim() || null,
         country: formData.country,
         latitude,
         longitude,
-        description: formData.description || null,
-        equipment_requirements: formData.equipmentRequirements || null,
-        game_rules: formData.gameRules || null,
+        description: formData.description.trim() || null,
+        equipment_requirements: formData.equipmentRequirements.trim() || null,
+        game_rules: formData.gameRules.trim() || null,
         status: "UPCOMING" as any,
         visibility: "PUBLIC" as any,
         current_players: 1,
@@ -440,29 +512,89 @@ export default function HostGame() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="description">Description</Label>
-                    <Textarea id="description" name="description" placeholder="Tell players about this game..." value={formData.description} onChange={handleInputChange} rows={3} />
+                    <Textarea 
+                      id="description" 
+                      name="description" 
+                      placeholder="Tell players about this game..." 
+                      value={formData.description} 
+                      onChange={handleInputChange} 
+                      rows={3}
+                      maxLength={FIELD_LIMITS.description}
+                      className={validationErrors.description ? "border-destructive" : ""}
+                    />
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs text-muted-foreground">
+                        {formData.description.trim().length}/{FIELD_LIMITS.description} characters
+                      </p>
+                      {validationErrors.description && (
+                        <p className="text-xs text-destructive">{validationErrors.description}</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="equipmentRequirements">Equipment Requirements</Label>
-                    <Textarea id="equipmentRequirements" name="equipmentRequirements" placeholder="What should players bring?" value={formData.equipmentRequirements} onChange={handleInputChange} rows={2} />
+                    <Textarea 
+                      id="equipmentRequirements" 
+                      name="equipmentRequirements" 
+                      placeholder="What should players bring? (e.g., cleats, water bottle, shin guards)" 
+                      value={formData.equipmentRequirements} 
+                      onChange={handleInputChange} 
+                      rows={2}
+                      maxLength={FIELD_LIMITS.equipmentRequirements}
+                      className={validationErrors.equipmentRequirements ? "border-destructive" : ""}
+                    />
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs text-muted-foreground">
+                        {formData.equipmentRequirements.trim().length}/{FIELD_LIMITS.equipmentRequirements} characters
+                      </p>
+                      {validationErrors.equipmentRequirements && (
+                        <p className="text-xs text-destructive">{validationErrors.equipmentRequirements}</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="gameRules">Game Rules</Label>
-                    <Textarea id="gameRules" name="gameRules" placeholder="Any specific rules or format?" value={formData.gameRules} onChange={handleInputChange} rows={2} />
+                    <Textarea 
+                      id="gameRules" 
+                      name="gameRules" 
+                      placeholder="Any specific rules or format? (e.g., no slide tackles, winner stays on)" 
+                      value={formData.gameRules} 
+                      onChange={handleInputChange} 
+                      rows={2}
+                      maxLength={FIELD_LIMITS.gameRules}
+                      className={validationErrors.gameRules ? "border-destructive" : ""}
+                    />
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs text-muted-foreground">
+                        {formData.gameRules.trim().length}/{FIELD_LIMITS.gameRules} characters
+                      </p>
+                      {validationErrors.gameRules && (
+                        <p className="text-xs text-destructive">{validationErrors.gameRules}</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 {/* Submit Buttons */}
                 <div className="flex gap-4 pt-4">
-                  <Button type="submit" disabled={loading} className="flex-1">
+                  <Button 
+                    type="submit" 
+                    disabled={loading || Object.keys(validationErrors).length > 0} 
+                    className="flex-1"
+                  >
                     {loading ? "Creating..." : "Create Game"}
                   </Button>
                   <Button type="button" variant="outline" onClick={() => navigate("/discover")} disabled={loading}>
                     Cancel
                   </Button>
                 </div>
+                {Object.keys(validationErrors).length > 0 && (
+                  <p className="text-sm text-destructive text-center">
+                    Please fix validation errors before submitting
+                  </p>
+                )}
               </form>
             </CardContent>
           </Card>
