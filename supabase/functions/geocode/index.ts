@@ -25,12 +25,18 @@ serve(async (req) => {
   }
 
   try {
-    const { address, city, state, zipCode, country } = await req.json();
+    const requestBody = await req.json();
+    console.log('📥 [Geocode] Full request body received:', JSON.stringify(requestBody));
     
-    console.log('Geocoding request:', { address, city, state, zipCode, country });
+    const { address, city, state, zipCode, country } = requestBody;
+    console.log('📍 [Geocode] Parsed fields:', { address, city, state, zipCode, country });
 
-    if (!address || !city || !country) {
-      throw new Error('Missing required fields: address, city, country');
+    if (!address || !city) {
+      throw new Error('Missing required fields: address, city');
+    }
+    
+    if (!country) {
+      throw new Error('Missing required field: country. Please select a country from the dropdown.');
     }
 
     // Get full state name for US addresses
