@@ -113,12 +113,14 @@ serve(async (req) => {
     }
 
     if (!data || data.length === 0) {
+      console.error('❌ No geocoding results found');
       return new Response(
         JSON.stringify({
-          error: 'Could not find coordinates for this address. Please verify the address is correct.'
+          error: 'Could not find coordinates for this address. Please verify the address is correct.',
+          success: false
         }),
         {
-          status: 404,
+          status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
@@ -127,9 +129,10 @@ serve(async (req) => {
     const result = {
       latitude: parseFloat(data[0].lat),
       longitude: parseFloat(data[0].lon),
+      success: true
     };
 
-    console.log('Geocoding successful:', result);
+    console.log('✅ Geocoding successful:', result);
 
     return new Response(
       JSON.stringify(result),
@@ -138,14 +141,17 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Geocoding error:', error);
+    console.error('❌ Geocoding error:', error);
+    console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
     
     return new Response(
       JSON.stringify({
-        error: error instanceof Error ? error.message : 'Failed to geocode address'
+        error: error instanceof Error ? error.message : 'Failed to geocode address',
+        success: false
       }),
       {
-        status: 500,
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

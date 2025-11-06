@@ -75,14 +75,16 @@ export default function HostGame() {
         body: { address, city, state, zipCode, country }
       });
 
+      console.log('📍 [Geocoding] Response received:', { data, error });
+
       if (error) {
         console.error('❌ [Geocoding] Edge function error:', error);
         throw new Error(error.message || 'Geocoding service error');
       }
 
-      if (data.error) {
-        console.error('❌ [Geocoding] API error:', data.error);
-        throw new Error(data.error);
+      if (!data || data.error || data.success === false) {
+        console.error('❌ [Geocoding] API error:', data?.error);
+        throw new Error(data?.error || 'Failed to geocode address');
       }
 
       console.log('✅ [Geocoding] Success:', data);
