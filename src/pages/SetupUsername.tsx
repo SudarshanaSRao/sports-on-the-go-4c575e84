@@ -13,6 +13,7 @@ const SetupUsername = () => {
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isChecking, setIsChecking] = useState(true); // Add checking state
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -26,21 +27,30 @@ const SetupUsername = () => {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("username")
-        .eq("id", user.id)
-        .single();
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", user.id)
+          .single();
 
-      // If username already exists, redirect to return URL or discover
-      if (profile?.username) {
-        const returnUrl = sessionStorage.getItem('authReturnUrl');
-        if (returnUrl) {
-          sessionStorage.removeItem('authReturnUrl');
-          navigate(returnUrl);
+        // If username already exists, redirect to return URL or discover
+        if (profile?.username) {
+          const returnUrl = sessionStorage.getItem('authReturnUrl');
+          if (returnUrl) {
+            sessionStorage.removeItem('authReturnUrl');
+            navigate(returnUrl, { replace: true });
+          } else {
+            navigate('/discover', { replace: true });
+          }
         } else {
-          navigate('/discover');
+          // No username exists, show the form
+          setIsChecking(false);
         }
+      } catch (error) {
+        console.error('Error checking username:', error);
+        // On error, show the form anyway
+        setIsChecking(false);
       }
     };
 
@@ -104,6 +114,18 @@ const SetupUsername = () => {
       setIsLoading(false);
     }
   };
+
+  // Show loading while checking username status
+  if (loading || isChecking) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex items-center justify-center px-4 py-12">
