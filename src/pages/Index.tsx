@@ -275,7 +275,7 @@ const Index = () => {
                 asChild
               >
                 <Link to="/auth">
-                  Get Started Free
+                  Get Started For Free
                 </Link>
               </Button>
             </div>
