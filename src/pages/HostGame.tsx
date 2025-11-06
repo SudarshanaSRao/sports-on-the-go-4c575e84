@@ -17,6 +17,34 @@ const SPORTS = getAllSportsDisplayNames();
 
 const SKILL_LEVELS = ["BEGINNER", "INTERMEDIATE", "ADVANCED", "ALL_LEVELS"];
 
+const COUNTRIES = [
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Armenia", "Australia", 
+  "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium",
+  "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei",
+  "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde",
+  "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica",
+  "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", "Djibouti", "Dominica", "Dominican Republic",
+  "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji",
+  "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada",
+  "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland",
+  "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan",
+  "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho",
+  "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia",
+  "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia",
+  "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia",
+  "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea",
+  "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea",
+  "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda",
+  "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino",
+  "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone",
+  "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea",
+  "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria",
+  "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago",
+  "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates",
+  "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela",
+  "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+];
+
 const US_STATE_MAP = {
   AL: "Alabama", AK: "Alaska", AZ: "Arizona", AR: "Arkansas", CA: "California",
   CO: "Colorado", CT: "Connecticut", DE: "Delaware", FL: "Florida", GA: "Georgia",
@@ -383,34 +411,12 @@ export default function HostGame() {
                       <SelectTrigger>
                         <SelectValue placeholder="Select a country" />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="United States">United States</SelectItem>
-                        <SelectItem value="Canada">Canada</SelectItem>
-                        <SelectItem value="United Kingdom">United Kingdom</SelectItem>
-                        <SelectItem value="India">India</SelectItem>
-                        <SelectItem value="Australia">Australia</SelectItem>
-                        <SelectItem value="Germany">Germany</SelectItem>
-                        <SelectItem value="France">France</SelectItem>
-                        <SelectItem value="Spain">Spain</SelectItem>
-                        <SelectItem value="Italy">Italy</SelectItem>
-                        <SelectItem value="Brazil">Brazil</SelectItem>
-                        <SelectItem value="Mexico">Mexico</SelectItem>
-                        <SelectItem value="Japan">Japan</SelectItem>
-                        <SelectItem value="China">China</SelectItem>
-                        <SelectItem value="South Korea">South Korea</SelectItem>
-                        <SelectItem value="Netherlands">Netherlands</SelectItem>
-                        <SelectItem value="Belgium">Belgium</SelectItem>
-                        <SelectItem value="Switzerland">Switzerland</SelectItem>
-                        <SelectItem value="Austria">Austria</SelectItem>
-                        <SelectItem value="Sweden">Sweden</SelectItem>
-                        <SelectItem value="Norway">Norway</SelectItem>
-                        <SelectItem value="Denmark">Denmark</SelectItem>
-                        <SelectItem value="Finland">Finland</SelectItem>
-                        <SelectItem value="Ireland">Ireland</SelectItem>
-                        <SelectItem value="New Zealand">New Zealand</SelectItem>
-                        <SelectItem value="Singapore">Singapore</SelectItem>
-                        <SelectItem value="United Arab Emirates">United Arab Emirates</SelectItem>
-                        <SelectItem value="South Africa">South Africa</SelectItem>
+                      <SelectContent className="max-h-[300px]">
+                        {COUNTRIES.map((country) => (
+                          <SelectItem key={country} value={country}>
+                            {country}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -432,8 +438,16 @@ export default function HostGame() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="state">State/Province</Label>
-                      <Input type="text" id="state" name="state" placeholder="e.g., California, Maharashtra" value={formData.state} onChange={handleInputChange} />
+                      <Label htmlFor="state">State/Province/Region</Label>
+                      <Input 
+                        type="text" 
+                        id="state" 
+                        name="state" 
+                        placeholder="e.g., California, Ontario, Karnataka" 
+                        value={formData.state} 
+                        onChange={handleInputChange}
+                      />
+                      <p className="text-xs text-muted-foreground">Optional - Enter state, province, or region</p>
                     </div>
 
                     <div className="space-y-2">

@@ -18,6 +18,13 @@ const US_STATE_MAP: Record<string, string> = {
   VA: "Virginia", WA: "Washington", WV: "West Virginia", WI: "Wisconsin", WY: "Wyoming",
 };
 
+const CANADIAN_PROVINCES: Record<string, string> = {
+  AB: "Alberta", BC: "British Columbia", MB: "Manitoba", NB: "New Brunswick",
+  NL: "Newfoundland and Labrador", NS: "Nova Scotia", NT: "Northwest Territories",
+  NU: "Nunavut", ON: "Ontario", PE: "Prince Edward Island", QC: "Quebec",
+  SK: "Saskatchewan", YT: "Yukon"
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -39,10 +46,16 @@ serve(async (req) => {
       throw new Error('Missing required field: country. Please select a country from the dropdown.');
     }
 
-    // Get full state name for US addresses
-    const stateName = state && US_STATE_MAP[state.toUpperCase()] ? US_STATE_MAP[state.toUpperCase()] : state;
-    if (state) {
-      console.log('State mapping:', state, '->', stateName);
+    // Get full state/province name based on country
+    let stateName = state;
+    if (state && country === 'United States') {
+      stateName = US_STATE_MAP[state.toUpperCase()] || state;
+      console.log('🇺🇸 US State mapping:', state, '->', stateName);
+    } else if (state && country === 'Canada') {
+      stateName = CANADIAN_PROVINCES[state.toUpperCase()] || state;
+      console.log('🇨🇦 Canadian Province mapping:', state, '->', stateName);
+    } else if (state) {
+      console.log('🌍 International state/region:', state);
     }
 
     // Build structured query URL based on available fields
