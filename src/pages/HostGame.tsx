@@ -378,16 +378,6 @@ export default function HostGame() {
                 {/* Location */}
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="locationName">Location Name *</Label>
-                    <Input type="text" id="locationName" name="locationName" placeholder="Enter a location" value={formData.locationName} onChange={handleInputChange} required />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Street Address *</Label>
-                    <Input type="text" id="address" name="address" placeholder="123 Main St" value={formData.address} onChange={handleInputChange} required />
-                  </div>
-
-                  <div className="space-y-2">
                     <Label htmlFor="country">Country *</Label>
                     <Select name="country" value={formData.country} onValueChange={(value) => handleSelectChange("country", value)} required>
                       <SelectTrigger>
@@ -423,6 +413,16 @@ export default function HostGame() {
                         <SelectItem value="South Africa">South Africa</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="locationName">Location Name *</Label>
+                    <Input type="text" id="locationName" name="locationName" placeholder="Enter a location" value={formData.locationName} onChange={handleInputChange} required />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Street Address *</Label>
+                    <Input type="text" id="address" name="address" placeholder="123 Main St" value={formData.address} onChange={handleInputChange} required />
                   </div>
 
                   <div className="grid md:grid-cols-3 gap-4">
