@@ -164,20 +164,28 @@ export default function HostGame() {
     setLoading(true);
 
     try {
-      // Step 1: Convert 12-hour time to 24-hour format for database
+      // Step 1: Convert time to 24-hour format for database
       console.log('⏰ [HostGame] Step 1: Converting time format...');
-      console.log('Input time:', formData.timeInput, formData.timePeriod);
+      console.log('Input time:', formData.timeInput);
       
-      const [hours, minutes] = formData.timeInput.split(':');
-      let hour24 = parseInt(hours);
+      // The native time input already provides time in HH:mm format
+      // We just need to ensure it's in 24-hour format
+      let startTime24 = formData.timeInput;
       
-      if (formData.timePeriod === "PM" && hour24 !== 12) {
-        hour24 += 12;
-      } else if (formData.timePeriod === "AM" && hour24 === 12) {
-        hour24 = 0;
+      // If for some reason we still have the timePeriod, handle that
+      if (formData.timePeriod) {
+        const [hours, minutes] = formData.timeInput.split(':');
+        let hour24 = parseInt(hours);
+        
+        if (formData.timePeriod === "PM" && hour24 !== 12) {
+          hour24 += 12;
+        } else if (formData.timePeriod === "AM" && hour24 === 12) {
+          hour24 = 0;
+        }
+        
+        startTime24 = `${hour24.toString().padStart(2, '0')}:${minutes}`;
       }
       
-      const startTime24 = `${hour24.toString().padStart(2, '0')}:${minutes}`;
       console.log('✅ [HostGame] Time converted to 24h format:', startTime24);
 
       // Step 2: Geocode the address
@@ -363,32 +371,33 @@ export default function HostGame() {
 
                   <div className="space-y-2">
                     <Label htmlFor="timeInput">Start Time *</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="time"
-                        id="timeInput"
-                        name="timeInput"
-                        value={formData.timeInput}
-                        onChange={handleInputChange}
-                        placeholder="00:00"
-                        required
-                        className="flex-1"
-                      />
-                      <Select
-                        name="timePeriod"
-                        value={formData.timePeriod}
-                        onValueChange={(value) => handleSelectChange("timePeriod", value)}
-                        required
-                      >
-                        <SelectTrigger className="w-24">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="AM">AM</SelectItem>
-                          <SelectItem value="PM">PM</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <Input
+                      type="time"
+                      id="timeInput"
+                      name="timeInput"
+                      value={formData.timeInput}
+                      onChange={(e) => {
+                        // Convert to 12-hour format for display consistency
+                        const time = e.target.value;
+                        if (time) {
+                          const [hours, minutes] = time.split(':');
+                          const hour = parseInt(hours);
+                          const period = hour >= 12 ? 'PM' : 'AM';
+                          const hour12 = hour % 12 || 12;
+                          
+                          setFormData(prev => ({
+                            ...prev,
+                            timeInput: time,
+                            timePeriod: period
+                          }));
+                        }
+                      }}
+                      required
+                      className="w-full"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Use your device's native time picker
+                    </p>
                   </div>
 
                   <div className="space-y-2">

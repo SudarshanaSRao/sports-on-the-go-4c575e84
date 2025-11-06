@@ -601,10 +601,44 @@ const MyGames = () => {
     }
   };
 
-  const handleMessageHost = (gameId: string, hostName: string) => {
-    toast.info(`Messaging feature coming soon!`);
-    // TODO: Open messaging interface or navigate to chat
-    // navigate(`/messages/${gameId}`);
+  const handleMessageHost = async (gameId: string, hostName: string) => {
+    if (!user) return;
+    
+    try {
+      // Get the host's user ID from the game
+      const { data: gameData, error: gameError } = await supabase
+        .from('games')
+        .select('host_id, profiles:host_id(username, first_name, last_name)')
+        .eq('id', gameId)
+        .single();
+
+      if (gameError) throw gameError;
+
+      const hostId = gameData.host_id;
+      
+      // Get or create a friendship/conversation
+      const { data: friendshipData } = await supabase
+        .from('friendships')
+        .select('*')
+        .or(`and(requester_id.eq.${user.id},addressee_id.eq.${hostId}),and(requester_id.eq.${hostId},addressee_id.eq.${user.id})`)
+        .maybeSingle();
+
+      // For now, show WhatsApp contact option since messaging isn't built yet
+      const message = encodeURIComponent(`Hi ${hostName}! I'm interested in your game (ID: ${gameId.substring(0, 8)}). Can we discuss the details?`);
+      
+      // Create a dialog with options
+      const shouldOpenWhatsApp = confirm(
+        `Messaging feature is coming soon!\n\nWould you like to contact ${hostName} via WhatsApp for now?\n\nClick OK to open WhatsApp, or Cancel to go back.`
+      );
+      
+      if (shouldOpenWhatsApp) {
+        // Open WhatsApp
+        window.open(`https://wa.me/?text=${message}`, '_blank');
+      }
+    } catch (error) {
+      console.error('Error initiating message:', error);
+      toast.error('Failed to start conversation');
+    }
   };
 
   const handleLeaveGame = async (gameId: string, gameName: string) => {
