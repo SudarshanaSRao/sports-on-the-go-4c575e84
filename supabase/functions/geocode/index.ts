@@ -98,7 +98,6 @@ serve(async (req) => {
     let data = await response.json();
     console.log('Structured query response:', data);
 
-    // If structured query fails, try full-text search
     if (!data || data.length === 0) {
       console.log('Structured query failed, trying full-text search...');
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -129,6 +128,41 @@ serve(async (req) => {
 
       data = await response.json();
       console.log('Full-text query response:', data);
+    }
+
+    // Fallback 2: Try just city, state/region, and country (without street address)
+    if (!data || data.length === 0) {
+      console.log('Full-text search failed, trying city-level search...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      let cityQueryParts = [city];
+      if (state && stateName) cityQueryParts.push(stateName);
+      cityQueryParts.push(country);
+      
+      const cityQuery = cityQueryParts.join(', ');
+      const cityUrl = `https://nominatim.openstreetmap.org/search?` +
+        `q=${encodeURIComponent(cityQuery)}&format=json&limit=1`;
+
+      console.log('City-level query URL:', cityUrl);
+
+      response = await fetch(cityUrl, {
+        headers: {
+          'User-Agent': 'SquadUp/1.0 (support@squadup.app)',
+          'Accept': 'application/json',
+          'Referer': 'https://squadup.app'
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Geocoding service error: ${response.status}`);
+      }
+
+      data = await response.json();
+      console.log('City-level query response:', data);
+      
+      if (data && data.length > 0) {
+        console.log('⚠️ Using city-level coordinates as fallback (street address not found)');
+      }
     }
 
     if (!data || data.length === 0) {
