@@ -420,14 +420,22 @@ export default function HostGame() {
                 </div>
 
                 {/* Date & Time */}
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div className="space-y-2 min-w-0">
-                    <Label htmlFor="gameDate">Date *</Label>
-                    <Input type="date" id="gameDate" name="gameDate" value={formData.gameDate} onChange={handleInputChange} required className="w-full" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="gameDate" className="text-sm">Date *</Label>
+                    <Input 
+                      type="date" 
+                      id="gameDate" 
+                      name="gameDate" 
+                      value={formData.gameDate} 
+                      onChange={handleInputChange} 
+                      required 
+                      className="w-full text-sm px-2 py-2" 
+                    />
                   </div>
 
-                  <div className="space-y-2 min-w-0">
-                    <Label htmlFor="timeInput">Start Time *</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="timeInput" className="text-sm">Start Time *</Label>
                     <Input
                       type="time"
                       id="timeInput"
@@ -435,16 +443,26 @@ export default function HostGame() {
                       value={formData.timeInput}
                       onChange={handleInputChange}
                       required
-                      className="w-full"
+                      className="w-full text-sm px-2 py-2"
                     />
                     <p className="text-xs text-muted-foreground">
                       Time shown in your device's format (12/24 hour)
                     </p>
                   </div>
 
-                  <div className="space-y-2 min-w-0">
-                    <Label htmlFor="durationMinutes">Duration (minutes) *</Label>
-                    <Input type="number" id="durationMinutes" name="durationMinutes" placeholder="0" value={formData.durationMinutes} onChange={handleInputChange} min="0" required className="w-full" />
+                  <div className="space-y-2">
+                    <Label htmlFor="durationMinutes" className="text-sm">Duration (minutes) *</Label>
+                    <Input 
+                      type="number" 
+                      id="durationMinutes" 
+                      name="durationMinutes" 
+                      placeholder="0" 
+                      value={formData.durationMinutes} 
+                      onChange={handleInputChange} 
+                      min="0" 
+                      required 
+                      className="w-full text-sm px-2 py-2" 
+                    />
                   </div>
                 </div>
 
