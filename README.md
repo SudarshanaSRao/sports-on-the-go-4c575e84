@@ -74,6 +74,84 @@ Before you begin, ensure you have the following installed:
    
    Navigate to `http://localhost:5173` to see the application running.
 
+## 🏗️ Architecture
+
+The following diagram illustrates the data flow and system architecture of SquadUp:
+
+<lov-mermaid>
+graph TB
+    subgraph "Client Layer"
+        A[React Frontend<br/>Vite + TypeScript]
+        B[React Router]
+        C[React Query<br/>State Management]
+        D[Leaflet Maps]
+    end
+    
+    subgraph "Authentication"
+        E[Auth Context]
+        F[Lovable Cloud Auth<br/>Email + Google OAuth]
+    end
+    
+    subgraph "Edge Functions"
+        G[Geocode Function<br/>Address → Coordinates]
+        H[Content Moderation<br/>User-Generated Content]
+    end
+    
+    subgraph "Database Layer"
+        I[(PostgreSQL Database)]
+        J[Row Level Security<br/>RLS Policies]
+    end
+    
+    subgraph "Core Tables"
+        K[profiles]
+        L[games]
+        M[rsvps]
+        N[friendships]
+        O[communities]
+        P[reviews]
+    end
+    
+    A --> B
+    A --> C
+    A --> D
+    B --> E
+    C --> F
+    
+    E --> F
+    F --> I
+    
+    A --> G
+    A --> H
+    G --> I
+    H --> I
+    
+    I --> J
+    J --> K
+    J --> L
+    J --> M
+    J --> N
+    J --> O
+    J --> P
+    
+    L -.Auto-create.-> O
+    M -.Update count.-> L
+    P -.Update rating.-> K
+    
+    style A fill:#3b82f6,stroke:#1e40af,color:#fff
+    style F fill:#10b981,stroke:#059669,color:#fff
+    style I fill:#8b5cf6,stroke:#6d28d9,color:#fff
+    style G fill:#f59e0b,stroke:#d97706,color:#fff
+    style H fill:#f59e0b,stroke:#d97706,color:#fff
+</lov-mermaid>
+
+### Data Flow
+1. **User Authentication**: Users sign up/login via Lovable Cloud Auth (email or Google)
+2. **Game Creation**: Host creates game → Geocode function validates address → Game stored in database
+3. **Game Discovery**: Users browse games → Map displays locations → Filter by sport/skill level
+4. **RSVP System**: User joins game → RSVP recorded → Player count updated → Community auto-created
+5. **Social Features**: Friend requests → Accepted friendships → Enhanced game visibility
+6. **Review System**: Post-game reviews → Ratings calculated → User profiles updated
+
 ## 🛠️ Tech Stack
 
 ### Frontend
