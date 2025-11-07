@@ -95,6 +95,10 @@ src/
 │   ├── Navbar.tsx            # Navigation component
 │   ├── GameMap.tsx           # Map visualization
 │   ├── FriendCard.tsx        # Friend display
+│   ├── ShareGameButton.tsx   # Social sharing
+│   ├── IOSTimePicker.tsx     # iOS-style time picker
+│   ├── ThemeToggle.tsx       # Dark/light mode toggle
+│   ├── SEO.tsx               # SEO meta tags
 │   └── ...                   # Feature-specific components
 │
 ├── pages/                     # Route components

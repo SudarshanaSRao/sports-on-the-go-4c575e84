@@ -42,8 +42,8 @@ Before you begin, ensure you have the following installed:
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repository-url>
-   cd squadup
+   git clone https://github.com/SudarshanaSRao/sports-on-the-go-4c575e84.git
+   cd sports-on-the-go-4c575e84
    ```
 
 2. **Install dependencies**
@@ -185,8 +185,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 If you encounter any issues or have questions:
-- Open an [issue](https://github.com/yourusername/squadup/issues)
-- Check existing [discussions](https://github.com/yourusername/squadup/discussions)
+- Open an [issue](https://github.com/SudarshanaSRao/sports-on-the-go-4c575e84/issues)
+- Check existing [discussions](https://github.com/SudarshanaSRao/sports-on-the-go-4c575e84/discussions)
 
 ## 🗺️ Roadmap
 

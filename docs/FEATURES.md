@@ -79,6 +79,13 @@ Comprehensive guide to all SquadUp features for users and developers.
 - **Host Details**: View host profile and ratings
 - **Participant List**: See who else is joining
 - **Join/Leave Options**: Easy one-click join or leave
+- **Social Sharing**: Share games via:
+  - WhatsApp
+  - Facebook
+  - Twitter
+  - Email
+  - Copy link to clipboard
+  - Native share (mobile devices)
 
 ## Game Management
 
@@ -297,9 +304,11 @@ Comprehensive guide to all SquadUp features for users and developers.
 
 #### Inclusive Design
 - **Font Scaling**: Respects user font preferences
-- **Dark Mode**: Automatic theme detection
+- **Dark Mode**: System-based theme detection with manual toggle
+- **Theme Persistence**: Theme preference saved across sessions
 - **Reduced Motion**: Respects motion preferences
 - **Touch Targets**: Minimum 44px touch areas
+- **iOS-Optimized Controls**: Native iOS-style time pickers for better UX
 
 ### SEO
 
@@ -326,7 +335,7 @@ Comprehensive guide to all SquadUp features for users and developers.
 - [ ] Multi-language support
 
 ### Feature Requests
-Have an idea? [Submit a feature request](https://github.com/yourusername/squadup/issues/new?template=feature_request.md)
+Have an idea? [Submit a feature request](https://github.com/SudarshanaSRao/sports-on-the-go-4c575e84/issues/new)
 
 ---
 
