@@ -76,73 +76,25 @@ Before you begin, ensure you have the following installed:
 
 ## 🏗️ Architecture
 
-The following diagram illustrates the data flow and system architecture of SquadUp:
+The following diagram illustrates the system architecture and data flow of SquadUp:
 
-<lov-mermaid>
-graph TB
-    subgraph "Client Layer"
-        A[React Frontend<br/>Vite + TypeScript]
-        B[React Router]
-        C[React Query<br/>State Management]
-        D[Leaflet Maps]
-    end
-    
-    subgraph "Authentication"
-        E[Auth Context]
-        F[Lovable Cloud Auth<br/>Email + Google OAuth]
-    end
-    
-    subgraph "Edge Functions"
-        G[Geocode Function<br/>Address → Coordinates]
-        H[Content Moderation<br/>User-Generated Content]
-    end
-    
-    subgraph "Database Layer"
-        I[(PostgreSQL Database)]
-        J[Row Level Security<br/>RLS Policies]
-    end
-    
-    subgraph "Core Tables"
-        K[profiles]
-        L[games]
-        M[rsvps]
-        N[friendships]
-        O[communities]
-        P[reviews]
-    end
-    
-    A --> B
-    A --> C
-    A --> D
-    B --> E
-    C --> F
-    
-    E --> F
-    F --> I
-    
-    A --> G
-    A --> H
-    G --> I
-    H --> I
-    
-    I --> J
-    J --> K
-    J --> L
-    J --> M
-    J --> N
-    J --> O
-    J --> P
-    
-    L -.Auto-create.-> O
-    M -.Update count.-> L
-    P -.Update rating.-> K
-    
-    style A fill:#3b82f6,stroke:#1e40af,color:#fff
-    style F fill:#10b981,stroke:#059669,color:#fff
-    style I fill:#8b5cf6,stroke:#6d28d9,color:#fff
-    style G fill:#f59e0b,stroke:#d97706,color:#fff
-    style H fill:#f59e0b,stroke:#d97706,color:#fff
-</lov-mermaid>
+![SquadUp Architecture](docs/architecture-diagram.png)
+
+### Architecture Overview
+
+SquadUp follows a modern client-server architecture with the following key components:
+
+- **Client Side**: React frontend built with Vite and TypeScript, handling user interactions and UI rendering
+- **Authentication Context**: Manages user authentication state with email and Google OAuth support
+- **Content Moderation**: Edge function that filters user-generated content for safety
+- **Geocode Function**: Edge function that converts addresses to coordinates for map display
+- **Row Level Security**: PostgreSQL database with RLS policies ensuring secure data access
+- **Core Database Tables**:
+  - **profiles**: Stores user profile information
+  - **games**: Stores game details and statistics
+  - **rsvps**: Manages event attendance
+  - **communities**: Auto-created for each game
+  - **reviews**: Player ratings and feedback
 
 ### Data Flow
 1. **User Authentication**: Users sign up/login via Lovable Cloud Auth (email or Google)
