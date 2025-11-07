@@ -542,7 +542,7 @@ const Index = () => {
               <div className="text-sm text-muted-foreground text-center md:text-right flex items-center gap-2 justify-center md:justify-end">
                 © 2025 SquadUp. Open-source & free to use.
                 <a 
-                  href="https://github.com/yourusername/squadup" 
+                  href="https://github.com/SudarshanaSRao/sports-on-the-go-4c575e84" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-smooth"
