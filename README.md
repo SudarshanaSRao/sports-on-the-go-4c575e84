@@ -7,6 +7,8 @@ SquadUp is a community-driven platform that connects athletes and sports enthusi
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Made with Lovable](https://img.shields.io/badge/Made%20with-Lovable-ff69b4)](https://lovable.dev)
 
+Find more information about this website [here](https://sudarshanasrao.github.io/portfolio/portfolio-00/)
+
 ## 🌟 Features
 
 ### For Players
