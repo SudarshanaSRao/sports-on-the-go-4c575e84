@@ -421,12 +421,12 @@ export default function HostGame() {
 
                 {/* Date & Time */}
                 <div className="grid md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
+                  <div className="space-y-2 min-w-0">
                     <Label htmlFor="gameDate">Date *</Label>
-                    <Input type="date" id="gameDate" name="gameDate" value={formData.gameDate} onChange={handleInputChange} required />
+                    <Input type="date" id="gameDate" name="gameDate" value={formData.gameDate} onChange={handleInputChange} required className="w-full" />
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 min-w-0">
                     <Label htmlFor="timeInput">Start Time *</Label>
                     <Input
                       type="time"
@@ -442,9 +442,9 @@ export default function HostGame() {
                     </p>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2 min-w-0">
                     <Label htmlFor="durationMinutes">Duration (minutes) *</Label>
-                    <Input type="number" id="durationMinutes" name="durationMinutes" placeholder="0" value={formData.durationMinutes} onChange={handleInputChange} min="0" required />
+                    <Input type="number" id="durationMinutes" name="durationMinutes" placeholder="0" value={formData.durationMinutes} onChange={handleInputChange} min="0" required className="w-full" />
                   </div>
                 </div>
 
