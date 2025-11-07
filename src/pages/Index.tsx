@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { SEO } from "@/components/SEO";
-import { MapPin, Users, Star, Calendar, Trophy, Shield, Zap, MessageSquare, Medal, CalendarCheck, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, Users, Star, Calendar, Trophy, Shield, Zap, MessageSquare, Medal, CalendarCheck, ChevronLeft, ChevronRight, Github } from "lucide-react";
 import heroImage from "@/assets/hero-sports.jpg";
 import {
   Dialog,
@@ -539,8 +539,17 @@ const Index = () => {
                 </Link>
               </div>
               
-              <div className="text-sm text-muted-foreground text-center md:text-right">
+              <div className="text-sm text-muted-foreground text-center md:text-right flex items-center gap-2 justify-center md:justify-end">
                 © 2025 SquadUp. Open-source & free to use.
+                <a 
+                  href="https://github.com/yourusername/squadup" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-muted-foreground hover:text-primary transition-smooth"
+                  aria-label="View SquadUp on GitHub"
+                >
+                  <Github className="w-4 h-4" />
+                </a>
               </div>
             </div>
             
