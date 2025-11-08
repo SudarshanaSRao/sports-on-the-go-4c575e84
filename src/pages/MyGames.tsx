@@ -309,6 +309,27 @@ const MyGames = () => {
     }
   }, [user]);
 
+  // Auto-refresh games at midnight to move them from upcoming to past
+  useEffect(() => {
+    if (!user) return;
+
+    let lastCheckDate = new Date().toDateString();
+
+    // Check every minute if the date has changed
+    const interval = setInterval(() => {
+      const currentDate = new Date().toDateString();
+      
+      if (currentDate !== lastCheckDate) {
+        // Date has changed (midnight passed), refetch games
+        console.log('Date changed, refreshing games categorization...');
+        fetchGames();
+        lastCheckDate = currentDate;
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, [user]);
+
   const fetchGames = async () => {
     if (!user) return;
 
