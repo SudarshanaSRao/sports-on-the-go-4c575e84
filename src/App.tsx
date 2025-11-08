@@ -19,6 +19,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Friends from "./pages/Friends";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
                   <Route path="/leaderboard" element={<Leaderboard />} />
                   <Route path="/my-games" element={<MyGames />} />
                   <Route path="/friends" element={<Friends />} />
+                  <Route path="/settings" element={<Settings />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="/privacy" element={<Privacy />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

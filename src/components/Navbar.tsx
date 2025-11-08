@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MapPin, User, Calendar, LogOut, Menu, X, MessageSquare, Trophy, Grid3x3, Users } from "lucide-react";
+import { MapPin, User, Calendar, LogOut, Menu, X, MessageSquare, Trophy, Grid3x3, Users, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { FriendRequestNotification } from "@/components/FriendRequestNotification";
@@ -128,6 +128,12 @@ export const Navbar = () => {
                         <FriendRequestNotification count={pendingRequests.length} />
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings" className="cursor-pointer">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer text-destructive">
                       <LogOut className="w-4 h-4 mr-2" />
@@ -235,6 +241,14 @@ export const Navbar = () => {
                         <Users className="w-5 h-5" />
                         <span className="font-medium">Friends</span>
                         <FriendRequestNotification count={pendingRequests.length} />
+                      </Link>
+                      <Link 
+                        to="/settings" 
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                      >
+                        <Settings className="w-5 h-5" />
+                        <span className="font-medium">Settings</span>
                       </Link>
                       
                       <div className="border-t pt-4 mt-4">
