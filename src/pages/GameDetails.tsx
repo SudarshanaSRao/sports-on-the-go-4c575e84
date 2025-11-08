@@ -125,6 +125,16 @@ const GameDetails = () => {
       return;
     }
 
+    // Check if user has already joined
+    if (hasRSVP) {
+      toast({
+        title: "Already joined",
+        description: "You've already joined this game.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Check if game is full
     if (game && game.current_players >= game.max_players) {
       toast({
@@ -143,6 +153,16 @@ const GameDetails = () => {
       });
 
       if (error) {
+        // Handle duplicate RSVP error
+        if (error.code === "23505") {
+          toast({
+            title: "Already joined",
+            description: "You've already joined this game.",
+            variant: "destructive",
+          });
+          setHasRSVP(true);
+          return;
+        }
         // Handle specific error for host trying to join own game
         if (error.message.includes("policy")) {
           toast({
@@ -377,9 +397,14 @@ const GameDetails = () => {
               )}
 
               {hasRSVP && !isHost && (
-                <Badge variant="secondary" className="flex-1 justify-center py-3">
-                  You're in!
-                </Badge>
+                <div className="flex-1">
+                  <Badge variant="secondary" className="w-full justify-center py-3 mb-2">
+                    ✓ You're in!
+                  </Badge>
+                  <p className="text-sm text-center text-muted-foreground">
+                    You've already joined this game
+                  </p>
+                </div>
               )}
 
               {isHost && (

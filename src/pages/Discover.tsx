@@ -854,6 +854,16 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
       return;
     }
 
+    // Check if user has already joined this game
+    if (userRSVPs.has(gameId)) {
+      toast({
+        title: "Already joined",
+        description: "You've already joined this game.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setJoiningGameId(gameId);
 
     try {
@@ -864,6 +874,17 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
       });
 
       if (error) {
+        // Handle duplicate RSVP error
+        if (error.code === "23505") {
+          toast({
+            title: "Already joined",
+            description: "You've already joined this game.",
+            variant: "destructive",
+          });
+          // Update local state
+          setUserRSVPs(prev => new Set([...prev, gameId]));
+          return;
+        }
         // Handle specific error for host trying to join own game
         if (error.message?.includes("policy")) {
           toast({
@@ -873,15 +894,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
           });
           return;
         }
-        if (error.code === "23505") {
-          toast({
-            title: "Already joined",
-            description: "You've already joined this game.",
-            variant: "destructive",
-          });
-        } else {
-          throw error;
-        }
+        throw error;
       } else {
         // Auto-join the game's community
         const { data: communityData } = await supabase
@@ -907,6 +920,9 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
           title: "Successfully joined!",
           description: "You're confirmed for this game and added to its community.",
         });
+        
+        // Update local state to reflect the join
+        setUserRSVPs(prev => new Set([...prev, gameId]));
       }
     } catch (error) {
       console.error("Error joining game:", error);
@@ -1187,9 +1203,14 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                       </p>
                     </div>
                   ) : selectedGame && userRSVPs.has(selectedGame.id) ? (
-                    <Badge variant="secondary" className="flex-1 justify-center py-3">
-                      You're in!
-                    </Badge>
+                    <div className="flex-1">
+                      <Badge variant="secondary" className="w-full justify-center py-3 mb-2">
+                        ✓ You're in!
+                      </Badge>
+                      <p className="text-sm text-center text-muted-foreground">
+                        You've already joined this game
+                      </p>
+                    </div>
                   ) : (
                     <Button 
                       onClick={() => selectedGame && handleJoinGame(selectedGame.id)}
