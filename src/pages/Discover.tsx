@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShareGameButton } from "@/components/ShareGameButton";
 import { SEO } from "@/components/SEO";
+import { GameReminderBanner } from "@/components/GameReminderBanner";
 import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -1005,7 +1006,17 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
         canonicalUrl="https://squadup.app/discover"
       />
       <Navbar />
-      <div className="pt-20 px-2 sm:px-4 pb-4 flex justify-center">
+      
+      {/* Game Reminder Banner */}
+      {user && (
+        <div className="pt-20 pb-2 px-4">
+          <div className="w-full max-w-7xl mx-auto">
+            <GameReminderBanner />
+          </div>
+        </div>
+      )}
+      
+      <div className={`${user ? 'pt-2' : 'pt-20'} px-2 sm:px-4 pb-4 flex justify-center`}>
         <div className="w-full max-w-7xl">
           <div className="mb-4 sm:mb-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Find Your Game</h1>

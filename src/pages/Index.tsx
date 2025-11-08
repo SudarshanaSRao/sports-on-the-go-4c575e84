@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { SEO } from "@/components/SEO";
+import { GameReminderBanner } from "@/components/GameReminderBanner";
 import { MapPin, Users, Star, Calendar, Trophy, Shield, Zap, MessageSquare, Medal, CalendarCheck, ChevronLeft, ChevronRight, Github } from "lucide-react";
 import heroImage from "@/assets/hero-sports.jpg";
 import {
@@ -218,6 +219,15 @@ const Index = () => {
         }}
       />
       <Navbar />
+      
+      {/* Game Reminder Banner */}
+      {user && (
+        <div className="pt-20 pb-4 px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto">
+            <GameReminderBanner />
+          </div>
+        </div>
+      )}
       
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">

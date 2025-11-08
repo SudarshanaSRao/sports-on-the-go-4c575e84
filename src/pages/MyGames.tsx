@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ShareGameButton } from "@/components/ShareGameButton";
+import { GameReminderBanner } from "@/components/GameReminderBanner";
 import { Calendar, Clock, MapPin, Users, Plus, Star, X, Pencil, MessageSquare } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -1161,6 +1162,11 @@ const MyGames = () => {
       
       <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-5xl">
+          {/* Game Reminder Banner */}
+          <div className="mb-6">
+            <GameReminderBanner />
+          </div>
+
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div>
