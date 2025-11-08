@@ -29,6 +29,8 @@ interface Game {
   lng: number;
   visibility: string;
   hostId: string;
+  rawGameDate?: string; // Store raw date for comparison (optional for sample games)
+  rawStartTime?: string; // Store raw time for comparison (optional for sample games)
 }
 
 interface GameMapProps {
@@ -414,6 +416,8 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     lng: parseFloat(game.longitude),
     visibility: game.visibility,
     hostId: game.host_id,
+    rawGameDate: game.game_date,
+    rawStartTime: game.start_time,
   });
 
   // Fetch user's games (RSVPs and hosted games)
@@ -864,6 +868,21 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
       return;
     }
 
+    // Check if game has already passed
+    if (game) {
+      const gameDateTime = new Date(`${game.rawGameDate}T${game.rawStartTime}`);
+      const now = new Date();
+      
+      if (gameDateTime < now) {
+        toast({
+          title: "Game has passed",
+          description: "You cannot join a game that has already started or ended.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setJoiningGameId(gameId);
 
     try {
@@ -1211,6 +1230,31 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                         You've already joined this game
                       </p>
                     </div>
+                  ) : selectedGame && selectedGame.rawGameDate && selectedGame.rawStartTime ? (
+                    (() => {
+                      const gameDateTime = new Date(`${selectedGame.rawGameDate}T${selectedGame.rawStartTime}`);
+                      const now = new Date();
+                      const isPastGame = gameDateTime < now;
+                      
+                      return isPastGame ? (
+                        <div className="flex-1">
+                          <Badge variant="outline" className="w-full justify-center py-3 mb-2">
+                            Game has ended
+                          </Badge>
+                          <p className="text-sm text-center text-muted-foreground">
+                            This game has already started or ended
+                          </p>
+                        </div>
+                      ) : (
+                        <Button 
+                          onClick={() => selectedGame && handleJoinGame(selectedGame.id)}
+                          disabled={joiningGameId === selectedGame?.id}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
+                        >
+                          {joiningGameId === selectedGame?.id ? "Joining..." : "Join Game"}
+                        </Button>
+                      );
+                    })()
                   ) : (
                     <Button 
                       onClick={() => selectedGame && handleJoinGame(selectedGame.id)}

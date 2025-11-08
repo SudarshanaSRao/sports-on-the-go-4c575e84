@@ -115,6 +115,21 @@ const GameDetails = () => {
       return;
     }
 
+    // Check if game has already passed
+    if (game) {
+      const gameDateTime = new Date(`${game.game_date}T${game.start_time}`);
+      const now = new Date();
+      
+      if (gameDateTime < now) {
+        toast({
+          title: "Game has passed",
+          description: "You cannot join a game that has already started or ended.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     // Defensive check: Prevent hosts from joining their own games
     if (game && user.id === game.host_id) {
       toast({
@@ -247,10 +262,16 @@ const GameDetails = () => {
 
   const spotsLeft = game.max_players - game.current_players;
   const isFull = spotsLeft <= 0;
+  
+  // Check if game has already passed
+  const gameDateTime = new Date(`${game.game_date}T${game.start_time}`);
+  const now = new Date();
+  const isPastGame = gameDateTime < now;
+  
   // Strict check to ensure host cannot join their own game
   const isHost = Boolean(user && game && user.id === game.host_id);
-  // Additional safety: Check if user already has RSVP or is the host
-  const canJoin = Boolean(user && !isHost && !hasRSVP && !isFull);
+  // Additional safety: Check if user already has RSVP or is the host or game has passed
+  const canJoin = Boolean(user && !isHost && !hasRSVP && !isFull && !isPastGame);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -418,10 +439,21 @@ const GameDetails = () => {
                 </div>
               )}
 
-              {isFull && !hasRSVP && !isHost && (
+              {isFull && !hasRSVP && !isHost && !isPastGame && (
                 <Badge variant="outline" className="flex-1 justify-center py-3">
                   Game is full
                 </Badge>
+              )}
+
+              {isPastGame && !isHost && (
+                <div className="flex-1">
+                  <Badge variant="outline" className="w-full justify-center py-3 mb-2">
+                    Game has ended
+                  </Badge>
+                  <p className="text-sm text-center text-muted-foreground">
+                    This game has already started or ended
+                  </p>
+                </div>
               )}
             </div>
           </Card>
