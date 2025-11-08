@@ -843,6 +843,17 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
       return;
     }
 
+    // Check if user is the host of this game
+    const game = games.find(g => g.id === gameId);
+    if (game && game.hostId === user.id) {
+      toast({
+        title: "Cannot join",
+        description: "You cannot join a game you are hosting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setJoiningGameId(gameId);
 
     try {
@@ -853,6 +864,15 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
       });
 
       if (error) {
+        // Handle specific error for host trying to join own game
+        if (error.message?.includes("policy")) {
+          toast({
+            title: "Cannot join",
+            description: "You cannot join a game you are hosting.",
+            variant: "destructive",
+          });
+          return;
+        }
         if (error.code === "23505") {
           toast({
             title: "Already joined",
@@ -1157,13 +1177,28 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                 </div>
 
                 <div className="flex gap-2 mb-4">
-                  <Button 
-                    onClick={() => selectedGame && handleJoinGame(selectedGame.id)}
-                    disabled={joiningGameId === selectedGame?.id}
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
-                  >
-                    {joiningGameId === selectedGame?.id ? "Joining..." : "Join Game"}
-                  </Button>
+                  {selectedGame && user && selectedGame.hostId === user.id ? (
+                    <div className="flex-1">
+                      <Badge variant="secondary" className="w-full justify-center py-3 mb-2">
+                        You're hosting this game
+                      </Badge>
+                      <p className="text-sm text-center text-muted-foreground">
+                        Hosts cannot join their own games
+                      </p>
+                    </div>
+                  ) : selectedGame && userRSVPs.has(selectedGame.id) ? (
+                    <Badge variant="secondary" className="flex-1 justify-center py-3">
+                      You're in!
+                    </Badge>
+                  ) : (
+                    <Button 
+                      onClick={() => selectedGame && handleJoinGame(selectedGame.id)}
+                      disabled={joiningGameId === selectedGame?.id}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
+                    >
+                      {joiningGameId === selectedGame?.id ? "Joining..." : "Join Game"}
+                    </Button>
+                  )}
                   <ShareGameButton 
                     gameId={selectedGame.id.toString()}
                     gameName={`${selectedGame.sport} Game`}

@@ -383,9 +383,14 @@ const GameDetails = () => {
               )}
 
               {isHost && (
-                <Badge variant="secondary" className="flex-1 justify-center py-3">
-                  You're hosting this game
-                </Badge>
+                <div className="flex-1">
+                  <Badge variant="secondary" className="w-full justify-center py-3 mb-2">
+                    You're hosting this game
+                  </Badge>
+                  <p className="text-sm text-center text-muted-foreground">
+                    Hosts cannot join their own games
+                  </p>
+                </div>
               )}
 
               {isFull && !hasRSVP && !isHost && (
