@@ -260,9 +260,8 @@ export const Navbar = () => {
                         asChild
                         variant="outline"
                         className="w-full"
-                        onClick={() => setMobileMenuOpen(false)}
                       >
-                        <Link to="/auth">
+                        <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                           <User className="w-4 h-4 mr-2" />
                           Sign In
                         </Link>
@@ -270,9 +269,8 @@ export const Navbar = () => {
                       <Button 
                         asChild
                         className="w-full gradient-primary text-white"
-                        onClick={() => setMobileMenuOpen(false)}
                       >
-                        <Link to="/auth">
+                        <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                           Get Started
                         </Link>
                       </Button>
