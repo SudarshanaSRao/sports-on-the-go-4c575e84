@@ -325,6 +325,7 @@ const MyGames = () => {
           games (
             *,
             profiles:host_id (
+              username,
               first_name,
               last_name,
               overall_rating
@@ -344,6 +345,7 @@ const MyGames = () => {
           games (
             *,
             profiles:host_id (
+              username,
               first_name,
               last_name,
               overall_rating
@@ -361,6 +363,7 @@ const MyGames = () => {
         .select(`
           *,
           profiles:host_id (
+            username,
             first_name,
             last_name,
             overall_rating
@@ -728,11 +731,13 @@ const MyGames = () => {
                 <h3 className="font-semibold mb-2">Host</h3>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold">
-                    {selectedGame.profiles.first_name?.[0]}{selectedGame.profiles.last_name?.[0]}
+                    {(selectedGame.profiles.username || selectedGame.profiles.first_name || 'U')[0].toUpperCase()}
                   </div>
                   <div>
                     <p className="font-medium">
-                      {selectedGame.profiles.first_name} {selectedGame.profiles.last_name}
+                      {selectedGame.profiles.username || 
+                        `${selectedGame.profiles.first_name || ''} ${selectedGame.profiles.last_name || ''}`.trim() || 
+                        'Anonymous Host'}
                     </p>
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
@@ -1178,7 +1183,9 @@ const MyGames = () => {
                 allUpcomingGames.map((game) => {
                   const isHost = game.host_id === user?.id;
                   const hostName = game.profiles 
-                    ? `${game.profiles.first_name} ${game.profiles.last_name}`
+                    ? (game.profiles.username || 
+                       `${game.profiles.first_name || ''} ${game.profiles.last_name || ''}`.trim() || 
+                       'Anonymous Host')
                     : 'Unknown';
                   
                   return (
