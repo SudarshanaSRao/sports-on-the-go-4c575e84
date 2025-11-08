@@ -336,7 +336,9 @@ const MyGames = () => {
     try {
       setLoading(true);
 
-      const today = new Date().toISOString().split('T')[0];
+      // Use local timezone for date comparison
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
       // Fetch upcoming games user has RSVP'd to
       const { data: rsvpData, error: rsvpError } = await supabase
