@@ -97,24 +97,63 @@ const Privacy = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold mb-3">8. Your Rights</h2>
+                <h2 className="text-2xl font-bold mb-3">8. Your Rights and Data Control</h2>
+                <p className="text-muted-foreground mb-3 font-semibold">
+                  <strong>You have complete control over your data.</strong> We believe that your data belongs to you, and you have the right to manage it as you see fit.
+                </p>
                 <p className="text-muted-foreground mb-2">You have the right to:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                  <li><strong>Access:</strong> Request a copy of your personal data</li>
-                  <li><strong>Correction:</strong> Update or correct your information</li>
-                  <li><strong>Deletion:</strong> Request deletion of your account and data</li>
-                  <li><strong>Portability:</strong> Request your data in a portable format</li>
-                  <li><strong>Withdraw Consent:</strong> Stop using the Service at any time</li>
+                  <li><strong>Access:</strong> View and request a copy of all your personal data at any time</li>
+                  <li><strong>Correction:</strong> Update or correct your information through your account settings</li>
+                  <li><strong>Portability:</strong> Request your data in a portable format for transfer to another service</li>
+                  <li><strong>Withdraw Consent:</strong> Stop using the Service at any time without penalty</li>
                 </ul>
-                <p className="text-muted-foreground mt-2">
-                  To exercise these rights, contact us through the official project channels.
+                
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <h3 className="text-lg font-semibold mb-2">Right to Delete Your Account and Data</h3>
+                  <p className="text-muted-foreground mb-2">
+                    <strong>You can permanently delete your account and all associated data at any time.</strong> This is a fundamental right we provide to all users. When you delete your account:
+                  </p>
+                  <ul className="list-disc pl-6 text-muted-foreground space-y-1 mb-3">
+                    <li>Your profile and account information will be permanently removed</li>
+                    <li>All games you've hosted will be deleted</li>
+                    <li>All your RSVPs and game participations will be removed</li>
+                    <li>All your friendships and connections will be deleted</li>
+                    <li>All reviews you've given or received will be permanently removed</li>
+                    <li>All your posts, comments, and votes will be deleted</li>
+                    <li>Your communities and memberships will be removed</li>
+                    <li>Your sports preferences and settings will be deleted</li>
+                    <li>All other data associated with your account will be permanently erased</li>
+                  </ul>
+                  <p className="text-muted-foreground mb-2">
+                    <strong>How to delete your account:</strong>
+                  </p>
+                  <ol className="list-decimal pl-6 text-muted-foreground space-y-1">
+                    <li>Log into your account</li>
+                    <li>Navigate to Settings from the user menu</li>
+                    <li>Scroll to the "Danger Zone" section</li>
+                    <li>Click "Delete Account" and follow the confirmation steps</li>
+                  </ol>
+                  <p className="text-muted-foreground mt-3 font-semibold">
+                    <strong>Important:</strong> Account deletion is permanent and cannot be undone. Once deleted, your data cannot be recovered. We recommend downloading any data you wish to keep before deleting your account.
+                  </p>
+                </div>
+                
+                <p className="text-muted-foreground mt-3">
+                  For other data-related requests or questions, contact us through the official project channels.
                 </p>
               </section>
 
               <section>
                 <h2 className="text-2xl font-bold mb-3">9. Data Retention</h2>
+                <p className="text-muted-foreground mb-3">
+                  We retain your personal data only as long as necessary to provide the Service and comply with legal obligations. <strong>You have full control over your data retention</strong> and can delete your account at any time through the Settings page.
+                </p>
+                <p className="text-muted-foreground mb-3">
+                  When you delete your account, all your personal information and associated data are permanently removed from our systems immediately. This includes your profile, games, RSVPs, friendships, reviews, posts, comments, and all other data linked to your account.
+                </p>
                 <p className="text-muted-foreground">
-                  We retain your personal data only as long as necessary to provide the Service and comply with legal obligations. When you delete your account, we will remove your personal information within a reasonable timeframe, except as required for legal, security, or legitimate operational purposes.
+                  In rare cases, certain aggregated or anonymized data may be retained for statistical purposes or to comply with legal obligations, but this data cannot be traced back to you individually.
                 </p>
               </section>
 
