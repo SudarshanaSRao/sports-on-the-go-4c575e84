@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ShareGameButton } from "@/components/ShareGameButton";
+import { PlayerLiabilityWaiver } from "@/components/PlayerLiabilityWaiver";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -60,6 +61,9 @@ const GameDetails = () => {
   const [game, setGame] = useState<GameDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasRSVP, setHasRSVP] = useState(false);
+  const [showWaiver, setShowWaiver] = useState(false);
+  const [isSubmittingWaiver, setIsSubmittingWaiver] = useState(false);
+  const [hasAcceptedWaiver, setHasAcceptedWaiver] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -84,7 +88,7 @@ const GameDetails = () => {
 
       setGame(gameData);
 
-      // Check if user has RSVP'd
+      // Check if user has RSVP'd and waiver acceptance
       if (user) {
         const { data: rsvpData } = await supabase
           .from("rsvps")
@@ -94,6 +98,15 @@ const GameDetails = () => {
           .maybeSingle();
 
         setHasRSVP(!!rsvpData);
+
+        // Check if user has accepted the player waiver
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("player_waiver_accepted")
+          .eq("id", user.id)
+          .single();
+
+        setHasAcceptedWaiver(profileData?.player_waiver_accepted || false);
       }
     } catch (error: any) {
       console.error("Error fetching game:", error);
@@ -112,6 +125,12 @@ const GameDetails = () => {
       // Store current game URL before redirecting to auth
       sessionStorage.setItem('authReturnUrl', window.location.pathname);
       navigate("/auth");
+      return;
+    }
+
+    // Check if user has accepted the player waiver
+    if (!hasAcceptedWaiver) {
+      setShowWaiver(true);
       return;
     }
 
@@ -160,10 +179,14 @@ const GameDetails = () => {
       return;
     }
 
+    await joinGameAfterWaiver();
+  };
+
+  const joinGameAfterWaiver = async () => {
     try {
       const { error } = await supabase.from("rsvps").insert({
         game_id: game!.id,
-        user_id: user.id,
+        user_id: user!.id,
         status: "CONFIRMED",
       });
 
@@ -201,10 +224,57 @@ const GameDetails = () => {
       console.error("Error joining game:", error);
       toast({
         title: "Error joining game",
-        description: error.message || "Something went wrong. Please try again.",
+        description: error.message,
         variant: "destructive",
       });
     }
+  };
+
+  const handleWaiverAccept = async () => {
+    if (!user) return;
+
+    setIsSubmittingWaiver(true);
+    try {
+      // Update user's profile to mark waiver as accepted
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          player_waiver_accepted: true,
+          player_waiver_accepted_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
+
+      if (error) throw error;
+
+      setHasAcceptedWaiver(true);
+      setShowWaiver(false);
+      
+      toast({
+        title: "Waiver accepted",
+        description: "You can now join games. Proceeding to join this game...",
+      });
+
+      // Automatically join the game after accepting waiver
+      await joinGameAfterWaiver();
+    } catch (error: any) {
+      console.error("Error accepting waiver:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save waiver acceptance. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingWaiver(false);
+    }
+  };
+
+  const handleWaiverDecline = () => {
+    setShowWaiver(false);
+    toast({
+      title: "Waiver declined",
+      description: "You must accept the waiver to join games on SquadUp.",
+      variant: "destructive",
+    });
   };
 
   const handleBack = () => {
@@ -459,6 +529,14 @@ const GameDetails = () => {
           </Card>
         </div>
       </main>
+
+      {/* Player Liability Waiver Dialog */}
+      <PlayerLiabilityWaiver
+        open={showWaiver}
+        onAccept={handleWaiverAccept}
+        onDecline={handleWaiverDecline}
+        isSubmitting={isSubmittingWaiver}
+      />
     </div>
   );
 };

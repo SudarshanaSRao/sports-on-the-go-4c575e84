@@ -355,6 +355,8 @@ export type Database = {
           overall_rating: number | null
           phone_number: string | null
           phone_verified: boolean | null
+          player_waiver_accepted: boolean | null
+          player_waiver_accepted_at: string | null
           profile_photo: string | null
           state: string | null
           total_reviews: number | null
@@ -382,6 +384,8 @@ export type Database = {
           overall_rating?: number | null
           phone_number?: string | null
           phone_verified?: boolean | null
+          player_waiver_accepted?: boolean | null
+          player_waiver_accepted_at?: string | null
           profile_photo?: string | null
           state?: string | null
           total_reviews?: number | null
@@ -409,6 +413,8 @@ export type Database = {
           overall_rating?: number | null
           phone_number?: string | null
           phone_verified?: boolean | null
+          player_waiver_accepted?: boolean | null
+          player_waiver_accepted_at?: string | null
           profile_photo?: string | null
           state?: string | null
           total_reviews?: number | null
