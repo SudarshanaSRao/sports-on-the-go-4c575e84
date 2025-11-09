@@ -15,6 +15,15 @@ const AuthCallback = () => {
         if (error) throw error;
 
         if (session?.user) {
+          // Check if this is a first-time Google user who hasn't accepted terms
+          const termsAccepted = session.user.user_metadata?.terms_accepted;
+          
+          // If terms not accepted, redirect to Google consent page
+          if (!termsAccepted) {
+            navigate('/google-consent');
+            return;
+          }
+
           // Check if user has a username
           const { data: profile } = await supabase
             .from('profiles')

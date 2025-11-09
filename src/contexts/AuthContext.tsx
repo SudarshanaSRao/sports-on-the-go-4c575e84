@@ -58,6 +58,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           data: {
             username: userData.username,
             date_of_birth: userData.dateOfBirth,
+            terms_accepted: true,
+            terms_accepted_at: new Date().toISOString(),
           },
         },
       });
