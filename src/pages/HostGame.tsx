@@ -1,17 +1,19 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { SEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/Navbar";
 import { getAllSportsDisplayNames, toDbSportValue } from "@/utils/sportsUtils";
+import { AlertTriangle } from "lucide-react";
 import { z } from "zod";
 
 // Field validation limits
@@ -84,6 +86,7 @@ export default function HostGame() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [hostLiabilityAcknowledged, setHostLiabilityAcknowledged] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
     description?: string;
     equipmentRequirements?: string;
@@ -188,6 +191,15 @@ export default function HostGame() {
         variant: "destructive",
       });
       navigate("/auth");
+      return;
+    }
+
+    if (!hostLiabilityAcknowledged) {
+      toast({
+        title: "Liability acknowledgment required",
+        description: "You must acknowledge the hosting responsibilities and liability before creating a game.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -595,14 +607,61 @@ export default function HostGame() {
                   </div>
                 </div>
 
+                {/* Host Liability Acknowledgment - MANDATORY */}
+                <div className="space-y-3 border-2 border-destructive/20 rounded-lg p-4 bg-destructive/5 mt-6">
+                  <div className="flex items-start space-x-3">
+                    <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-foreground mb-2">
+                        HOST LIABILITY ACKNOWLEDGMENT
+                      </p>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        By hosting a game, you are taking on additional responsibilities and risks. Please read and acknowledge:
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3">
+                    <Checkbox
+                      id="host-liability"
+                      checked={hostLiabilityAcknowledged}
+                      onCheckedChange={(checked) => setHostLiabilityAcknowledged(checked === true)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <Label
+                        htmlFor="host-liability"
+                        className="text-xs leading-relaxed cursor-pointer font-normal"
+                      >
+                        <strong className="text-foreground">I acknowledge and agree</strong> that by hosting this game:
+                        <ul className="list-disc pl-5 mt-2 space-y-1.5 text-muted-foreground">
+                          <li><strong className="text-foreground">I am hosting at my own risk</strong> and accept full personal responsibility for organizing this activity</li>
+                          <li><strong className="text-foreground">The platform has no liability</strong> for any injuries, damages, disputes, or incidents that occur during my hosted game</li>
+                          <li><strong className="text-foreground">I am responsible for venue safety</strong> - I must ensure the location is safe, appropriate, and legally accessible for the activity</li>
+                          <li><strong className="text-foreground">I am responsible for all participants</strong> - The platform does not verify, supervise, or manage attendees</li>
+                          <li><strong className="text-foreground">I assume all risks</strong> including but not limited to injuries, property damage, theft, disputes, and legal claims</li>
+                          <li><strong className="text-foreground">I release the platform</strong> from any and all claims, damages, or liabilities related to this game</li>
+                          <li><strong className="text-foreground">I am bound by the{" "}
+                            <Link to="/terms" target="_blank" className="text-primary underline hover:text-primary/80">
+                              Terms and Conditions
+                            </Link></strong>, including the $100 liability cap, arbitration clause, and all legal provisions</li>
+                        </ul>
+                        <p className="mt-3 font-semibold text-foreground">
+                          I understand that SquadUp is only a coordination platform and provides no supervision, insurance, or liability coverage for hosted games.
+                        </p>
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Submit Buttons */}
                 <div className="flex gap-4 pt-4">
                   <Button 
                     type="submit" 
-                    disabled={loading || Object.keys(validationErrors).length > 0} 
+                    disabled={loading || !hostLiabilityAcknowledged || Object.keys(validationErrors).length > 0} 
                     className="flex-1"
                   >
-                    {loading ? "Creating..." : "Create Game"}
+                    {loading ? "Creating..." : "I Acknowledge - Create Game"}
                   </Button>
                   <Button type="button" variant="outline" onClick={() => navigate("/discover")} disabled={loading}>
                     Cancel
