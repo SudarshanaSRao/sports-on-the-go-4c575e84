@@ -200,27 +200,28 @@ const Privacy = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold mb-3">13. International Users and California Jurisdiction</h2>
+                <h2 className="text-2xl font-bold mb-3">13. International Users and Data Governance</h2>
                 
                 <h3 className="text-xl font-semibold mb-2 mt-4">13.1 INTERNATIONAL ACCESS</h3>
                 <p className="text-muted-foreground">
-                  SquadUp may be accessed from anywhere in the world. By using the Service, you consent to the transfer, storage, and processing of your information in the United States, specifically within systems that may be governed by California law.
+                  SquadUp may be accessed from anywhere in the world. By using the Service, you consent to the transfer, storage, and processing of your information in accordance with this Privacy Policy, regardless of your location or the operator's location.
                 </p>
 
-                <h3 className="text-xl font-semibold mb-2 mt-4">13.2 CALIFORNIA JURISDICTION</h3>
+                <h3 className="text-xl font-semibold mb-2 mt-4">13.2 CHOICE OF LAW FOR DATA PRACTICES</h3>
                 <p className="text-muted-foreground">
-                  This Privacy Policy and all data practices are governed by the laws of the <strong>State of California, United States of America</strong>. Any disputes regarding privacy or data practices shall be resolved in accordance with California law and the jurisdiction provisions specified in the Terms of Service.
+                  This Privacy Policy and all data practices are governed by the laws of the <strong>State of California, United States of America</strong>, as specified in the Terms of Service. Any disputes regarding privacy or data practices shall be resolved in accordance with California law and the jurisdiction provisions specified in the Terms of Service, regardless of where users or the operator are located.
                 </p>
 
-                <h3 className="text-xl font-semibold mb-2 mt-4">13.3 CALIFORNIA PRIVACY RIGHTS</h3>
+                <h3 className="text-xl font-semibold mb-2 mt-4">13.3 ENHANCED PRIVACY RIGHTS</h3>
                 <p className="text-muted-foreground mb-2">
-                  California residents have specific rights under the California Consumer Privacy Act (CCPA), including:
+                  We provide all users with robust privacy rights, including:
                 </p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-2">
                   <li>Right to know what personal information is collected</li>
                   <li>Right to request deletion of personal information</li>
-                  <li>Right to opt-out of sale of personal information (Note: We do NOT sell your data)</li>
-                  <li>Right to non-discrimination for exercising CCPA rights</li>
+                  <li>Right to data portability</li>
+                  <li>Right to opt-out of any data sales (Note: We do NOT sell your data)</li>
+                  <li>Right to non-discrimination for exercising privacy rights</li>
                 </ul>
                 <p className="text-muted-foreground mt-3">
                   To exercise these rights, use the account deletion feature in Settings or contact us through official channels.
@@ -228,7 +229,7 @@ const Privacy = () => {
 
                 <h3 className="text-xl font-semibold mb-2 mt-4">13.4 NO SALE OF DATA</h3>
                 <p className="text-muted-foreground">
-                  <strong>We do NOT sell, rent, trade, or otherwise transfer your personal information to third parties for monetary consideration.</strong> California residents: You do NOT need to opt-out of data sales because we do not engage in such practices.
+                  <strong>We do NOT sell, rent, trade, or otherwise transfer your personal information to third parties for monetary consideration.</strong> All users can be assured that we do not engage in data sales.
                 </p>
               </section>
 

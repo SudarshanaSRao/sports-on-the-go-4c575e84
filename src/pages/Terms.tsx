@@ -206,24 +206,24 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold mb-3">13. Governing Law and Jurisdiction</h2>
+                <h2 className="text-2xl font-bold mb-3">13. Choice of Law and Jurisdiction</h2>
                 
-                <h3 className="text-xl font-semibold mb-2 mt-4">13.1 GOVERNING LAW</h3>
+                <h3 className="text-xl font-semibold mb-2 mt-4">13.1 CHOICE OF LAW</h3>
                 <p className="text-muted-foreground">
-                  These Terms shall be governed by and construed in accordance with the laws of the <strong>State of California, United States of America</strong>, without regard to its conflict of law principles.
+                  These Terms shall be governed by and construed in accordance with the laws of the <strong>State of California, United States of America</strong>, without regard to its conflict of law principles. This choice of law applies regardless of the location of the operator or users.
                 </p>
 
-                <h3 className="text-xl font-semibold mb-2 mt-4">13.2 EXCLUSIVE JURISDICTION AND VENUE</h3>
+                <h3 className="text-xl font-semibold mb-2 mt-4">13.2 EXCLUSIVE VENUE</h3>
                 <p className="text-muted-foreground mb-2 font-semibold">
-                  YOU AGREE that any dispute, claim, or controversy arising out of or relating to these Terms or your use of the Service shall be brought EXCLUSIVELY in the state or federal courts located in <strong>Santa Clara County, California</strong>.
+                  YOU AGREE that any dispute, claim, or controversy arising out of or relating to these Terms or your use of the Service shall be brought EXCLUSIVELY in the state or federal courts located in <strong>Santa Clara County, California</strong>, regardless of where the parties reside.
                 </p>
                 <p className="text-muted-foreground">
                   YOU HEREBY IRREVOCABLY CONSENT to the personal jurisdiction of such courts and WAIVE any objection to venue in such courts, including but not limited to any claim that such forum is inconvenient.
                 </p>
 
-                <h3 className="text-xl font-semibold mb-2 mt-4">13.3 CALIFORNIA RESIDENTS</h3>
+                <h3 className="text-xl font-semibold mb-2 mt-4">13.3 WAIVER OF UNKNOWN CLAIMS</h3>
                 <p className="text-muted-foreground">
-                  If you are a California resident, you hereby waive your rights under California Civil Code Section 1542, which states: <em>"A general release does not extend to claims that the creditor or releasing party does not know or suspect to exist in his or her favor at the time of executing the release and that, if known by him or her, would have materially affected his or her settlement with the debtor or released party."</em>
+                  You hereby waive any rights similar to California Civil Code Section 1542, which states: <em>"A general release does not extend to claims that the creditor or releasing party does not know or suspect to exist in his or her favor at the time of executing the release and that, if known by him or her, would have materially affected his or her settlement with the debtor or released party."</em> You acknowledge that you may later discover facts or incur damages currently unknown, and you waive any right to seek additional compensation for such unknown claims.
                 </p>
               </section>
 
