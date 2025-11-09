@@ -73,7 +73,8 @@ export const UserSearchDialog = ({ trigger }: UserSearchDialogProps) => {
 
     const timeoutId = setTimeout(searchUsers, 300);
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, checkFriendshipStatus]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery]);
 
   const handleSendRequest = async (userId: string) => {
     await sendFriendRequest(userId);
