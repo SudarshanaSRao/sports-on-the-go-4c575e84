@@ -336,6 +336,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          accepted_terms_version: string | null
           account_status: Database["public"]["Enums"]["account_status"] | null
           bio: string | null
           city: string | null
@@ -359,12 +360,14 @@ export type Database = {
           player_waiver_accepted_at: string | null
           profile_photo: string | null
           state: string | null
+          terms_last_accepted_at: string | null
           total_reviews: number | null
           updated_at: string
           username: string | null
           zip_code: string | null
         }
         Insert: {
+          accepted_terms_version?: string | null
           account_status?: Database["public"]["Enums"]["account_status"] | null
           bio?: string | null
           city?: string | null
@@ -388,12 +391,14 @@ export type Database = {
           player_waiver_accepted_at?: string | null
           profile_photo?: string | null
           state?: string | null
+          terms_last_accepted_at?: string | null
           total_reviews?: number | null
           updated_at?: string
           username?: string | null
           zip_code?: string | null
         }
         Update: {
+          accepted_terms_version?: string | null
           account_status?: Database["public"]["Enums"]["account_status"] | null
           bio?: string | null
           city?: string | null
@@ -417,6 +422,7 @@ export type Database = {
           player_waiver_accepted_at?: string | null
           profile_photo?: string | null
           state?: string | null
+          terms_last_accepted_at?: string | null
           total_reviews?: number | null
           updated_at?: string
           username?: string | null
