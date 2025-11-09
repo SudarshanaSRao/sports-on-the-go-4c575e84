@@ -195,7 +195,7 @@ export const GameReminderBanner = () => {
                     </div>
                   </div>
 
-                  <Link to="/my-games">
+                  <Link to={`/game/${game.id}`}>
                     <Button size="sm" className="mt-2">
                       View Details
                     </Button>
