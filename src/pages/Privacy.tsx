@@ -12,7 +12,7 @@ const Privacy = () => {
           
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Last Updated: {new Date().toLocaleDateString()}</CardTitle>
+              <CardTitle>Last Updated: January 15, 2025</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <section>
@@ -165,42 +165,116 @@ const Privacy = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold mb-3">11. Third-Party Authentication</h2>
+                <h2 className="text-2xl font-bold mb-3">11. Data Security Limitations and Disclaimers</h2>
+                <p className="text-muted-foreground mb-2 font-semibold">
+                  While we implement reasonable security measures to protect your data, YOU ACKNOWLEDGE AND AGREE THAT:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>No system is perfectly secure or immune from cyber attacks</li>
+                  <li>Data breaches, hacking, or unauthorized access may occur despite our efforts</li>
+                  <li>We cannot guarantee that your data will never be compromised</li>
+                  <li>Internet transmission is inherently insecure and subject to interception</li>
+                </ul>
+                <p className="text-muted-foreground mt-3 font-semibold">
+                  IN THE EVENT OF A DATA BREACH, the operator's liability shall be limited as specified in the Terms of Service (maximum $100 USD total liability). You use the Service at your own risk and acknowledge that data security cannot be absolutely guaranteed.
+                </p>
+                <p className="text-muted-foreground mt-3 mb-2">
+                  The operator shall not be liable for:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Unauthorized access to your data by third parties</li>
+                  <li>Data loss due to technical failures, cyber attacks, or force majeure events</li>
+                  <li>Identity theft or fraud resulting from data breaches</li>
+                  <li>Any damages, losses, or expenses arising from compromised data security</li>
+                </ul>
+                <p className="text-muted-foreground mt-3">
+                  You are responsible for maintaining strong passwords and account security practices.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-3">12. Third-Party Authentication</h2>
                 <p className="text-muted-foreground">
                   If you sign up using Google or other third-party authentication services, we receive only the information you authorize and that is necessary for account creation. We do not have access to your third-party account credentials.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold mb-3">12. Open Source Nature</h2>
+                <h2 className="text-2xl font-bold mb-3">13. International Users and California Jurisdiction</h2>
+                
+                <h3 className="text-xl font-semibold mb-2 mt-4">13.1 INTERNATIONAL ACCESS</h3>
+                <p className="text-muted-foreground">
+                  SquadUp may be accessed from anywhere in the world. By using the Service, you consent to the transfer, storage, and processing of your information in the United States, specifically within systems that may be governed by California law.
+                </p>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">13.2 CALIFORNIA JURISDICTION</h3>
+                <p className="text-muted-foreground">
+                  This Privacy Policy and all data practices are governed by the laws of the <strong>State of California, United States of America</strong>. Any disputes regarding privacy or data practices shall be resolved in accordance with California law and the jurisdiction provisions specified in the Terms of Service.
+                </p>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">13.3 CALIFORNIA PRIVACY RIGHTS</h3>
+                <p className="text-muted-foreground mb-2">
+                  California residents have specific rights under the California Consumer Privacy Act (CCPA), including:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Right to know what personal information is collected</li>
+                  <li>Right to request deletion of personal information</li>
+                  <li>Right to opt-out of sale of personal information (Note: We do NOT sell your data)</li>
+                  <li>Right to non-discrimination for exercising CCPA rights</li>
+                </ul>
+                <p className="text-muted-foreground mt-3">
+                  To exercise these rights, use the account deletion feature in Settings or contact us through official channels.
+                </p>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">13.4 NO SALE OF DATA</h3>
+                <p className="text-muted-foreground">
+                  <strong>We do NOT sell, rent, trade, or otherwise transfer your personal information to third parties for monetary consideration.</strong> California residents: You do NOT need to opt-out of data sales because we do not engage in such practices.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-3">14. Open Source Nature</h2>
                 <p className="text-muted-foreground">
                   As an open-source project, the codebase is publicly available. However, this does NOT include access to user data, which is stored securely and privately. Only authorized maintainers have access to production data for maintenance and security purposes.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold mb-3">13. International Users</h2>
-                <p className="text-muted-foreground">
-                  SquadUp may be accessed from anywhere in the world. By using the Service, you consent to the transfer and processing of your information in accordance with this Privacy Policy, regardless of where you are located.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="text-2xl font-bold mb-3">14. Changes to Privacy Policy</h2>
+                <h2 className="text-2xl font-bold mb-3">15. Changes to Privacy Policy</h2>
                 <p className="text-muted-foreground">
                   We may update this Privacy Policy from time to time. We will notify users of material changes by posting the updated policy on the Service. Your continued use after changes constitutes acceptance of the updated policy.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold mb-3">15. Contact Information</h2>
+                <h2 className="text-2xl font-bold mb-3">16. Contact Information</h2>
                 <p className="text-muted-foreground">
                   For privacy-related questions, concerns, or requests, please contact the project maintainers through the official GitHub repository or community channels. We will respond to legitimate requests within a reasonable timeframe.
                 </p>
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold mb-3">16. Your Consent</h2>
+                <h2 className="text-2xl font-bold mb-3">17. Limitation of Liability for Privacy Matters</h2>
+                <p className="text-muted-foreground mb-3 font-semibold">
+                  TO THE MAXIMUM EXTENT PERMITTED BY LAW, the operator's total liability for any privacy-related claims, data breaches, or unauthorized access to your information <strong>SHALL NOT EXCEED ONE HUNDRED DOLLARS ($100.00 USD)</strong>, regardless of the nature of the claim or damages incurred.
+                </p>
+                <p className="text-muted-foreground mb-2">
+                  This limitation applies to:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Data breaches or security incidents</li>
+                  <li>Unauthorized access or disclosure of your information</li>
+                  <li>Misuse of your data by third parties</li>
+                  <li>Identity theft or fraud arising from your use of the Service</li>
+                  <li>Any other privacy-related claims or damages</li>
+                </ul>
+                <p className="text-muted-foreground mt-3">
+                  By using this Service, you acknowledge that this free, volunteer-run project cannot provide the same level of data security as commercial enterprises with dedicated security teams, and you accept the inherent risks involved.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-3">18. Your Consent</h2>
                 <p className="text-muted-foreground">
                   By using SquadUp, you consent to this Privacy Policy and agree to its terms. If you do not agree with this policy, please do not use the Service.
                 </p>
