@@ -644,7 +644,7 @@ export default function HostGame() {
                           <li><strong className="text-foreground">I am bound by the{" "}
                             <Link to="/terms" target="_blank" className="text-primary underline hover:text-primary/80">
                               Terms and Conditions
-                            </Link></strong>, including the $100 liability cap, arbitration clause, and all legal provisions</li>
+                            </Link></strong> and all legal provisions</li>
                         </ul>
                         <p className="mt-3 font-semibold text-foreground">
                           I understand that SquadUp is only a coordination platform and provides no supervision, insurance, or liability coverage for hosted games.

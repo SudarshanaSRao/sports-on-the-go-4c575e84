@@ -97,7 +97,7 @@ const GoogleConsent = () => {
           <Alert className="border-destructive bg-destructive/10">
             <AlertTriangle className="h-5 w-5 text-destructive" />
             <AlertDescription className="text-sm font-semibold text-destructive ml-2">
-              IMPORTANT LEGAL NOTICE: By continuing with Google sign-in, you agree to binding arbitration, waive your right to sue in court, waive your right to a jury trial, and acknowledge significant liability limitations ($100 maximum). Please read carefully before proceeding.
+              IMPORTANT LEGAL NOTICE: By continuing with Google sign-in, you agree to assume all risks of injury from sports activities and release the platform from all liability. Please read the full Terms and Privacy Policy carefully before proceeding.
             </AlertDescription>
           </Alert>
 
@@ -135,14 +135,10 @@ const GoogleConsent = () => {
                   <Link to="/privacy" target="_blank" className="text-primary font-semibold underline hover:text-primary/80">
                     Privacy Policy
                   </Link>
-                  , including but not limited to:
+                  , including:
                   <ul className="list-disc pl-5 mt-2 space-y-1 text-muted-foreground">
                     <li><strong className="text-foreground">Assumption of all risks</strong> of injury, disability, or death from sports activities</li>
                     <li><strong className="text-foreground">Release of all claims</strong> against the operator and waiver of right to sue</li>
-                    <li><strong className="text-foreground">Binding arbitration</strong> in Santa Clara County, California for all disputes</li>
-                    <li><strong className="text-foreground">Waiver of jury trial</strong> and class action rights</li>
-                    <li><strong className="text-foreground">$100 maximum liability cap</strong> for all claims and damages</li>
-                    <li><strong className="text-foreground">California law</strong> governs all aspects of this agreement</li>
                   </ul>
                 </Label>
               </div>
