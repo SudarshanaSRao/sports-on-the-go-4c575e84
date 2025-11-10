@@ -6,9 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MapPin, Mail, Lock, User, ArrowLeft, Calendar, AlertTriangle } from "lucide-react";
+import { MapPin, Mail, Lock, User, ArrowLeft, CalendarIcon, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { z } from "zod";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -36,6 +40,7 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [dateOfBirth, setDateOfBirth] = useState<Date>();
   const { signIn, signUp, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
 
@@ -78,7 +83,7 @@ const Auth = () => {
       username: formData.get('username') as string,
       email: formData.get('signup-email') as string,
       password: formData.get('signup-password') as string,
-      dateOfBirth: formData.get('dob') as string,
+      dateOfBirth: dateOfBirth ? format(dateOfBirth, 'yyyy-MM-dd') : '',
       agreeToTerms: agreeToTerms,
     };
 
@@ -280,17 +285,31 @@ const Auth = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="dob">Date of Birth</Label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="dob"
-                      name="dob"
-                      type="date"
-                      className="pl-10"
-                      max={new Date(Date.now() - 567648000000).toISOString().split('T')[0]} // 18 years ago
-                      required
-                    />
-                  </div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal pl-10",
+                          !dateOfBirth && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="absolute left-3 w-4 h-4" />
+                        {dateOfBirth ? format(dateOfBirth, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-background z-50" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={dateOfBirth}
+                        onSelect={setDateOfBirth}
+                        disabled={(date) =>
+                          date > new Date(Date.now() - 567648000000) || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                   {errors.dateOfBirth && <p className="text-xs text-destructive">{errors.dateOfBirth}</p>}
                 </div>
 

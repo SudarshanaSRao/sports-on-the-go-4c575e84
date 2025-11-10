@@ -4,14 +4,51 @@ import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
 function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
+  const [currentMonth, setCurrentMonth] = React.useState<Date>(props.month || new Date());
+
+  const years = React.useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear - 100;
+    const endYear = currentYear;
+    return Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
+  }, []);
+
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const handleMonthChange = (monthIndex: string) => {
+    const newDate = new Date(currentMonth);
+    newDate.setMonth(parseInt(monthIndex));
+    setCurrentMonth(newDate);
+    props.onMonthChange?.(newDate);
+  };
+
+  const handleYearChange = (year: string) => {
+    const newDate = new Date(currentMonth);
+    newDate.setFullYear(parseInt(year));
+    setCurrentMonth(newDate);
+    props.onMonthChange?.(newDate);
+  };
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
+      className={cn("p-3 pointer-events-auto", className)}
+      month={currentMonth}
+      onMonthChange={setCurrentMonth}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
@@ -44,6 +81,40 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
       components={{
         IconLeft: ({ ..._props }) => <ChevronLeft className="h-4 w-4" />,
         IconRight: ({ ..._props }) => <ChevronRight className="h-4 w-4" />,
+        Caption: ({ ...captionProps }) => (
+          <div className="flex justify-center items-center gap-2 mb-2">
+            <Select
+              value={currentMonth.getMonth().toString()}
+              onValueChange={handleMonthChange}
+            >
+              <SelectTrigger className="w-[110px] h-8 bg-background">
+                <SelectValue>{months[currentMonth.getMonth()]}</SelectValue>
+              </SelectTrigger>
+              <SelectContent className="max-h-[200px] bg-background z-50">
+                {months.map((month, index) => (
+                  <SelectItem key={month} value={index.toString()}>
+                    {month}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={currentMonth.getFullYear().toString()}
+              onValueChange={handleYearChange}
+            >
+              <SelectTrigger className="w-[90px] h-8 bg-background">
+                <SelectValue>{currentMonth.getFullYear()}</SelectValue>
+              </SelectTrigger>
+              <SelectContent className="max-h-[200px] bg-background z-50">
+                {years.reverse().map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ),
       }}
       {...props}
     />
