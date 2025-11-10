@@ -650,6 +650,21 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   const filteredGames = useMemo(() => {
     let filtered = games;
     
+    // Filter out past games based on user's local timezone
+    const now = new Date();
+    filtered = filtered.filter(game => {
+      // Skip filtering for sample games without rawGameDate
+      if (!game.rawGameDate || !game.rawStartTime) {
+        return true;
+      }
+      
+      // Combine date and time into a single Date object in user's local timezone
+      const gameDateTime = new Date(`${game.rawGameDate}T${game.rawStartTime}`);
+      
+      // Only show games that haven't passed yet
+      return gameDateTime > now;
+    });
+    
     // Filter by selected sports
     if (selectedSports.length > 0) {
       filtered = filtered.filter(game => selectedSports.includes(game.sport));
