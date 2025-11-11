@@ -68,7 +68,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (data.user) {
         toast.success("Account created successfully! Welcome to SquadUp.");
-        navigate('/discover');
+        
+        // Check for stored return URL
+        const returnUrl = sessionStorage.getItem('authReturnUrl');
+        if (returnUrl && returnUrl !== '/auth') {
+          sessionStorage.removeItem('authReturnUrl');
+          navigate(returnUrl);
+        } else {
+          navigate('/discover');
+        }
       }
     } catch (error: any) {
       console.error("Sign up error:", error);
@@ -106,8 +114,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         toast.success("Welcome back!");
         
-        // Redirect based on username presence
-        if (!profile?.username) {
+        // Check for stored return URL
+        const returnUrl = sessionStorage.getItem('authReturnUrl');
+        if (returnUrl && returnUrl !== '/auth') {
+          sessionStorage.removeItem('authReturnUrl');
+          navigate(returnUrl);
+        } else if (!profile?.username) {
           navigate('/setup-username');
         } else {
           navigate('/discover');
