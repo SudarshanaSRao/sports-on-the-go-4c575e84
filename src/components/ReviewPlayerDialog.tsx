@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,6 +30,7 @@ export function ReviewPlayerDialog({
 }: ReviewPlayerDialogProps) {
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [ratings, setRatings] = useState({
     showed_up_on_time: 5,
     skill_accurate: 5,
@@ -37,17 +39,14 @@ export function ReviewPlayerDialog({
   });
   const [comment, setComment] = useState("");
 
-  const handleSubmit = async () => {
+  const handleSubmitClick = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmedSubmit = async () => {
+    setShowConfirmDialog(false);
     setSubmitting(true);
     try {
-      // Calculate overall rating as average
-      const overall = (
-        ratings.showed_up_on_time +
-        ratings.skill_accurate +
-        ratings.good_sportsmanship +
-        ratings.would_play_again
-      ) / 4;
-
       // Insert review (overall_rating is calculated by database)
       const { error: reviewError } = await supabase.from("reviews").insert({
         game_id: gameId,
@@ -260,7 +259,7 @@ export function ReviewPlayerDialog({
             Cancel
           </Button>
           <Button
-            onClick={handleSubmit}
+            onClick={handleSubmitClick}
             disabled={submitting}
             className="flex-1 gradient-primary text-white"
           >
@@ -268,6 +267,37 @@ export function ReviewPlayerDialog({
           </Button>
         </div>
       </DialogContent>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Review Submission</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>You're about to submit a review for <strong>{revieweeName}</strong> with an overall rating of:</p>
+              <div className="flex items-center justify-center gap-2 p-3 bg-muted rounded-lg">
+                <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                <span className="text-2xl font-bold">
+                  {(
+                    (ratings.showed_up_on_time +
+                      ratings.skill_accurate +
+                      ratings.good_sportsmanship +
+                      ratings.would_play_again) /
+                    4
+                  ).toFixed(1)}
+                  /5
+                </span>
+              </div>
+              <p className="text-sm">Reviews cannot be edited after submission. Are you sure you want to continue?</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmedSubmit} disabled={submitting}>
+              {submitting ? "Submitting..." : "Yes, Submit Review"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
