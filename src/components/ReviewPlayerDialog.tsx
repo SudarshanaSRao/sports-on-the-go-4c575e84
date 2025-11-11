@@ -48,7 +48,7 @@ export function ReviewPlayerDialog({
         ratings.would_play_again
       ) / 4;
 
-      // Insert review
+      // Insert review (overall_rating is calculated by database)
       const { error: reviewError } = await supabase.from("reviews").insert({
         game_id: gameId,
         reviewer_id: reviewerId,
@@ -57,7 +57,6 @@ export function ReviewPlayerDialog({
         skill_accurate: ratings.skill_accurate,
         good_sportsmanship: ratings.good_sportsmanship,
         would_play_again: ratings.would_play_again,
-        overall_rating: overall,
         comment: comment.trim() || null,
         is_anonymous: false,
       });
