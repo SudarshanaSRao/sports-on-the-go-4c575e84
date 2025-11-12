@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { ShareGameButton } from "@/components/ShareGameButton";
 import { SEO } from "@/components/SEO";
 import { GameReminderBanner } from "@/components/GameReminderBanner";
-import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink } from "lucide-react";
+import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink, Bookmark, BookmarkCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { toDisplaySportName, getSportEmoji } from "@/utils/sportsUtils";
+import { useSavedGames } from "@/hooks/useSavedGames";
 
 interface Game {
   id: string;
@@ -396,6 +397,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { savedGameIds, toggleSaveGame, isSaved } = useSavedGames(user?.id);
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Transform a single game from database format to UI format
@@ -1290,6 +1292,22 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                       {joiningGameId === selectedGame?.id ? "Joining..." : "Join Game"}
                     </Button>
                   )}
+                  
+                  {/* Save/Bookmark Button */}
+                  <Button
+                    onClick={() => selectedGame && toggleSaveGame(selectedGame.id)}
+                    variant="outline"
+                    size="lg"
+                    className="px-3"
+                    title={isSaved(selectedGame?.id || '') ? "Remove from saved" : "Save for later"}
+                  >
+                    {isSaved(selectedGame?.id || '') ? (
+                      <BookmarkCheck className="w-5 h-5 text-primary" />
+                    ) : (
+                      <Bookmark className="w-5 h-5" />
+                    )}
+                  </Button>
+                  
                   <ShareGameButton 
                     gameId={selectedGame.id.toString()}
                     gameName={`${selectedGame.sport} Game`}

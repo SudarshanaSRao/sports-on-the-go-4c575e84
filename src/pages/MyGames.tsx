@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ShareGameButton } from "@/components/ShareGameButton";
 import { GameReminderBanner } from "@/components/GameReminderBanner";
-import { Calendar, Clock, MapPin, Users, Plus, Star, X, Pencil, MessageSquare } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Star, X, Pencil, MessageSquare, Bookmark } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { getSportEmoji, toDisplaySportName, getAllSportsDisplayNames, toDbSportValue } from "@/utils/sportsUtils";
 import { ReviewPlayerDialog } from "@/components/ReviewPlayerDialog";
+import { useSavedGames } from "@/hooks/useSavedGames";
 import {
   Dialog,
   DialogContent,
@@ -278,6 +279,8 @@ const MyGames = () => {
   const [upcomingGames, setUpcomingGames] = useState<Game[]>([]);
   const [hostedGames, setHostedGames] = useState<Game[]>([]);
   const [pastGames, setPastGames] = useState<Game[]>([]);
+  const [savedGames, setSavedGames] = useState<Game[]>([]);
+  const { unsaveGame } = useSavedGames(user?.id);
   const [loading, setLoading] = useState(true);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -405,9 +408,42 @@ const MyGames = () => {
       const past = [...allAttendedGames, ...allHostedGames].filter(g => g.game_date < today);
       const hosted = allHostedGames.filter(g => g.game_date >= today);
 
+      // Fetch saved games
+      const { data: savedGameIds, error: savedError } = await supabase
+        .from('saved_games')
+        .select('game_id')
+        .eq('user_id', user.id);
+
+      if (savedError) throw savedError;
+
+      // Fetch game details for saved games
+      const savedGameIdsList = savedGameIds?.map(s => s.game_id) || [];
+      let allSavedGames: Game[] = [];
+      
+      if (savedGameIdsList.length > 0) {
+        const { data: savedGamesData, error: savedGamesError } = await supabase
+          .from('games')
+          .select(`
+            *,
+            profiles:host_id (
+              username,
+              first_name,
+              last_name,
+              overall_rating
+            )
+          `)
+          .in('id', savedGameIdsList);
+
+        if (savedGamesError) throw savedGamesError;
+        allSavedGames = savedGamesData || [];
+      }
+
+      const upcomingSaved = allSavedGames.filter(g => g.game_date >= today);
+
       setUpcomingGames(upcoming);
       setPastGames(past);
       setHostedGames(hosted);
+      setSavedGames(upcomingSaved);
     } catch (error: any) {
       console.error('Error fetching games:', error);
       toast.error('Failed to load games');
@@ -1420,6 +1456,89 @@ const MyGames = () => {
                             onClick={() => handleCancelGame(game.id, game.sport)}
                           >
                             Cancel Game
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </TabsContent>
+
+            {/* Saved Games Tab */}
+            <TabsContent value="saved" className="space-y-4">
+              {savedGames.length === 0 ? (
+                <div className="text-center py-12">
+                  <Bookmark className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground mb-2">No saved games yet</p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Bookmark games you're interested in to easily find and join them later
+                  </p>
+                  <Button variant="outline" asChild>
+                    <Link to="/discover">Browse Games</Link>
+                  </Button>
+                </div>
+              ) : (
+                savedGames.map((game) => (
+                  <Card key={game.id} className="border-2">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col md:flex-row md:items-start gap-4">
+                        <div className="flex items-start space-x-4 flex-1">
+                          <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center text-2xl shadow-primary flex-shrink-0">
+                            {getSportEmoji(game.sport)}
+                          </div>
+                          
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-xl font-bold mb-1">{toDisplaySportName(game.sport)}</h3>
+                            <div className="flex items-center text-muted-foreground text-sm mb-3">
+                              <MapPin className="w-4 h-4 mr-1" />
+                              <span className="truncate">{game.location_name}</span>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                              <div className="flex items-center space-x-2 text-sm">
+                                <Calendar className="w-4 h-4 text-muted-foreground" />
+                                <span className="font-medium">
+                                  {format(new Date(game.game_date), 'MMM dd, yyyy')}
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-2 text-sm">
+                                <Clock className="w-4 h-4 text-muted-foreground" />
+                                <span className="font-medium">{game.start_time}</span>
+                              </div>
+                              <div className="flex items-center space-x-2 text-sm">
+                                <Users className="w-4 h-4 text-muted-foreground" />
+                                <span className="font-medium">
+                                  {game.current_players}/{game.max_players} players
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-2 text-sm">
+                                <Badge variant="secondary">{game.skill_level.replace('_', ' ')}</Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col space-y-2 md:min-w-[160px]">
+                          <Button 
+                            variant="default" 
+                            className="w-full"
+                            asChild
+                          >
+                            <Link to={`/game/${game.id}`}>
+                              View Details
+                            </Link>
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="w-full"
+                            onClick={() => {
+                              unsaveGame(game.id);
+                              setSavedGames(prev => prev.filter(g => g.id !== game.id));
+                            }}
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Remove
                           </Button>
                         </div>
                       </div>
