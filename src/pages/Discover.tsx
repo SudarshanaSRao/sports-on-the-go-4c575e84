@@ -1151,7 +1151,15 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <div className="text-4xl mb-2">{selectedGame.emoji}</div>
-                    <h2 className="text-2xl font-bold text-gray-900">{selectedGame.sport}</h2>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h2 className="text-2xl font-bold text-gray-900">{selectedGame.sport}</h2>
+                      {isSaved(selectedGame.id) && (
+                        <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700 border-amber-300">
+                          <Bookmark className="w-3 h-3 mr-1" />
+                          Saved
+                        </Badge>
+                      )}
+                    </div>
                     <div className="flex items-center text-sm text-gray-600 mt-1">
                       <MapPin className="w-4 h-4 mr-1" />
                       {selectedGame.location}
@@ -1341,7 +1349,15 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                         <div className="flex items-center gap-3">
                           <span className="text-2xl">{game.emoji}</span>
                           <div>
-                            <div className="font-semibold text-gray-900">{game.sport}</div>
+                            <div className="font-semibold text-gray-900 flex items-center gap-2">
+                              {game.sport}
+                              {isSaved(game.id) && (
+                                <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700 border-amber-300">
+                                  <Bookmark className="w-3 h-3 mr-1" />
+                                  Saved
+                                </Badge>
+                              )}
+                            </div>
                             <div className="text-xs text-gray-600">{game.location}</div>
                           </div>
                         </div>
