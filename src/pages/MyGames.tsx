@@ -280,6 +280,8 @@ const MyGames = () => {
   const [hostedGames, setHostedGames] = useState<Game[]>([]);
   const [pastGames, setPastGames] = useState<Game[]>([]);
   const [savedGames, setSavedGames] = useState<Game[]>([]);
+  const [joiningGameId, setJoiningGameId] = useState<string | null>(null);
+  const [userRSVPs, setUserRSVPs] = useState<Set<string>>(new Set());
   const { unsaveGame } = useSavedGames(user?.id);
   const [loading, setLoading] = useState(true);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
@@ -310,8 +312,27 @@ const MyGames = () => {
   useEffect(() => {
     if (user) {
       fetchGames();
+      fetchUserRSVPs();
     }
   }, [user]);
+
+  const fetchUserRSVPs = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('rsvps')
+        .select('game_id')
+        .eq('user_id', user.id)
+        .eq('status', 'CONFIRMED');
+
+      if (error) throw error;
+
+      setUserRSVPs(new Set(data?.map(r => r.game_id) || []));
+    } catch (error) {
+      console.error('Error fetching user RSVPs:', error);
+    }
+  };
 
   // Auto-refresh games at midnight to move them from upcoming to past
   useEffect(() => {
@@ -723,6 +744,98 @@ const MyGames = () => {
     } catch (error: any) {
       console.error('Error leaving game:', error);
       toast.error('Failed to leave game');
+    }
+  };
+
+  const handleJoinSavedGame = async (game: Game) => {
+    if (!user) {
+      toast.error("Please log in to join a game.");
+      navigate("/auth");
+      return;
+    }
+
+    // Check if user is the host of this game
+    if (game.host_id === user.id) {
+      toast.error("You cannot join a game you are hosting.");
+      return;
+    }
+
+    // Check if user has already joined this game
+    if (userRSVPs.has(game.id)) {
+      toast.error("You've already joined this game.");
+      return;
+    }
+
+    // Check if game has already passed
+    const gameDateTime = new Date(`${game.game_date}T${game.start_time}`);
+    const now = new Date();
+    
+    if (gameDateTime < now) {
+      toast.error("You cannot join a game that has already started or ended.");
+      return;
+    }
+
+    // Check if game is full
+    if (game.current_players >= game.max_players) {
+      toast.error("This game is already full.");
+      return;
+    }
+
+    setJoiningGameId(game.id);
+
+    try {
+      const { error } = await supabase.from("rsvps").insert({
+        game_id: game.id,
+        user_id: user.id,
+        status: "CONFIRMED",
+      });
+
+      if (error) {
+        if (error.code === "23505") {
+          toast.error("You've already joined this game.");
+          setUserRSVPs(prev => new Set([...prev, game.id]));
+          return;
+        }
+        if (error.message?.includes("policy")) {
+          toast.error("You cannot join a game you are hosting.");
+          return;
+        }
+        throw error;
+      }
+
+      // Auto-join the game's community
+      const { data: communityData } = await supabase
+        .from("communities")
+        .select("id")
+        .eq("game_id", game.id)
+        .eq("type", "game")
+        .single();
+
+      if (communityData) {
+        await supabase
+          .from("community_members")
+          .insert({
+            community_id: communityData.id,
+            user_id: user.id,
+            role: 'member'
+          })
+          .select();
+      }
+
+      toast.success("Successfully joined! You're confirmed for this game.");
+      
+      // Update local state
+      setUserRSVPs(prev => new Set([...prev, game.id]));
+      
+      // Remove from saved games and refresh
+      setSavedGames(prev => prev.filter(g => g.id !== game.id));
+      fetchGames();
+      fetchUserRSVPs();
+    } catch (error) {
+      console.error("Error joining game:", error);
+      toast.error("Failed to join game. Please try again.");
+    } finally {
+      setJoiningGameId(null);
     }
   };
 
@@ -1520,8 +1633,43 @@ const MyGames = () => {
                         </div>
 
                         <div className="flex flex-col space-y-2 md:min-w-[160px]">
+                          {/* Show different buttons based on game state */}
+                          {game.host_id === user?.id ? (
+                            <Badge variant="secondary" className="w-full justify-center py-2">
+                              You're hosting
+                            </Badge>
+                          ) : userRSVPs.has(game.id) ? (
+                            <Badge variant="secondary" className="w-full justify-center py-2">
+                              ✓ Already joined
+                            </Badge>
+                          ) : (() => {
+                            const gameDateTime = new Date(`${game.game_date}T${game.start_time}`);
+                            const now = new Date();
+                            const isPastGame = gameDateTime < now;
+                            const isFull = game.current_players >= game.max_players;
+                            
+                            return isPastGame ? (
+                              <Badge variant="outline" className="w-full justify-center py-2">
+                                Game ended
+                              </Badge>
+                            ) : isFull ? (
+                              <Badge variant="outline" className="w-full justify-center py-2">
+                                Game full
+                              </Badge>
+                            ) : (
+                              <Button 
+                                variant="default" 
+                                className="w-full"
+                                onClick={() => handleJoinSavedGame(game)}
+                                disabled={joiningGameId === game.id}
+                              >
+                                {joiningGameId === game.id ? "Joining..." : "Join Game"}
+                              </Button>
+                            );
+                          })()}
+                          
                           <Button 
-                            variant="default" 
+                            variant="outline" 
                             className="w-full"
                             asChild
                           >
@@ -1530,7 +1678,8 @@ const MyGames = () => {
                             </Link>
                           </Button>
                           <Button 
-                            variant="outline" 
+                            variant="ghost" 
+                            size="sm"
                             className="w-full"
                             onClick={() => {
                               unsaveGame(game.id);
