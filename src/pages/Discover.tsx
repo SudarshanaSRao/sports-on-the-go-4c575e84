@@ -394,6 +394,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   const [hideMyGames, setHideMyGames] = useState(false);
   const [userRSVPs, setUserRSVPs] = useState<Set<string>>(new Set());
   const [userHostedGames, setUserHostedGames] = useState<Set<string>>(new Set());
+  const [savedGamesFilter, setSavedGamesFilter] = useState<'all' | 'only-saved' | 'hide-saved'>('all');
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -701,8 +702,15 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
       });
     }
     
+    // Filter by saved games preference
+    if (savedGamesFilter === 'only-saved' && user) {
+      filtered = filtered.filter(game => savedGameIds.has(game.id));
+    } else if (savedGamesFilter === 'hide-saved' && user) {
+      filtered = filtered.filter(game => !savedGameIds.has(game.id));
+    }
+    
     return filtered;
-  }, [games, selectedSports, hideMyGames, user, userRSVPs, userHostedGames]);
+  }, [games, selectedSports, hideMyGames, user, userRSVPs, userHostedGames, savedGamesFilter, savedGameIds]);
 
   // Apply sport filter from URL on mount
   useEffect(() => {
@@ -1070,21 +1078,68 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
               })}
             </div>
             
-            <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
-              <input
-                type="checkbox"
-                id="hideMyGames"
-                checked={hideMyGames}
-                onChange={(e) => setHideMyGames(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300"
-              />
-              <label htmlFor="hideMyGames" className="text-sm text-gray-600 cursor-pointer">
-                Hide My Games (hosting or RSVPed)
-              </label>
+            <div className="flex flex-col gap-2 pt-2 border-t border-gray-200">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="hideMyGames"
+                  checked={hideMyGames}
+                  onChange={(e) => setHideMyGames(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+                <label htmlFor="hideMyGames" className="text-sm text-gray-600 cursor-pointer">
+                  Hide My Games (hosting or RSVPed)
+                </label>
+              </div>
+
+              {/* Saved Games Filter */}
+              {user && (
+                <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+                  <label className="text-sm font-medium text-gray-700">Saved Games:</label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setSavedGamesFilter('all')}
+                      className={`px-3 py-1 text-xs rounded-full transition-all ${
+                        savedGamesFilter === 'all'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Show All
+                    </button>
+                    <button
+                      onClick={() => setSavedGamesFilter('only-saved')}
+                      className={`px-3 py-1 text-xs rounded-full transition-all flex items-center gap-1 ${
+                        savedGamesFilter === 'only-saved'
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      <Bookmark className="w-3 h-3" />
+                      Only Saved
+                    </button>
+                    <button
+                      onClick={() => setSavedGamesFilter('hide-saved')}
+                      className={`px-3 py-1 text-xs rounded-full transition-all ${
+                        savedGamesFilter === 'hide-saved'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Hide Saved
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <p className="text-sm text-gray-500 mt-3">
               Showing {filteredGames.length} of {games.length} games
+              {user && savedGamesFilter === 'only-saved' && savedGameIds.size > 0 && (
+                <span className="ml-1 text-amber-600">
+                  • {savedGameIds.size} saved
+                </span>
+              )}
             </p>
           </div>
         </div>
