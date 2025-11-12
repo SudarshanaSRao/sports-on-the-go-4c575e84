@@ -1332,12 +1332,15 @@ const MyGames = () => {
 
           {/* Tabs */}
           <Tabs defaultValue="upcoming" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsList className="grid w-full grid-cols-4 mb-8">
               <TabsTrigger value="upcoming">
                 Upcoming ({allUpcomingGames.length})
               </TabsTrigger>
               <TabsTrigger value="hosting">
                 Hosting ({hostedGames.length})
+              </TabsTrigger>
+              <TabsTrigger value="saved">
+                Saved ({savedGames.length})
               </TabsTrigger>
               <TabsTrigger value="past">
                 Past ({pastGames.length})
