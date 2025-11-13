@@ -715,12 +715,12 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   // Apply sport filter from URL on mount
   useEffect(() => {
     const sportParam = searchParams.get('sport');
-    if (sportParam && availableSports.includes(sportParam)) {
+    if (sportParam && availableSports.length > 0 && availableSports.includes(sportParam) && selectedSports.length === 0) {
       setSelectedSports([sportParam]);
       // Clear the URL parameter after applying
       setSearchParams({});
     }
-  }, []);
+  }, [searchParams, availableSports, selectedSports.length, setSearchParams]);
 
   // Get user's location on mount
   useEffect(() => {
