@@ -151,6 +151,118 @@ const Index = () => {
       skillLevels: "Intermediate to Advanced",
       equipment: "Ball, protective gear, field"
     },
+    { 
+      name: "Badminton", 
+      emoji: "🏸",
+      description: "Fast-paced racket sport with a shuttlecock. Great for speed and precision.",
+      rules: [
+        "Singles (1v1) or Doubles (2v2)",
+        "Score by hitting shuttlecock over net into opponent's court",
+        "Games played to 21 points (must win by 2)",
+        "Shuttlecock cannot touch the ground",
+        "Players alternate serving after each point won"
+      ],
+      skillLevels: "All levels",
+      equipment: "Racket, shuttlecock, net, court"
+    },
+    { 
+      name: "Cycling", 
+      emoji: "🚴",
+      description: "Solo or group rides on bikes. Excellent cardio and leg workout.",
+      rules: [
+        "Individual or group activity",
+        "Follow traffic laws and cycling etiquette",
+        "Common formats: road cycling, mountain biking, track",
+        "Helmet and safety gear required",
+        "Group rides maintain pace and communicate hazards"
+      ],
+      skillLevels: "Beginner to Advanced",
+      equipment: "Bike, helmet, cycling gear"
+    },
+    { 
+      name: "Golf", 
+      emoji: "⛳",
+      description: "Precision sport on a course. Perfect for strategy and concentration.",
+      rules: [
+        "Individual or team play (2-4 players typical)",
+        "Score by completing 18 holes in fewest strokes",
+        "Each hole has a par (expected number of strokes)",
+        "Various clubs used for different distances and situations",
+        "Etiquette: quiet during swings, maintain pace of play"
+      ],
+      skillLevels: "Beginner to Advanced",
+      equipment: "Clubs, balls, tees, golf course"
+    },
+    { 
+      name: "Hockey", 
+      emoji: "🏒",
+      description: "Fast-paced ice or field sport. High intensity and teamwork required.",
+      rules: [
+        "Two teams of 6 players each (ice) or 11 (field)",
+        "Score by shooting puck/ball into opponent's goal",
+        "Game played in 3 periods of 20 minutes (ice hockey)",
+        "Physical contact allowed but regulated",
+        "Offsides and icing rules control play flow"
+      ],
+      skillLevels: "Intermediate to Advanced",
+      equipment: "Stick, puck/ball, protective gear, rink/field"
+    },
+    { 
+      name: "Pickleball", 
+      emoji: "🎾",
+      description: "Paddle sport combining elements of tennis, badminton, and ping-pong.",
+      rules: [
+        "Singles or Doubles (2v2 most common)",
+        "Score by hitting ball over net into opponent's court",
+        "Games played to 11 points (must win by 2)",
+        "Double bounce rule: ball must bounce once per side initially",
+        "Non-volley zone (kitchen) prevents net smashing"
+      ],
+      skillLevels: "All levels welcome",
+      equipment: "Paddle, ball, net, court"
+    },
+    { 
+      name: "Rugby", 
+      emoji: "🏉",
+      description: "Physical team sport with continuous play. Ultimate test of endurance.",
+      rules: [
+        "Two teams of 15 players each (Rugby Union)",
+        "Score by carrying ball over goal line or kicking through posts",
+        "Ball can only be passed backwards or kicked forward",
+        "Tackling is a core element - must wrap arms",
+        "Scrums and lineouts restart play after stoppages"
+      ],
+      skillLevels: "Intermediate to Advanced",
+      equipment: "Ball, protective gear, field"
+    },
+    { 
+      name: "Running", 
+      emoji: "🏃",
+      description: "Solo or group running activity. Perfect for cardio and mental health.",
+      rules: [
+        "Individual or group activity",
+        "Common formats: road running, trail running, track",
+        "Group runs maintain agreed-upon pace",
+        "Safety: run against traffic, wear reflective gear",
+        "Distances vary from sprints to marathons"
+      ],
+      skillLevels: "All levels welcome",
+      equipment: "Running shoes, athletic wear"
+    },
+    { 
+      name: "Ultimate Frisbee", 
+      emoji: "🥏",
+      description: "Non-contact team sport with a flying disc. Great for fitness and fun.",
+      rules: [
+        "Two teams of 7 players each",
+        "Score by catching disc in opponent's end zone",
+        "Players cannot run with the disc (pivot allowed)",
+        "No physical contact - fouls are self-officiated",
+        "Possession changes on incomplete pass or interception"
+      ],
+      skillLevels: "Beginner to Intermediate",
+      equipment: "Flying disc, field"
+    },
   ];
 
   const [selectedSport, setSelectedSport] = useState<typeof sports[0] | null>(null);
