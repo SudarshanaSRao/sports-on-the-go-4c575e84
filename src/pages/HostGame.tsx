@@ -142,6 +142,43 @@ export default function HostGame() {
     localStorage.setItem('hostGameLiabilityAcknowledged', String(hostLiabilityAcknowledged));
   }, [hostLiabilityAcknowledged]);
 
+  const handleClearForm = () => {
+    // Reset form data to initial state
+    setFormData({
+      sport: "",
+      skillLevel: "",
+      gameDate: "",
+      timeInput: "12:00",
+      durationMinutes: "",
+      maxPlayers: "",
+      locationName: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "United States",
+      description: "",
+      equipmentRequirements: "",
+      gameRules: "",
+      customSportName: "",
+    });
+    
+    // Reset liability acknowledgment
+    setHostLiabilityAcknowledged(false);
+    
+    // Clear validation errors
+    setValidationErrors({});
+    
+    // Clear localStorage
+    localStorage.removeItem('hostGameFormData');
+    localStorage.removeItem('hostGameLiabilityAcknowledged');
+    
+    toast({
+      title: "Form cleared",
+      description: "All fields have been reset.",
+    });
+  };
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -769,6 +806,14 @@ export default function HostGame() {
                     className="flex-1"
                   >
                     {loading ? "Creating..." : "I Acknowledge - Create Game"}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleClearForm} 
+                    disabled={loading}
+                  >
+                    Clear Form
                   </Button>
                   <Button type="button" variant="outline" onClick={() => navigate("/discover")} disabled={loading}>
                     Cancel
