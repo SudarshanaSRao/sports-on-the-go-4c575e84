@@ -174,17 +174,17 @@ export const GameReminderBanner = () => {
               </div>
 
               <div className="flex-1 min-w-0">
-                <AlertTitle className="text-lg font-bold mb-2 flex items-center gap-2 text-black dark:text-white">
+                <AlertTitle className="text-lg font-bold mb-2 flex items-center gap-2 text-green-800">
                   <Clock className="w-5 h-5 text-primary animate-pulse" />
                   {isHosting ? "Your Game Starts Soon!" : "Game Starting Soon!"}
                 </AlertTitle>
                 
                 <AlertDescription className="space-y-2">
-                  <div className="font-semibold text-black dark:text-white">
+                  <div className="font-semibold text-green-800">
                     {toDisplaySportName(game.sport)} • {formatTimeUntilGame(game.hoursUntilGame)} away
                   </div>
                   
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-black/80 dark:text-white/80">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-green-700">
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
                       <span>{format(gameDateTime, 'MMM dd, yyyy • h:mm a')}</span>
