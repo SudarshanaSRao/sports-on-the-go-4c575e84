@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,24 +94,54 @@ export default function HostGame() {
     customSportName?: string;
   }>({});
 
-  const [formData, setFormData] = useState({
-    sport: "",
-    skillLevel: "",
-    gameDate: "",
-    timeInput: "12:00",
-    durationMinutes: "",
-    maxPlayers: "",
-    locationName: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    country: "United States",
-    description: "",
-    equipmentRequirements: "",
-    gameRules: "",
-    customSportName: "",
+  // Load saved form data from localStorage on component mount
+  const [formData, setFormData] = useState(() => {
+    const savedData = localStorage.getItem('hostGameFormData');
+    if (savedData) {
+      try {
+        return JSON.parse(savedData);
+      } catch (error) {
+        console.error('Error parsing saved form data:', error);
+      }
+    }
+    return {
+      sport: "",
+      skillLevel: "",
+      gameDate: "",
+      timeInput: "12:00",
+      durationMinutes: "",
+      maxPlayers: "",
+      locationName: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "United States",
+      description: "",
+      equipmentRequirements: "",
+      gameRules: "",
+      customSportName: "",
+    };
   });
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('hostGameFormData', JSON.stringify(formData));
+  }, [formData]);
+
+  // Load saved liability acknowledgment
+  useEffect(() => {
+    const savedAcknowledgment = localStorage.getItem('hostGameLiabilityAcknowledged');
+    if (savedAcknowledgment === 'true') {
+      setHostLiabilityAcknowledged(true);
+    }
+  }, []);
+
+  // Save liability acknowledgment to localStorage
+  useEffect(() => {
+    localStorage.setItem('hostGameLiabilityAcknowledged', String(hostLiabilityAcknowledged));
+  }, [hostLiabilityAcknowledged]);
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -411,6 +441,10 @@ export default function HostGame() {
         title: "Game created!",
         description: "Your game has been posted successfully.",
       });
+
+      // Clear saved form data from localStorage after successful submission
+      localStorage.removeItem('hostGameFormData');
+      localStorage.removeItem('hostGameLiabilityAcknowledged');
 
       navigate("/my-games");
     } catch (error: any) {
