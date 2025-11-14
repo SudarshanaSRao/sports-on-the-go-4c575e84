@@ -358,9 +358,13 @@ export default function HostGame() {
       // Step 4: Auto-create a community for the game
       console.log('👥 [HostGame] Step 4: Creating community...');
       
-      // Use custom sport name for community if "Other" is selected
-      const communityName = `${sportValue} - ${formData.locationName}`;
-      const communityDescription = `Community for the ${sportValue} game on ${formData.gameDate}. ${formData.description || ''}`;
+      // Format community name to show "Other - [Custom Sport Name]" for custom sports
+      const displaySportName = formData.sport === 'Other' && formData.customSportName.trim()
+        ? `Other - ${formData.customSportName.trim()}`
+        : sportValue;
+      
+      const communityName = `${displaySportName} - ${formData.locationName}`;
+      const communityDescription = `Community for the ${displaySportName} game on ${formData.gameDate}. ${formData.description || ''}`;
 
       const communityPayload = {
         name: communityName,
