@@ -91,6 +91,7 @@ export default function HostGame() {
     description?: string;
     equipmentRequirements?: string;
     gameRules?: string;
+    customSportName?: string;
   }>({});
 
   const [formData, setFormData] = useState({
@@ -109,10 +110,30 @@ export default function HostGame() {
     description: "",
     equipmentRequirements: "",
     gameRules: "",
+    customSportName: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    // Validate custom sport name to only allow English alphabets and spaces
+    if (name === 'customSportName') {
+      const alphabetOnly = /^[a-zA-Z\s]*$/;
+      if (!alphabetOnly.test(value)) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          customSportName: 'Only English alphabets are allowed',
+        }));
+        return;
+      } else {
+        setValidationErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.customSportName;
+          return newErrors;
+        });
+      }
+    }
+    
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Real-time validation for text fields
@@ -139,6 +160,16 @@ export default function HostGame() {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Clear custom sport name when switching away from "Other"
+    if (name === 'sport' && value !== 'Other') {
+      setFormData((prev) => ({ ...prev, customSportName: '' }));
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.customSportName;
+        return newErrors;
+      });
+    }
   };
 
   const geocodeAddress = async () => {
@@ -198,6 +229,16 @@ export default function HostGame() {
       toast({
         title: "Liability acknowledgment required",
         description: "You must acknowledge the hosting responsibilities and liability before creating a game.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate custom sport name if "Other" is selected
+    if (formData.sport === 'Other' && !formData.customSportName.trim()) {
+      toast({
+        title: "Custom sport name required",
+        description: "Please specify the sport name when 'Other' is selected.",
         variant: "destructive",
       });
       return;
@@ -269,9 +310,15 @@ export default function HostGame() {
 
       // Step 3: Create the game
       console.log('🎮 [HostGame] Step 3: Creating game in database...');
+      
+      // Use custom sport name if "Other" is selected, otherwise use the selected sport
+      const sportValue = formData.sport === 'Other' && formData.customSportName.trim() 
+        ? formData.customSportName.trim() 
+        : formData.sport;
+      
       const gamePayload = {
         host_id: user.id,
-        sport: toDbSportValue(formData.sport) as any,
+        sport: toDbSportValue(sportValue) as any,
         skill_level: formData.skillLevel as any,
         game_date: formData.gameDate,
         start_time: startTime24,
@@ -310,8 +357,10 @@ export default function HostGame() {
 
       // Step 4: Auto-create a community for the game
       console.log('👥 [HostGame] Step 4: Creating community...');
-      const communityName = `${formData.sport} - ${formData.locationName}`;
-      const communityDescription = `Community for the ${formData.sport} game on ${formData.gameDate}. ${formData.description || ''}`;
+      
+      // Use custom sport name for community if "Other" is selected
+      const communityName = `${sportValue} - ${formData.locationName}`;
+      const communityDescription = `Community for the ${sportValue} game on ${formData.gameDate}. ${formData.description || ''}`;
 
       const communityPayload = {
         name: communityName,
@@ -319,7 +368,7 @@ export default function HostGame() {
         game_id: gameData.id,
         created_by: user.id,
         type: 'game',
-        sport: toDbSportValue(formData.sport) as any
+        sport: toDbSportValue(sportValue) as any
       };
       console.log('Community payload:', communityPayload);
       
@@ -413,6 +462,26 @@ export default function HostGame() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  {/* Custom Sport Name - Only show when "Other" is selected */}
+                  {formData.sport === 'Other' && (
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="customSportName">Custom Sport Name *</Label>
+                      <Input
+                        type="text"
+                        id="customSportName"
+                        name="customSportName"
+                        placeholder="Enter sport name (English alphabets only)"
+                        value={formData.customSportName}
+                        onChange={handleInputChange}
+                        required={formData.sport === 'Other'}
+                        className={validationErrors.customSportName ? 'border-destructive' : ''}
+                      />
+                      {validationErrors.customSportName && (
+                        <p className="text-sm text-destructive">{validationErrors.customSportName}</p>
+                      )}
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label htmlFor="skillLevel">Skill Level *</Label>
