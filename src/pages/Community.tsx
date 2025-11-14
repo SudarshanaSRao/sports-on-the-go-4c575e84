@@ -9,11 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SEO } from "@/components/SEO";
-import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filter, Trash2, Search } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filter, Trash2, Search, Calendar } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { getAllSportsDbValues, toDisplaySportName } from "@/utils/sportsUtils";
+import { format } from "date-fns";
 
 interface Community {
   id: string;
@@ -100,6 +102,8 @@ export default function Community() {
   const [editingVisibility, setEditingVisibility] = useState(false);
   const [selectedVisibility, setSelectedVisibility] = useState<'PUBLIC' | 'FRIENDS_ONLY' | 'INVITE_ONLY'>('PUBLIC');
   const [showArchived, setShowArchived] = useState(false);
+  const [showReviveDialog, setShowReviveDialog] = useState(false);
+  const [gameData, setGameData] = useState<any>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -130,8 +134,8 @@ export default function Community() {
     if (error) {
       console.error("Error fetching communities:", error);
     } else {
-      setCommunities(data || []);
-      setFilteredCommunities(data || []);
+      setCommunities((data || []) as Community[]);
+      setFilteredCommunities((data || []) as Community[]);
     }
   };
 
@@ -466,9 +470,40 @@ export default function Community() {
     }
   };
 
-  const handleViewCommunity = (community: Community) => {
+  const handleViewCommunity = async (community: Community) => {
     setSelectedCommunity(community);
     setViewMode("posts");
+    
+    // If community is archived and has a game_id, fetch game data and show revive dialog
+    if (community.archived && community.game_id) {
+      const { data: game, error } = await supabase
+        .from("games")
+        .select("*")
+        .eq("id", community.game_id)
+        .maybeSingle();
+      
+      if (game && !error) {
+        setGameData(game);
+        setShowReviveDialog(true);
+      }
+    }
+  };
+  
+  const handleReviveCommunity = () => {
+    if (!selectedCommunity || !gameData) return;
+    
+    // Navigate to host game page with pre-filled data from the archived game
+    const params = new URLSearchParams({
+      sport: gameData.sport,
+      location: gameData.location_name,
+      address: gameData.address,
+      city: gameData.city,
+      description: gameData.description || '',
+      communityId: selectedCommunity.id
+    });
+    
+    navigate(`/host-game?${params.toString()}`);
+    setShowReviveDialog(false);
   };
 
   const handleBackToCommunities = () => {
@@ -1052,6 +1087,44 @@ export default function Community() {
           )}
         </div>
       </div>
+      
+      {/* Revive Community Dialog */}
+      <AlertDialog open={showReviveDialog} onOpenChange={setShowReviveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archived Community</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p>
+                This community is archived because the associated game has ended.
+              </p>
+              {gameData && (
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="w-4 h-4" />
+                    <span className="font-medium">Original Game Date:</span>
+                    <span>{format(new Date(gameData.game_date), 'MMMM d, yyyy')}</span>
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Time:</span> {gameData.start_time}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-medium">Location:</span> {gameData.location_name}
+                  </div>
+                </div>
+              )}
+              <p className="text-foreground">
+                Would you like to create a new game to revive this community? This will help bring the community back to life with a fresh game session.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Continue Viewing</AlertDialogCancel>
+            <AlertDialogAction onClick={handleReviveCommunity}>
+              Create New Game
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
