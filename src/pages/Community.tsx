@@ -26,6 +26,8 @@ interface Community {
   game_id: string | null;
   created_by: string;
   visibility: 'PUBLIC' | 'FRIENDS_ONLY' | 'INVITE_ONLY';
+  archived: boolean;
+  archived_at: string | null;
 }
 
 interface Post {
@@ -97,6 +99,7 @@ export default function Community() {
   const [communitySearchQuery, setCommunitySearchQuery] = useState("");
   const [editingVisibility, setEditingVisibility] = useState(false);
   const [selectedVisibility, setSelectedVisibility] = useState<'PUBLIC' | 'FRIENDS_ONLY' | 'INVITE_ONLY'>('PUBLIC');
+  const [showArchived, setShowArchived] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -135,6 +138,9 @@ export default function Community() {
   useEffect(() => {
     let filtered = communities;
     
+    // Filter by archived status
+    filtered = filtered.filter(c => c.archived === showArchived);
+    
     // Filter by sport
     if (sportFilter !== "ALL") {
       filtered = filtered.filter(c => c.sport === sportFilter);
@@ -150,7 +156,7 @@ export default function Community() {
     }
     
     setFilteredCommunities(filtered);
-  }, [sportFilter, communitySearchQuery, communities]);
+  }, [sportFilter, communitySearchQuery, communities, showArchived]);
 
   const fetchPosts = async (communityId: string) => {
     const { data: postsData, error: postsError } = await supabase
@@ -673,10 +679,18 @@ export default function Community() {
                     />
                   </div>
                 </div>
-                <Button onClick={() => setShowNewCommunity(!showNewCommunity)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  {showNewCommunity ? "Cancel" : "Create Community"}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant={showArchived ? "default" : "outline"}
+                    onClick={() => setShowArchived(!showArchived)}
+                  >
+                    {showArchived ? "Show Active" : "Show Archived"}
+                  </Button>
+                  <Button onClick={() => setShowNewCommunity(!showNewCommunity)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    {showNewCommunity ? "Cancel" : "Create Community"}
+                  </Button>
+                </div>
               </div>
 
               {showNewCommunity && (
@@ -738,7 +752,12 @@ export default function Community() {
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <CardTitle className="text-lg">{community.name}</CardTitle>
+                          <div className="flex items-center gap-2 mb-1">
+                            <CardTitle className="text-lg">{community.name}</CardTitle>
+                            {community.archived && (
+                              <Badge variant="secondary">Archived</Badge>
+                            )}
+                          </div>
                           <CardDescription className="mt-2 line-clamp-2">
                             {community.description}
                           </CardDescription>
@@ -783,7 +802,12 @@ export default function Community() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-2xl">{selectedCommunity?.name}</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-2xl">{selectedCommunity?.name}</CardTitle>
+                        {selectedCommunity?.archived && (
+                          <Badge variant="secondary">Archived</Badge>
+                        )}
+                      </div>
                       <CardDescription className="mt-2">
                         {selectedCommunity?.description}
                       </CardDescription>
