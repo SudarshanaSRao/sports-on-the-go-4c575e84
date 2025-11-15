@@ -16,6 +16,7 @@ import { useSavedGames } from "@/hooks/useSavedGames";
 interface Game {
   id: string;
   sport: string;
+  rawSport: string; // Raw sport type from DB (e.g., "OTHER")
   emoji: string;
   location: string;
   address: string;
@@ -47,6 +48,7 @@ const sampleGames: Game[] = [
   {
     id: "1",
     sport: "Basketball",
+    rawSport: "BASKETBALL",
     emoji: "🏀",
     location: "Mission Playground",
     address: "19th & Valencia, San Francisco, CA",
@@ -66,6 +68,7 @@ const sampleGames: Game[] = [
   {
     id: "2",
     sport: "Soccer",
+    rawSport: "SOCCER",
     emoji: "⚽",
     location: "Central Park",
     address: "Great Lawn, New York, NY",
@@ -85,6 +88,7 @@ const sampleGames: Game[] = [
   {
     id: "3",
     sport: "Tennis",
+    rawSport: "TENNIS",
     emoji: "🎾",
     location: "Griffith Park",
     address: "Los Angeles, CA",
@@ -104,6 +108,7 @@ const sampleGames: Game[] = [
   {
     id: "4",
     sport: "Volleyball",
+    rawSport: "VOLLEYBALL",
     emoji: "🏐",
     location: "South Beach",
     address: "Miami Beach, FL",
@@ -123,6 +128,7 @@ const sampleGames: Game[] = [
   {
     id: "5",
     sport: "Football",
+    rawSport: "FOOTBALL",
     emoji: "🏈",
     location: "Grant Park",
     address: "Chicago, IL",
@@ -142,6 +148,7 @@ const sampleGames: Game[] = [
   {
     id: "6",
     sport: "Baseball",
+    rawSport: "BASEBALL",
     emoji: "⚾",
     location: "Gas Works Park",
     address: "Seattle, WA",
@@ -161,6 +168,7 @@ const sampleGames: Game[] = [
   {
     id: "16",
     sport: "Cricket",
+    rawSport: "CRICKET",
     emoji: "🏏",
     location: "Golden Gate Park",
     address: "San Francisco, CA",
@@ -180,6 +188,7 @@ const sampleGames: Game[] = [
   {
     id: "17",
     sport: "Cricket",
+    rawSport: "CRICKET",
     emoji: "🏏",
     location: "Flushing Meadows Park",
     address: "Queens, NY",
@@ -199,6 +208,7 @@ const sampleGames: Game[] = [
   {
     id: "7",
     sport: "Pickleball",
+    rawSport: "PICKLEBALL",
     emoji: "🎾",
     location: "Zilker Park",
     address: "Austin, TX",
@@ -218,6 +228,7 @@ const sampleGames: Game[] = [
   {
     id: "8",
     sport: "Ultimate Frisbee",
+    rawSport: "ULTIMATE_FRISBEE",
     emoji: "🥏",
     location: "Boston Common",
     address: "Boston, MA",
@@ -237,6 +248,7 @@ const sampleGames: Game[] = [
   {
     id: "9",
     sport: "Running",
+    rawSport: "RUNNING",
     emoji: "🏃",
     location: "City Park",
     address: "Denver, CO",
@@ -256,6 +268,7 @@ const sampleGames: Game[] = [
   {
     id: "10",
     sport: "Cycling",
+    rawSport: "CYCLING",
     emoji: "🚴",
     location: "Schuylkill River Trail",
     address: "Philadelphia, PA",
@@ -275,6 +288,7 @@ const sampleGames: Game[] = [
   {
     id: "11",
     sport: "Badminton",
+    rawSport: "BADMINTON",
     emoji: "🏸",
     location: "Piedmont Park",
     address: "Atlanta, GA",
@@ -294,6 +308,7 @@ const sampleGames: Game[] = [
   {
     id: "12",
     sport: "Golf",
+    rawSport: "GOLF",
     emoji: "⛳",
     location: "Discovery Park",
     address: "Seattle, WA",
@@ -313,6 +328,7 @@ const sampleGames: Game[] = [
   {
     id: "13",
     sport: "Basketball",
+    rawSport: "BASKETBALL",
     emoji: "🏀",
     location: "Waterfront Park",
     address: "Portland, OR",
@@ -332,6 +348,7 @@ const sampleGames: Game[] = [
   {
     id: "14",
     sport: "Soccer",
+    rawSport: "SOCCER",
     emoji: "⚽",
     location: "Discovery Green",
     address: "Houston, TX",
@@ -351,6 +368,7 @@ const sampleGames: Game[] = [
   {
     id: "15",
     sport: "Volleyball",
+    rawSport: "VOLLEYBALL",
     emoji: "🏐",
     location: "Mission Bay Park",
     address: "San Diego, CA",
@@ -406,6 +424,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   const transformGame = (game: any): Game => ({
     id: game.id,
     sport: formatSportDisplay(game.sport, game.custom_sport_name),
+    rawSport: game.sport, // Store raw DB value for filtering
     emoji: getSportEmoji(game.sport),
     location: game.location_name,
     address: `${game.address}, ${game.city}`,
@@ -648,7 +667,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
 
   // Get unique sports from games (using DB enum values)
   const availableSports = useMemo(() => {
-    return Array.from(new Set(games.map(g => g.sport))).sort();
+    return Array.from(new Set(games.map(g => g.rawSport))).sort();
   }, [games]);
 
   // Filter games based on selected sports and visibility
@@ -672,7 +691,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     
     // Filter by selected sports
     if (selectedSports.length > 0) {
-      filtered = filtered.filter(game => selectedSports.includes(game.sport));
+      filtered = filtered.filter(game => selectedSports.includes(game.rawSport));
     }
     
     // Filter by visibility rules
