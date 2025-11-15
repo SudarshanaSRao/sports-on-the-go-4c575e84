@@ -694,7 +694,7 @@ export default function Community() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen min-h-screen-mobile bg-background">
       <SEO
         title="Sports Communities & Discussion Forums"
         description="Join sport-specific communities, connect with fellow athletes, share tips and strategies. Participate in discussions about games, training, and local sports events."
@@ -702,7 +702,7 @@ export default function Community() {
         canonicalUrl="https://squadup.app/community"
       />
       <Navbar />
-      <div className="pt-20 px-4 pb-4">
+      <div className="pt-20 px-4 pb-4 safe-bottom">
         <div className="max-w-7xl mx-auto">
           {viewMode === "list" ? (
             <>

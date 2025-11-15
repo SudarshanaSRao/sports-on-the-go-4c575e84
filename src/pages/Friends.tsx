@@ -39,9 +39,9 @@ const Friends = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen min-h-screen-mobile bg-gradient-to-b from-background to-muted/20">
       <Navbar />
-      <main className="container mx-auto px-4 pt-24 pb-12">
+      <main className="container mx-auto px-4 pt-24 pb-12 safe-bottom">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>

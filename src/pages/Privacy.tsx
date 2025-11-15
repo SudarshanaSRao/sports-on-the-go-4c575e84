@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Privacy = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen min-h-screen-mobile bg-background">
       <Navbar />
       
       <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">

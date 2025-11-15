@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { TermsVersionChecker } from "./components/TermsVersionChecker";
+import { useMobileViewport } from "./hooks/useMobileViewport";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
@@ -26,7 +27,11 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  // Enable mobile viewport optimization
+  useMobileViewport();
+  
+  return (
   <QueryClientProvider client={queryClient}>
     <HelmetProvider>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
@@ -64,6 +69,7 @@ const App = () => (
       </ThemeProvider>
     </HelmetProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
