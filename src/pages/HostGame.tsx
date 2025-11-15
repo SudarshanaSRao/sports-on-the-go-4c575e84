@@ -510,16 +510,16 @@ export default function HostGame() {
       <div className="mobile-page-padding px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-3xl mobile-container">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-3xl font-black">Host a Game</CardTitle>
-              <CardDescription>Fill out the details to create your game</CardDescription>
+            <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+              <CardTitle className="text-2xl sm:text-3xl font-black">Host a Game</CardTitle>
+              <CardDescription className="text-sm sm:text-base">Fill out the details to create your game</CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Sport & Skill Level */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-form-grid">
-                  <div className="space-y-2">
-                    <Label htmlFor="sport">Sport *</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mobile-form-grid">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="sport" className="text-sm">Sport *</Label>
                     <Select name="sport" value={formData.sport} onValueChange={(value) => handleSelectChange("sport", value)} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a sport" />
@@ -536,8 +536,8 @@ export default function HostGame() {
 
                   {/* Custom Sport Name - Only show when "Other" is selected */}
                   {formData.sport === 'Other' && (
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="customSportName">Custom Sport Name *</Label>
+                    <div className="space-y-1.5 sm:space-y-2 md:col-span-2">
+                      <Label htmlFor="customSportName" className="text-sm">Custom Sport Name *</Label>
                       <Input
                         type="text"
                         id="customSportName"
@@ -554,8 +554,8 @@ export default function HostGame() {
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="skillLevel">Skill Level *</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="skillLevel" className="text-sm">Skill Level *</Label>
                     <Select name="skillLevel" value={formData.skillLevel} onValueChange={(value) => handleSelectChange("skillLevel", value)} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select skill level" />
@@ -572,8 +572,8 @@ export default function HostGame() {
                 </div>
 
                 {/* Date & Time */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mobile-form-grid">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mobile-form-grid">
+                  <div className="space-y-1.5 sm:space-y-2">
                     <Label htmlFor="gameDate" className="text-sm">Date *</Label>
                     <Input 
                       type="date" 
@@ -620,15 +620,15 @@ export default function HostGame() {
                 </div>
 
                 {/* Players */}
-                <div className="space-y-2">
-                  <Label htmlFor="maxPlayers">Max Players</Label>
-                  <Input type="number" id="maxPlayers" name="maxPlayers" placeholder="10" value={formData.maxPlayers} onChange={handleInputChange} min="2" max="99999" required />
+                <div className="space-y-1.5 sm:space-y-2">
+                  <Label htmlFor="maxPlayers" className="text-sm">Max Players</Label>
+                  <Input type="number" id="maxPlayers" name="maxPlayers" placeholder="10" value={formData.maxPlayers} onChange={handleInputChange} min="2" max="99999" required className="text-sm" />
                 </div>
 
                 {/* Location */}
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="country">Country *</Label>
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="country" className="text-sm">Country *</Label>
                     <Select name="country" value={formData.country} onValueChange={(value) => handleSelectChange("country", value)} required>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a country" />
@@ -643,24 +643,24 @@ export default function HostGame() {
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="locationName">Location Name *</Label>
-                    <Input type="text" id="locationName" name="locationName" placeholder="Enter a location" value={formData.locationName} onChange={handleInputChange} required />
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="locationName" className="text-sm">Location Name *</Label>
+                    <Input type="text" id="locationName" name="locationName" placeholder="Enter a location" value={formData.locationName} onChange={handleInputChange} required className="text-sm" />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Street Address *</Label>
-                    <Input type="text" id="address" name="address" placeholder="123 Main St" value={formData.address} onChange={handleInputChange} required />
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="address" className="text-sm">Street Address *</Label>
+                    <Input type="text" id="address" name="address" placeholder="123 Main St" value={formData.address} onChange={handleInputChange} required className="text-sm" />
                   </div>
 
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City *</Label>
-                      <Input type="text" id="city" name="city" placeholder="Enter a city" value={formData.city} onChange={handleInputChange} required />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mobile-form-grid">
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="city" className="text-sm">City *</Label>
+                      <Input type="text" id="city" name="city" placeholder="Enter a city" value={formData.city} onChange={handleInputChange} required className="text-sm" />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="state">State/Province/Region</Label>
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="state" className="text-sm">State/Province/Region</Label>
                       <Input 
                         type="text" 
                         id="state" 
@@ -669,20 +669,20 @@ export default function HostGame() {
                         value={formData.state} 
                         onChange={handleInputChange}
                       />
-                      <p className="text-xs text-muted-foreground">Optional - Enter state, province, or region</p>
+                      <p className="text-[0.6875rem] sm:text-xs text-muted-foreground">Optional - Enter state, province, or region</p>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="zipCode">ZIP/Postal Code</Label>
-                      <Input type="text" id="zipCode" name="zipCode" placeholder="Enter postal code" value={formData.zipCode} onChange={handleInputChange} />
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <Label htmlFor="zipCode" className="text-sm">ZIP/Postal Code</Label>
+                      <Input type="text" id="zipCode" name="zipCode" placeholder="Enter postal code" value={formData.zipCode} onChange={handleInputChange} className="text-sm" />
                     </div>
                   </div>
                 </div>
 
                 {/* Optional Details */}
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="description" className="text-sm">Description</Label>
                     <Textarea 
                       id="description" 
                       name="description" 
@@ -691,20 +691,20 @@ export default function HostGame() {
                       onChange={handleInputChange} 
                       rows={3}
                       maxLength={FIELD_LIMITS.description}
-                      className={validationErrors.description ? "border-destructive" : ""}
+                      className={`text-sm ${validationErrors.description ? "border-destructive" : ""}`}
                     />
-                    <div className="flex justify-between items-center">
-                      <p className="text-xs text-muted-foreground">
+                    <div className="flex justify-between items-center gap-2">
+                      <p className="text-[0.6875rem] sm:text-xs text-muted-foreground">
                         {formData.description.trim().length}/{FIELD_LIMITS.description} characters
                       </p>
                       {validationErrors.description && (
-                        <p className="text-xs text-destructive">{validationErrors.description}</p>
+                        <p className="text-[0.6875rem] sm:text-xs text-destructive">{validationErrors.description}</p>
                       )}
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="equipmentRequirements">Equipment Requirements</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="equipmentRequirements" className="text-sm">Equipment Requirements</Label>
                     <Textarea 
                       id="equipmentRequirements" 
                       name="equipmentRequirements" 
@@ -713,20 +713,20 @@ export default function HostGame() {
                       onChange={handleInputChange} 
                       rows={2}
                       maxLength={FIELD_LIMITS.equipmentRequirements}
-                      className={validationErrors.equipmentRequirements ? "border-destructive" : ""}
+                      className={`text-sm ${validationErrors.equipmentRequirements ? "border-destructive" : ""}`}
                     />
-                    <div className="flex justify-between items-center">
-                      <p className="text-xs text-muted-foreground">
+                    <div className="flex justify-between items-center gap-2">
+                      <p className="text-[0.6875rem] sm:text-xs text-muted-foreground">
                         {formData.equipmentRequirements.trim().length}/{FIELD_LIMITS.equipmentRequirements} characters
                       </p>
                       {validationErrors.equipmentRequirements && (
-                        <p className="text-xs text-destructive">{validationErrors.equipmentRequirements}</p>
+                        <p className="text-[0.6875rem] sm:text-xs text-destructive">{validationErrors.equipmentRequirements}</p>
                       )}
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="gameRules">Game Rules</Label>
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <Label htmlFor="gameRules" className="text-sm">Game Rules</Label>
                     <Textarea 
                       id="gameRules" 
                       name="gameRules" 
@@ -735,59 +735,59 @@ export default function HostGame() {
                       onChange={handleInputChange} 
                       rows={2}
                       maxLength={FIELD_LIMITS.gameRules}
-                      className={validationErrors.gameRules ? "border-destructive" : ""}
+                      className={`text-sm ${validationErrors.gameRules ? "border-destructive" : ""}`}
                     />
-                    <div className="flex justify-between items-center">
-                      <p className="text-xs text-muted-foreground">
+                    <div className="flex justify-between items-center gap-2">
+                      <p className="text-[0.6875rem] sm:text-xs text-muted-foreground">
                         {formData.gameRules.trim().length}/{FIELD_LIMITS.gameRules} characters
                       </p>
                       {validationErrors.gameRules && (
-                        <p className="text-xs text-destructive">{validationErrors.gameRules}</p>
+                        <p className="text-[0.6875rem] sm:text-xs text-destructive">{validationErrors.gameRules}</p>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {/* Host Liability Acknowledgment - MANDATORY */}
-                <div className="space-y-3 border-2 border-destructive/20 rounded-lg p-4 bg-destructive/5 mt-6">
-                  <div className="flex items-start space-x-3">
-                    <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div className="space-y-2 sm:space-y-3 border-2 border-destructive/20 rounded-lg p-3 sm:p-4 bg-destructive/5 mt-4 sm:mt-6 mobile-alert-compact">
+                  <div className="flex items-start space-x-2 sm:space-x-3">
+                    <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-destructive flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-foreground mb-2">
+                      <p className="text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">
                         HOST LIABILITY ACKNOWLEDGMENT
                       </p>
-                      <p className="text-xs text-muted-foreground mb-3">
+                      <p className="text-[0.6875rem] sm:text-xs text-muted-foreground mb-2 sm:mb-3">
                         By hosting a game, you are taking on additional responsibilities and risks. Please read and acknowledge:
                       </p>
                     </div>
                   </div>
                   
-                  <div className="flex items-start space-x-3">
+                  <div className="flex items-start space-x-2 sm:space-x-3">
                     <Checkbox
                       id="host-liability"
                       checked={hostLiabilityAcknowledged}
                       onCheckedChange={(checked) => setHostLiabilityAcknowledged(checked === true)}
-                      className="mt-1"
+                      className="mt-1 flex-shrink-0"
                     />
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <Label
                         htmlFor="host-liability"
-                        className="text-xs leading-relaxed cursor-pointer font-normal"
+                        className="text-[0.6875rem] sm:text-xs leading-relaxed cursor-pointer font-normal mobile-checkbox-label block"
                       >
-                        <strong className="text-foreground">I acknowledge and agree</strong> that by hosting this game:
-                        <ul className="list-disc pl-5 mt-2 space-y-1.5 text-muted-foreground">
-                          <li><strong className="text-foreground">I am hosting at my own risk</strong> and accept full personal responsibility for organizing this activity</li>
-                          <li><strong className="text-foreground">The platform has no liability</strong> for any injuries, damages, disputes, or incidents that occur during my hosted game</li>
-                          <li><strong className="text-foreground">I am responsible for venue safety</strong> - I must ensure the location is safe, appropriate, and legally accessible for the activity</li>
-                          <li><strong className="text-foreground">I am responsible for all participants</strong> - The platform does not verify, supervise, or manage attendees</li>
-                          <li><strong className="text-foreground">I assume all risks</strong> including but not limited to injuries, property damage, theft, disputes, and legal claims</li>
-                          <li><strong className="text-foreground">I release the platform</strong> from any and all claims, damages, or liabilities related to this game</li>
-                          <li><strong className="text-foreground">I am bound by the{" "}
+                        <strong className="text-foreground block mb-1">I acknowledge and agree</strong> that by hosting this game:
+                        <ul className="list-disc pl-4 sm:pl-5 mt-1 sm:mt-2 space-y-1 sm:space-y-1.5 text-muted-foreground">
+                          <li className="leading-snug"><strong className="text-foreground">I am hosting at my own risk</strong> and accept full personal responsibility for organizing this activity</li>
+                          <li className="leading-snug"><strong className="text-foreground">The platform has no liability</strong> for any injuries, damages, disputes, or incidents that occur during my hosted game</li>
+                          <li className="leading-snug"><strong className="text-foreground">I am responsible for venue safety</strong> - I must ensure the location is safe, appropriate, and legally accessible for the activity</li>
+                          <li className="leading-snug"><strong className="text-foreground">I am responsible for all participants</strong> - The platform does not verify, supervise, or manage attendees</li>
+                          <li className="leading-snug"><strong className="text-foreground">I assume all risks</strong> including but not limited to injuries, property damage, theft, disputes, and legal claims</li>
+                          <li className="leading-snug"><strong className="text-foreground">I release the platform</strong> from any and all claims, damages, or liabilities related to this game</li>
+                          <li className="leading-snug"><strong className="text-foreground">I am bound by the{" "}
                             <Link to="/terms" target="_blank" className="text-primary underline hover:text-primary/80">
                               Terms and Conditions
                             </Link></strong> and all legal provisions</li>
                         </ul>
-                        <p className="mt-3 font-semibold text-foreground">
+                        <p className="mt-2 sm:mt-3 font-semibold text-foreground text-[0.6875rem] sm:text-xs leading-snug">
                           I understand that SquadUp is only a coordination platform and provides no supervision, insurance, or liability coverage for hosted games.
                         </p>
                       </Label>
@@ -796,28 +796,35 @@ export default function HostGame() {
                 </div>
 
                 {/* Submit Buttons */}
-                <div className="flex gap-4 pt-4">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6 mobile-button-stack">
                   <Button 
                     type="submit" 
                     disabled={loading || !hostLiabilityAcknowledged || Object.keys(validationErrors).length > 0} 
-                    className="flex-1"
+                    className="w-full sm:flex-1 text-sm sm:text-base"
                   >
-                    {loading ? "Creating..." : "I Acknowledge - Create Game"}
+                    {loading ? "Creating..." : "Create Game"}
                   </Button>
                   <Button 
                     type="button" 
                     variant="outline" 
                     onClick={handleClearForm} 
                     disabled={loading}
+                    className="w-full sm:w-auto text-sm sm:text-base"
                   >
                     Clear Form
                   </Button>
-                  <Button type="button" variant="outline" onClick={() => navigate("/discover")} disabled={loading}>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => navigate("/discover")} 
+                    disabled={loading}
+                    className="w-full sm:w-auto text-sm sm:text-base"
+                  >
                     Cancel
                   </Button>
                 </div>
                 {Object.keys(validationErrors).length > 0 && (
-                  <p className="text-sm text-destructive text-center">
+                  <p className="text-xs sm:text-sm text-destructive text-center mt-2">
                     Please fix validation errors before submitting
                   </p>
                 )}
