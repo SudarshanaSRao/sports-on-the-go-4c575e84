@@ -621,20 +621,49 @@ const Index = () => {
         <div className="container mx-auto relative z-10">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-4xl sm:text-5xl font-black text-white mb-6">
-              Ready to Play?
+              {user ? "Keep Playing!" : "Ready to Play?"}
             </h2>
             <p className="text-xl text-white/90 mb-10">
-              Join thousands of athletes finding games every day. It's free to get started.
+              {user 
+                ? "Discover new games, connect with players, and expand your sports network."
+                : "Join thousands of athletes finding games every day. It's free to get started."
+              }
             </p>
-            <Button 
-              size="lg" 
-              className="bg-white text-primary hover:bg-white/90 shadow-elevated text-lg px-10 py-6 hover:scale-105 transition-smooth"
-              asChild
-            >
-              <Link to="/auth">
-                Create Free Account
-              </Link>
-            </Button>
+            {!user && (
+              <Button 
+                size="lg" 
+                className="bg-white text-primary hover:bg-white/90 shadow-elevated text-lg px-10 py-6 hover:scale-105 transition-smooth"
+                asChild
+              >
+                <Link to="/auth">
+                  Create Free Account
+                </Link>
+              </Button>
+            )}
+            {user && (
+              <div className="flex items-center justify-center gap-4">
+                <Button 
+                  size="lg" 
+                  className="bg-white text-primary hover:bg-white/90 shadow-elevated text-lg px-10 py-6 hover:scale-105 transition-smooth"
+                  asChild
+                >
+                  <Link to="/discover">
+                    <MapPin className="w-5 h-5 mr-2" />
+                    Find Games
+                  </Link>
+                </Button>
+                <Button 
+                  size="lg" 
+                  className="bg-white/10 text-white border-2 border-white/20 hover:bg-white/20 text-lg px-10 py-6 hover:scale-105 transition-smooth"
+                  asChild
+                >
+                  <Link to="/host-game">
+                    <Calendar className="w-5 h-5 mr-2" />
+                    Host a Game
+                  </Link>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>
