@@ -1412,7 +1412,7 @@ const MyGames = () => {
                               <div className="flex items-center space-x-2 text-sm">
                                 <Calendar className="w-4 h-4 text-muted-foreground" />
                                 <span className="font-medium">
-                                  {format(new Date(game.game_date), 'MMM dd')}
+                                  {format(new Date(game.game_date), 'MMM dd, yyyy')}
                                 </span>
                               </div>
                               <div className="flex items-center space-x-2 text-sm">
@@ -1535,7 +1535,7 @@ const MyGames = () => {
                               <div className="flex items-center space-x-2 text-sm">
                                 <Calendar className="w-4 h-4 text-muted-foreground" />
                                 <span className="font-medium">
-                                  {format(new Date(game.game_date), 'MMM dd')}
+                                  {format(new Date(game.game_date), 'MMM dd, yyyy')}
                                 </span>
                               </div>
                               <div className="flex items-center space-x-2 text-sm">
