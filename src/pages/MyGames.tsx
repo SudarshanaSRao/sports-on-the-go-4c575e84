@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ShareGameButton } from "@/components/ShareGameButton";
 import { GameReminderBanner } from "@/components/GameReminderBanner";
 import { Calendar, Clock, MapPin, Users, Plus, Star, X, Pencil, MessageSquare, Bookmark } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -276,6 +276,7 @@ const PastGameCard = ({ game, userId, onReviewSubmitted }: { game: Game; userId:
 
 const MyGames = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const [upcomingGames, setUpcomingGames] = useState<Game[]>([]);
   const [hostedGames, setHostedGames] = useState<Game[]>([]);
@@ -316,6 +317,26 @@ const MyGames = () => {
       fetchUserRSVPs();
     }
   }, [user]);
+
+  // Restore dialog state from URL on page load
+  useEffect(() => {
+    const gameId = searchParams.get('gameId');
+    const view = searchParams.get('view');
+    
+    if (gameId && (upcomingGames.length > 0 || hostedGames.length > 0 || savedGames.length > 0)) {
+      const allGames = [...upcomingGames, ...hostedGames, ...savedGames];
+      const game = allGames.find(g => g.id === gameId);
+      
+      if (game) {
+        setSelectedGame(game);
+        if (view === 'details') {
+          setIsDetailsOpen(true);
+        } else if (view === 'manage') {
+          handleManageGame(gameId);
+        }
+      }
+    }
+  }, [searchParams, upcomingGames, hostedGames, savedGames]);
 
   const fetchUserRSVPs = async () => {
     if (!user) return;
@@ -843,7 +864,15 @@ const MyGames = () => {
   const allUpcomingGames = [...upcomingGames, ...hostedGames];
 
   const renderDetailsDialog = () => (
-    <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+    <Dialog open={isDetailsOpen} onOpenChange={(open) => {
+      setIsDetailsOpen(open);
+      if (!open) {
+        const params = new URLSearchParams(searchParams);
+        params.delete('gameId');
+        params.delete('view');
+        setSearchParams(params);
+      }
+    }}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
@@ -969,7 +998,13 @@ const MyGames = () => {
   const renderManageDialog = () => (
     <Dialog open={isManageOpen} onOpenChange={(open) => {
       setIsManageOpen(open);
-      if (!open) setIsEditMode(false);
+      if (!open) {
+        setIsEditMode(false);
+        const params = new URLSearchParams(searchParams);
+        params.delete('gameId');
+        params.delete('view');
+        setSearchParams(params);
+      }
     }}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>

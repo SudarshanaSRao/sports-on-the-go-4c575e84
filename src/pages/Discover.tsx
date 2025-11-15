@@ -663,6 +663,22 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   // Use propGames if provided, otherwise use fetched DB games
   const games = propGames || dbGames;
   
+  // Restore game selection from URL on page load
+  useEffect(() => {
+    const gameId = searchParams.get('gameId');
+    
+    if (gameId && games.length > 0 && !selectedGame) {
+      const game = games.find(g => g.id === gameId);
+      
+      if (game) {
+        setSelectedGame(game);
+        if (map) {
+          map.setView([game.lat, game.lng], 14);
+        }
+      }
+    }
+  }, [searchParams, games, map]);
+  
   // Auto-center map on first real game with coordinates
   const center = propCenter || (games.length > 0 && games[0].lat && games[0].lng 
     ? [games[0].lat, games[0].lng] as [number, number]
@@ -839,6 +855,9 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
 
         marker.on("click", () => {
           setSelectedGame(game);
+          const params = new URLSearchParams(searchParams);
+          params.set('gameId', game.id);
+          setSearchParams(params);
           map.setView([game.lat, game.lng], 14);
         });
 
@@ -1403,7 +1422,12 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                 </div>
 
                 <button
-                  onClick={() => setSelectedGame(null)}
+                  onClick={() => {
+                    setSelectedGame(null);
+                    const params = new URLSearchParams(searchParams);
+                    params.delete('gameId');
+                    setSearchParams(params);
+                  }}
                   className="w-full mt-3 text-sm text-gray-600 hover:text-gray-900 font-medium"
                 >
                   ← Back to all games
@@ -1418,6 +1442,9 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
                       key={game.id}
                       onClick={() => {
                         setSelectedGame(game);
+                        const params = new URLSearchParams(searchParams);
+                        params.set('gameId', game.id);
+                        setSearchParams(params);
                         if (map) {
                           map.setView([game.lat, game.lng], 14);
                         }
