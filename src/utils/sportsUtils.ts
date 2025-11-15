@@ -162,8 +162,14 @@ export function toDisplaySportName(dbValue: string): string {
 
 /**
  * Get emoji for a sport (works with both display name and DB value)
+ * If customEmoji is provided (for OTHER sport), it will be used instead
  */
-export function getSportEmoji(sport: string): string {
+export function getSportEmoji(sport: string, customEmoji?: string | null): string {
+  // If custom emoji is provided and sport is OTHER, use it
+  if (customEmoji && (sport === 'OTHER' || sport.toLowerCase() === 'other')) {
+    return customEmoji;
+  }
+  
   // Try as DB value first
   let dbValue = sport.toUpperCase() as SportType;
   if (SPORT_EMOJIS[dbValue]) {

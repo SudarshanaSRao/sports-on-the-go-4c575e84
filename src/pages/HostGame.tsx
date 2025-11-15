@@ -92,6 +92,7 @@ export default function HostGame() {
     equipmentRequirements?: string;
     gameRules?: string;
     customSportName?: string;
+    customEmoji?: string;
   }>({});
 
   // Load saved form data from localStorage on component mount
@@ -121,6 +122,7 @@ export default function HostGame() {
       equipmentRequirements: "",
       gameRules: "",
       customSportName: "",
+      customEmoji: "",
     };
   });
 
@@ -161,6 +163,7 @@ export default function HostGame() {
       equipmentRequirements: "",
       gameRules: "",
       customSportName: "",
+      customEmoji: "",
     });
     
     // Reset liability acknowledgment
@@ -196,6 +199,25 @@ export default function HostGame() {
         setValidationErrors((prev) => {
           const newErrors = { ...prev };
           delete newErrors.customSportName;
+          return newErrors;
+        });
+      }
+    }
+    
+    // Validate custom emoji to only allow single emoji character
+    if (name === 'customEmoji') {
+      // Regex to match a single emoji (basic emoji support)
+      const emojiRegex = /^[\p{Emoji_Presentation}\p{Extended_Pictographic}]$/u;
+      if (value && !emojiRegex.test(value)) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          customEmoji: 'Please enter a single emoji only',
+        }));
+        return;
+      } else {
+        setValidationErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.customEmoji;
           return newErrors;
         });
       }
@@ -382,6 +404,7 @@ export default function HostGame() {
         host_id: user.id,
         sport: toDbSportValue(formData.sport) as any,
         custom_sport_name: formData.sport === 'Other' ? formData.customSportName.trim() : null,
+        custom_emoji: formData.sport === 'Other' && formData.customEmoji.trim() ? formData.customEmoji.trim() : null,
         skill_level: formData.skillLevel as any,
         game_date: formData.gameDate,
         start_time: startTime24,
@@ -536,22 +559,44 @@ export default function HostGame() {
 
                   {/* Custom Sport Name - Only show when "Other" is selected */}
                   {formData.sport === 'Other' && (
-                    <div className="space-y-1.5 sm:space-y-2 md:col-span-2">
-                      <Label htmlFor="customSportName" className="text-sm">Custom Sport Name *</Label>
-                      <Input
-                        type="text"
-                        id="customSportName"
-                        name="customSportName"
-                        placeholder="Enter sport name (English alphabets only)"
-                        value={formData.customSportName}
-                        onChange={handleInputChange}
-                        required={formData.sport === 'Other'}
-                        className={validationErrors.customSportName ? 'border-destructive' : ''}
-                      />
-                      {validationErrors.customSportName && (
-                        <p className="text-sm text-destructive">{validationErrors.customSportName}</p>
-                      )}
-                    </div>
+                    <>
+                      <div className="space-y-1.5 sm:space-y-2 md:col-span-2">
+                        <Label htmlFor="customSportName" className="text-sm">Custom Sport Name *</Label>
+                        <Input
+                          type="text"
+                          id="customSportName"
+                          name="customSportName"
+                          placeholder="Enter sport name (English alphabets only)"
+                          value={formData.customSportName}
+                          onChange={handleInputChange}
+                          required={formData.sport === 'Other'}
+                          className={validationErrors.customSportName ? 'border-destructive' : ''}
+                        />
+                        {validationErrors.customSportName && (
+                          <p className="text-sm text-destructive">{validationErrors.customSportName}</p>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-1.5 sm:space-y-2">
+                        <Label htmlFor="customEmoji" className="text-sm">
+                          Custom Emoji <span className="text-muted-foreground">(Optional)</span>
+                        </Label>
+                        <Input
+                          type="text"
+                          id="customEmoji"
+                          name="customEmoji"
+                          placeholder="🎯 (default if empty)"
+                          value={formData.customEmoji}
+                          onChange={handleInputChange}
+                          maxLength={2}
+                          className={validationErrors.customEmoji ? 'border-destructive' : ''}
+                        />
+                        {validationErrors.customEmoji && (
+                          <p className="text-sm text-destructive">{validationErrors.customEmoji}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground">Enter a single emoji to represent your sport</p>
+                      </div>
+                    </>
                   )}
 
                   <div className="space-y-1.5 sm:space-y-2">

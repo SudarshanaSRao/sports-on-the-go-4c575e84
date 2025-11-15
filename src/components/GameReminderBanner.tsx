@@ -11,7 +11,11 @@ import { getSportEmoji, toDisplaySportName } from "@/utils/sportsUtils";
 interface UpcomingGame {
   id: string;
   sport: string;
+  custom_sport_name?: string | null;
+  custom_emoji?: string | null;
   location_name: string;
+  address: string;
+  city: string;
   game_date: string;
   start_time: string;
   host_id: string;
@@ -63,7 +67,11 @@ export const GameReminderBanner = () => {
           games (
             id,
             sport,
+            custom_sport_name,
+            custom_emoji,
             location_name,
+            address,
+            city,
             game_date,
             start_time,
             host_id,
@@ -78,7 +86,7 @@ export const GameReminderBanner = () => {
       // Fetch games user is hosting
       const { data: hostData, error: hostError } = await supabase
         .from('games')
-        .select('id, sport, location_name, game_date, start_time, host_id, status')
+        .select('id, sport, custom_sport_name, custom_emoji, location_name, address, city, game_date, start_time, host_id, status')
         .eq('host_id', user.id)
         .eq('status', 'UPCOMING');
 
@@ -108,7 +116,11 @@ export const GameReminderBanner = () => {
           return {
             id: game.id,
             sport: game.sport,
+            custom_sport_name: game.custom_sport_name,
+            custom_emoji: game.custom_emoji,
             location_name: game.location_name,
+            address: game.address,
+            city: game.city,
             game_date: game.game_date,
             start_time: game.start_time,
             host_id: game.host_id,
@@ -170,7 +182,7 @@ export const GameReminderBanner = () => {
 
             <div className="flex items-start gap-3 pr-8">
               <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center text-2xl shadow-primary flex-shrink-0">
-                {getSportEmoji(game.sport)}
+                {getSportEmoji(game.sport, game.custom_emoji)}
               </div>
 
               <div className="flex-1 min-w-0">
