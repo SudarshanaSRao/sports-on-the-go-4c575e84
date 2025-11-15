@@ -533,7 +533,7 @@ export default function HostGame() {
         canonicalUrl="https://squadup.app/host-game"
       />
       <Navbar />
-      <div className="mobile-page-padding px-4 sm:px-6 lg:px-8">
+      <div className="mobile-page-padding px-4 sm:px-6 lg:px-8 pt-20 md:pt-24">
         <div className="container mx-auto max-w-3xl mobile-container">
           <Card>
             <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
