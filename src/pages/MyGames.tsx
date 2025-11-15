@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { getSportEmoji, toDisplaySportName, getAllSportsDisplayNames, toDbSportValue } from "@/utils/sportsUtils";
+import { getSportEmoji, toDisplaySportName, formatSportDisplay, getAllSportsDisplayNames, toDbSportValue } from "@/utils/sportsUtils";
 import { ReviewPlayerDialog } from "@/components/ReviewPlayerDialog";
 import { useSavedGames } from "@/hooks/useSavedGames";
 import {
@@ -54,6 +54,7 @@ interface Game {
   description?: string;
   equipment_requirements?: string;
   game_rules?: string;
+  custom_sport_name?: string;
   profiles?: {
     id?: string;
     first_name: string;
@@ -158,7 +159,7 @@ const PastGameCard = ({ game, userId, onReviewSubmitted }: { game: Game; userId:
               </div>
               
               <div className="flex-1 min-w-0">
-                <h3 className="text-xl font-bold mb-1">{toDisplaySportName(game.sport)}</h3>
+                <h3 className="text-xl font-bold mb-1">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
                 <div className="flex items-center text-muted-foreground text-sm mb-3">
                   <MapPin className="w-4 h-4 mr-1" />
                   <span className="truncate">{game.location_name}</span>
@@ -486,7 +487,7 @@ const MyGames = () => {
     if (game) {
       setSelectedGame(game);
       setEditForm({
-        sport: toDisplaySportName(game.sport),
+        sport: formatSportDisplay(game.sport, game.custom_sport_name),
         skill_level: game.skill_level,
         location_name: game.location_name,
         address: game.address,
@@ -847,7 +848,7 @@ const MyGames = () => {
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             <span className="text-3xl">{selectedGame && getSportEmoji(selectedGame.sport)}</span>
-            {selectedGame && toDisplaySportName(selectedGame.sport)}
+            {selectedGame && formatSportDisplay(selectedGame.sport, selectedGame.custom_sport_name)}
           </DialogTitle>
         </DialogHeader>
         {selectedGame && (
@@ -938,7 +939,7 @@ const MyGames = () => {
                   </Button>
                   <ShareGameButton 
                     gameId={selectedGame.id}
-                    gameName={`${toDisplaySportName(selectedGame.sport)} Game`}
+                    gameName={`${formatSportDisplay(selectedGame.sport, selectedGame.custom_sport_name)} Game`}
                   />
                 </>
               ) : (
@@ -953,7 +954,7 @@ const MyGames = () => {
                   </Button>
                   <ShareGameButton 
                     gameId={selectedGame.id}
-                    gameName={`${toDisplaySportName(selectedGame.sport)} Game`}
+                    gameName={`${formatSportDisplay(selectedGame.sport, selectedGame.custom_sport_name)} Game`}
                   />
                 </>
               )}
@@ -987,7 +988,7 @@ const MyGames = () => {
             )}
           </DialogTitle>
           <DialogDescription>
-            {selectedGame && toDisplaySportName(selectedGame.sport)} at {isEditMode ? editForm.location_name : selectedGame?.location_name}
+            {selectedGame && formatSportDisplay(selectedGame.sport, selectedGame.custom_sport_name)} at {isEditMode ? editForm.location_name : selectedGame?.location_name}
           </DialogDescription>
         </DialogHeader>
         {selectedGame && (
@@ -1247,7 +1248,7 @@ const MyGames = () => {
                     variant="destructive" 
                     onClick={() => {
                       setIsManageOpen(false);
-                      handleCancelGame(selectedGame.id, toDisplaySportName(selectedGame.sport));
+                      handleCancelGame(selectedGame.id, formatSportDisplay(selectedGame.sport, selectedGame.custom_sport_name));
                     }}
                   >
                     Cancel Game
@@ -1384,7 +1385,7 @@ const MyGames = () => {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 mb-3">
                               <div>
-                                <h3 className="text-xl font-bold mb-1">{toDisplaySportName(game.sport)}</h3>
+                                <h3 className="text-xl font-bold mb-1">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
                                 <div className="flex items-center text-muted-foreground text-sm">
                                   <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
                                   <span className="truncate">{game.location_name}</span>
@@ -1510,7 +1511,7 @@ const MyGames = () => {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2 mb-3">
                               <div>
-                                <h3 className="text-xl font-bold mb-1">{toDisplaySportName(game.sport)}</h3>
+                                <h3 className="text-xl font-bold mb-1">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
                                 <div className="flex items-center text-muted-foreground text-sm">
                                   <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
                                   <span className="truncate">{game.location_name}</span>
@@ -1605,7 +1606,7 @@ const MyGames = () => {
                           </div>
                           
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-xl font-bold mb-1">{toDisplaySportName(game.sport)}</h3>
+                            <h3 className="text-xl font-bold mb-1">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
                             <div className="flex items-center text-muted-foreground text-sm mb-3">
                               <MapPin className="w-4 h-4 mr-1" />
                               <span className="truncate">{game.location_name}</span>

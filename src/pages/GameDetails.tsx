@@ -22,10 +22,12 @@ import {
   UserPlus,
 } from "lucide-react";
 import { format } from "date-fns";
+import { formatSportDisplay, getSportEmoji } from "@/utils/sportsUtils";
 
 interface GameDetails {
   id: string;
   sport: string;
+  custom_sport_name?: string | null;
   skill_level: string;
   location_name: string;
   address: string;
@@ -361,7 +363,7 @@ const GameDetails = () => {
             <div className="flex items-start justify-between mb-6">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-3xl font-bold">{game.sport}</h1>
+                  <h1 className="text-3xl font-bold">{formatSportDisplay(game.sport, game.custom_sport_name)}</h1>
                   <Badge variant="secondary">{game.skill_level}</Badge>
                   {game.visibility !== "PUBLIC" && (
                     <Badge variant="outline">{game.visibility}</Badge>
@@ -369,7 +371,7 @@ const GameDetails = () => {
                 </div>
                 <p className="text-muted-foreground">Hosted by {hostName}</p>
               </div>
-              <ShareGameButton gameId={game.id} gameName={`${game.sport} Game`} />
+              <ShareGameButton gameId={game.id} gameName={`${formatSportDisplay(game.sport, game.custom_sport_name)} Game`} />
             </div>
 
             <div className="grid md:grid-cols-2 gap-6 mb-6">

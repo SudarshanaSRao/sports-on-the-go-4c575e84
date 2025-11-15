@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
-import { toDisplaySportName, getSportEmoji } from "@/utils/sportsUtils";
+import { toDisplaySportName, getSportEmoji, formatSportDisplay } from "@/utils/sportsUtils";
 import { useSavedGames } from "@/hooks/useSavedGames";
 
 interface Game {
@@ -33,6 +33,7 @@ interface Game {
   hostId: string;
   rawGameDate?: string; // Store raw date for comparison (optional for sample games)
   rawStartTime?: string; // Store raw time for comparison (optional for sample games)
+  customSportName?: string | null;
 }
 
 interface GameMapProps {
@@ -404,7 +405,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   // Transform a single game from database format to UI format
   const transformGame = (game: any): Game => ({
     id: game.id,
-    sport: toDisplaySportName(game.sport),
+    sport: formatSportDisplay(game.sport, game.custom_sport_name),
     emoji: getSportEmoji(game.sport),
     location: game.location_name,
     address: `${game.address}, ${game.city}`,
@@ -422,6 +423,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     hostId: game.host_id,
     rawGameDate: game.game_date,
     rawStartTime: game.start_time,
+    customSportName: game.custom_sport_name,
   });
 
   // Fetch user's games (RSVPs and hosted games)

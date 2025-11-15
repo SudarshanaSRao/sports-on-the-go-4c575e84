@@ -378,14 +378,10 @@ export default function HostGame() {
       // Step 3: Create the game
       console.log('🎮 [HostGame] Step 3: Creating game in database...');
       
-      // Use custom sport name if "Other" is selected, otherwise use the selected sport
-      const sportValue = formData.sport === 'Other' && formData.customSportName.trim() 
-        ? formData.customSportName.trim() 
-        : formData.sport;
-      
       const gamePayload = {
         host_id: user.id,
-        sport: toDbSportValue(sportValue) as any,
+        sport: toDbSportValue(formData.sport) as any,
+        custom_sport_name: formData.sport === 'Other' ? formData.customSportName.trim() : null,
         skill_level: formData.skillLevel as any,
         game_date: formData.gameDate,
         start_time: startTime24,
@@ -428,7 +424,7 @@ export default function HostGame() {
       // Format community name to show "Other - [Custom Sport Name]" for custom sports
       const displaySportName = formData.sport === 'Other' && formData.customSportName.trim()
         ? `Other - ${formData.customSportName.trim()}`
-        : sportValue;
+        : formData.sport;
       
       const communityName = `${displaySportName} - ${formData.locationName}`;
       const communityDescription = `Community for the ${displaySportName} game on ${formData.gameDate}. ${formData.description || ''}`;
@@ -439,7 +435,7 @@ export default function HostGame() {
         game_id: gameData.id,
         created_by: user.id,
         type: 'game',
-        sport: toDbSportValue(sportValue) as any
+        sport: toDbSportValue(formData.sport) as any
       };
       console.log('Community payload:', communityPayload);
       

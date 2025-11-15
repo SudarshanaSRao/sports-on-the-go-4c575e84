@@ -196,3 +196,20 @@ export function isValidSport(sport: string): boolean {
   const normalized = sport.toLowerCase().trim();
   return normalized in SPORT_MAPPING;
 }
+
+/**
+ * Format sport display name with custom name for "Other" sports
+ * @param sport - The sport database value
+ * @param customSportName - The custom sport name (if sport is "OTHER")
+ * @returns Formatted display name (e.g., "Other - Custom Name" or "Basketball")
+ */
+export function formatSportDisplay(sport: string, customSportName?: string | null): string {
+  const displayName = toDisplaySportName(sport);
+  
+  // If sport is "Other" and we have a custom name, format as "Other - Custom Name"
+  if (displayName === 'Other' && customSportName && customSportName.trim()) {
+    return `Other - ${customSportName.trim()}`;
+  }
+  
+  return displayName;
+}
