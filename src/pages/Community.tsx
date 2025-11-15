@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SEO } from "@/components/SEO";
-import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filter, Trash2, Search, Calendar } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -17,7 +16,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { getAllSportsDbValues, toDisplaySportName } from "@/utils/sportsUtils";
 import { format } from "date-fns";
-import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 
 interface Community {
   id: string;
@@ -190,19 +188,6 @@ export default function Community() {
     }
   }, []);
 
-  // Pull-to-refresh functionality
-  const pullToRefreshState = usePullToRefresh({
-    onRefresh: async () => {
-      if (selectedCommunity) {
-        await Promise.all([fetchPosts(selectedCommunity.id), fetchCommunities()]);
-        toast({ title: "Refreshed!", description: "Community feed updated" });
-      } else {
-        await fetchCommunities();
-        toast({ title: "Refreshed!", description: "Communities list updated" });
-      }
-    },
-    enabled: !!user,
-  });
 
   useEffect(() => {
     let filtered = communities;
@@ -711,7 +696,6 @@ export default function Community() {
 
   return (
     <div className="min-h-screen min-h-screen-mobile bg-background">
-      <PullToRefreshIndicator {...pullToRefreshState} />
       <SEO
         title="Sports Communities & Discussion Forums"
         description="Join sport-specific communities, connect with fellow athletes, share tips and strategies. Participate in discussions about games, training, and local sports events."

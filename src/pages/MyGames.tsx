@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ShareGameButton } from "@/components/ShareGameButton";
 import { GameReminderBanner } from "@/components/GameReminderBanner";
-import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 import { Calendar, Clock, MapPin, Users, Plus, Star, X, Pencil, MessageSquare, Bookmark } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -16,7 +15,6 @@ import { format } from "date-fns";
 import { getSportEmoji, toDisplaySportName, formatSportDisplay, getAllSportsDisplayNames, toDbSportValue } from "@/utils/sportsUtils";
 import { ReviewPlayerDialog } from "@/components/ReviewPlayerDialog";
 import { useSavedGames } from "@/hooks/useSavedGames";
-import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import {
   Dialog,
   DialogContent,
@@ -296,14 +294,6 @@ const MyGames = () => {
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedReviewee, setSelectedReviewee] = useState<{ id: string; name: string } | null>(null);
 
-  // Pull-to-refresh functionality
-  const pullToRefreshState = usePullToRefresh({
-    onRefresh: async () => {
-      await Promise.all([fetchGames(), fetchUserRSVPs()]);
-      toast.success("Games refreshed!");
-    },
-    enabled: !!user,
-  });
   const [editForm, setEditForm] = useState({
     sport: '',
     skill_level: '',
@@ -1358,7 +1348,6 @@ const MyGames = () => {
 
   return (
     <div className="min-h-screen min-h-screen-mobile bg-background">
-      <PullToRefreshIndicator {...pullToRefreshState} />
       <Navbar />
       {renderDetailsDialog()}
       {renderManageDialog()}
