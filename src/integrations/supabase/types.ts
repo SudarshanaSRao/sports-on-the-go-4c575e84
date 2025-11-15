@@ -169,6 +169,7 @@ export type Database = {
           country: string
           created_at: string
           current_players: number | null
+          custom_emoji: string | null
           custom_sport_name: string | null
           description: string | null
           duration_minutes: number
@@ -197,6 +198,7 @@ export type Database = {
           country?: string
           created_at?: string
           current_players?: number | null
+          custom_emoji?: string | null
           custom_sport_name?: string | null
           description?: string | null
           duration_minutes: number
@@ -225,6 +227,7 @@ export type Database = {
           country?: string
           created_at?: string
           current_players?: number | null
+          custom_emoji?: string | null
           custom_sport_name?: string | null
           description?: string | null
           duration_minutes?: number

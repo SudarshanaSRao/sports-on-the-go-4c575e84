@@ -425,7 +425,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     id: game.id,
     sport: formatSportDisplay(game.sport, game.custom_sport_name),
     rawSport: game.sport, // Store raw DB value for filtering
-    emoji: getSportEmoji(game.sport),
+    emoji: getSportEmoji(game.sport, game.custom_emoji),
     location: game.location_name,
     address: `${game.address}, ${game.city}`,
     date: new Date(game.game_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),

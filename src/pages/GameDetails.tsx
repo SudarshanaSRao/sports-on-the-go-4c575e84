@@ -28,6 +28,7 @@ interface GameDetails {
   id: string;
   sport: string;
   custom_sport_name?: string | null;
+  custom_emoji?: string | null;
   skill_level: string;
   location_name: string;
   address: string;

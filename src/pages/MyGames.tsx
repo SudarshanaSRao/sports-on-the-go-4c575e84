@@ -55,6 +55,7 @@ interface Game {
   equipment_requirements?: string;
   game_rules?: string;
   custom_sport_name?: string;
+  custom_emoji?: string;
   profiles?: {
     id?: string;
     first_name: string;
@@ -155,7 +156,7 @@ const PastGameCard = ({ game, userId, onReviewSubmitted }: { game: Game; userId:
           <div className="flex flex-col md:flex-row md:items-start gap-4">
             <div className="flex items-start space-x-4 flex-1">
               <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center text-2xl shadow-primary flex-shrink-0">
-                {getSportEmoji(game.sport)}
+                {getSportEmoji(game.sport, game.custom_emoji)}
               </div>
               
               <div className="flex-1 min-w-0">
@@ -884,7 +885,7 @@ const MyGames = () => {
       <DialogContent className="max-w-2xl max-h-[90vh] dialog-content-scroll">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
-            <span className="text-3xl">{selectedGame && getSportEmoji(selectedGame.sport)}</span>
+            <span className="text-3xl">{selectedGame && getSportEmoji(selectedGame.sport, selectedGame.custom_emoji)}</span>
             {selectedGame && formatSportDisplay(selectedGame.sport, selectedGame.custom_sport_name)}
           </DialogTitle>
         </DialogHeader>
@@ -1421,7 +1422,7 @@ const MyGames = () => {
                         <div className="flex items-start space-x-4 flex-1">
                           {/* Sport Icon */}
                           <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center text-2xl shadow-primary flex-shrink-0">
-                            {getSportEmoji(game.sport)}
+                            {getSportEmoji(game.sport, game.custom_emoji)}
                           </div>
                           
                           {/* Game Info */}
@@ -1548,7 +1549,7 @@ const MyGames = () => {
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
                         <div className="flex items-start space-x-4 flex-1">
                           <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center text-2xl shadow-primary flex-shrink-0">
-                            {getSportEmoji(game.sport)}
+                            {getSportEmoji(game.sport, game.custom_emoji)}
                           </div>
                           
                           <div className="flex-1 min-w-0">
@@ -1645,7 +1646,7 @@ const MyGames = () => {
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
                         <div className="flex items-start space-x-4 flex-1">
                           <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center text-2xl shadow-primary flex-shrink-0">
-                            {getSportEmoji(game.sport)}
+                            {getSportEmoji(game.sport, game.custom_emoji)}
                           </div>
                           
                           <div className="flex-1 min-w-0">
