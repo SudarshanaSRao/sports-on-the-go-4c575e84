@@ -489,6 +489,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
           .select(`
             id,
             sport,
+            custom_sport_name,
             location_name,
             address,
             city,
@@ -550,6 +551,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
             .select(`
               id,
               sport,
+              custom_sport_name,
               location_name,
               address,
               city,
@@ -595,6 +597,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
             .select(`
               id,
               sport,
+              custom_sport_name,
               location_name,
               address,
               city,
