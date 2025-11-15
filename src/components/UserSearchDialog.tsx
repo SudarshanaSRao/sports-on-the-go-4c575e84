@@ -19,6 +19,7 @@ export const UserSearchDialog = ({ trigger }: UserSearchDialogProps) => {
   const [searchResults, setSearchResults] = useState<FriendProfile[]>([]);
   const [loading, setLoading] = useState(false);
   const [friendStatuses, setFriendStatuses] = useState<Record<string, string | null>>({});
+  const [sendingRequests, setSendingRequests] = useState<Set<string>>(new Set());
   const { sendFriendRequest, checkFriendshipStatus } = useFriends();
   const { toast } = useToast();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -77,15 +78,40 @@ export const UserSearchDialog = ({ trigger }: UserSearchDialogProps) => {
   }, [searchQuery]);
 
   const handleSendRequest = async (userId: string) => {
-    await sendFriendRequest(userId);
-    const newStatus = await checkFriendshipStatus(userId);
-    setFriendStatuses((prev) => ({ ...prev, [userId]: newStatus }));
+    // Prevent double-clicks
+    if (sendingRequests.has(userId)) {
+      return;
+    }
+
+    // Optimistic update - immediately update UI
+    setSendingRequests((prev) => new Set([...prev, userId]));
+    setFriendStatuses((prev) => ({ ...prev, [userId]: "SENT" }));
+
+    try {
+      await sendFriendRequest(userId);
+      // Success - keep the optimistic update
+    } catch (error: any) {
+      // On error, revert to the previous state
+      console.error("Error sending friend request:", error);
+      const actualStatus = await checkFriendshipStatus(userId);
+      setFriendStatuses((prev) => ({ ...prev, [userId]: actualStatus }));
+    } finally {
+      // Remove from sending set after a short delay to prevent rapid re-clicks
+      setTimeout(() => {
+        setSendingRequests((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(userId);
+          return newSet;
+        });
+      }, 500);
+    }
   };
 
   const getActionButton = (profile: FriendProfile) => {
     if (profile.id === currentUserId) return null;
 
     const status = friendStatuses[profile.id];
+    const isSending = sendingRequests.has(profile.id);
 
     if (status === "FRIENDS") {
       return (
@@ -108,10 +134,11 @@ export const UserSearchDialog = ({ trigger }: UserSearchDialogProps) => {
       <Button
         size="sm"
         onClick={() => handleSendRequest(profile.id)}
-        className="gradient-primary text-white"
+        disabled={isSending}
+        className="gradient-primary text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
         <UserPlus className="w-4 h-4 mr-2" />
-        Add Friend
+        {isSending ? "Sending..." : "Add Friend"}
       </Button>
     );
   };
@@ -156,11 +183,18 @@ export const UserSearchDialog = ({ trigger }: UserSearchDialogProps) => {
                 profile.username ||
                 `${profile.first_name || ""} ${profile.last_name || ""}`.trim() ||
                 "Anonymous User";
+              
+              const status = friendStatuses[profile.id];
+              const shouldFadeOut = status === "SENT" || status === "FRIENDS";
 
               return (
                 <div
                   key={profile.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-smooth"
+                  className={`flex items-center gap-3 p-3 rounded-lg border bg-card transition-all duration-300 ${
+                    shouldFadeOut 
+                      ? 'opacity-0 scale-95 pointer-events-none' 
+                      : 'opacity-100 scale-100 hover:bg-accent'
+                  }`}
                 >
                   <Avatar className="w-12 h-12">
                     <AvatarImage src={profile.profile_photo || undefined} />

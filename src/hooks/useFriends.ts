@@ -160,7 +160,15 @@ export const useFriends = () => {
           status: "PENDING",
         });
 
-      if (error) throw error;
+      if (error) {
+        // Check if it's a duplicate key error
+        if (error.code === '23505' || error.message.includes('unique_friendship')) {
+          // Silent fail for duplicate - request already exists
+          console.log("Friend request already exists");
+          return;
+        }
+        throw error;
+      }
 
       toast({
         title: "Friend request sent",
@@ -174,6 +182,7 @@ export const useFriends = () => {
         description: error.message,
         variant: "destructive",
       });
+      throw error; // Re-throw to allow caller to handle
     }
   };
 
