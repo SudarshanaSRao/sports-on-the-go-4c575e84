@@ -323,20 +323,22 @@ const MyGames = () => {
     const gameId = searchParams.get('gameId');
     const view = searchParams.get('view');
     
-    if (gameId && (upcomingGames.length > 0 || hostedGames.length > 0 || savedGames.length > 0)) {
+    // Only restore if we have URL params and dialogs are not already open
+    if (gameId && view && !isDetailsOpen && !isManageOpen && 
+        (upcomingGames.length > 0 || hostedGames.length > 0 || savedGames.length > 0)) {
       const allGames = [...upcomingGames, ...hostedGames, ...savedGames];
       const game = allGames.find(g => g.id === gameId);
       
       if (game) {
-        setSelectedGame(game);
         if (view === 'details') {
+          setSelectedGame(game);
           setIsDetailsOpen(true);
-        } else if (view === 'manage') {
+        } else if (view === 'manage' && hostedGames.find(g => g.id === gameId)) {
           handleManageGame(gameId);
         }
       }
     }
-  }, [searchParams, upcomingGames, hostedGames, savedGames]);
+  }, [searchParams, upcomingGames, hostedGames, savedGames, isDetailsOpen, isManageOpen]);
 
   const fetchUserRSVPs = async () => {
     if (!user) return;
@@ -496,10 +498,14 @@ const MyGames = () => {
   };
 
   const handleViewDetails = (gameId: string) => {
-    const game = [...upcomingGames, ...hostedGames].find(g => g.id === gameId);
+    const game = [...upcomingGames, ...hostedGames, ...savedGames].find(g => g.id === gameId);
     if (game) {
       setSelectedGame(game);
       setIsDetailsOpen(true);
+      const params = new URLSearchParams(searchParams);
+      params.set('gameId', game.id);
+      params.set('view', 'details');
+      setSearchParams(params);
     }
   };
 

@@ -130,14 +130,16 @@ export default function Community() {
   useEffect(() => {
     const communityId = searchParams.get('communityId');
     
+    // Only restore if we have URL param and no community is already selected
     if (communityId && communities.length > 0 && !selectedCommunity) {
       const community = communities.find(c => c.id === communityId);
       
       if (community) {
-        handleViewCommunity(community);
+        setSelectedCommunity(community);
+        setViewMode("posts");
       }
     }
-  }, [searchParams, communities]);
+  }, [searchParams, communities, selectedCommunity]);
 
   const fetchCommunities = async () => {
     const { data, error } = await supabase

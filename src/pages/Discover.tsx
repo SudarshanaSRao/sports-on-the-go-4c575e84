@@ -667,6 +667,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   useEffect(() => {
     const gameId = searchParams.get('gameId');
     
+    // Only restore if we have URL param and no game is already selected
     if (gameId && games.length > 0 && !selectedGame) {
       const game = games.find(g => g.id === gameId);
       
@@ -677,7 +678,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
         }
       }
     }
-  }, [searchParams, games, map]);
+  }, [searchParams, games, map, selectedGame]);
   
   // Auto-center map on first real game with coordinates
   const center = propCenter || (games.length > 0 && games[0].lat && games[0].lng 
