@@ -12,7 +12,7 @@ import { SEO } from "@/components/SEO";
 import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filter, Trash2, Search, Calendar } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { getAllSportsDbValues, toDisplaySportName } from "@/utils/sportsUtils";
 import { format } from "date-fns";
@@ -77,6 +77,7 @@ interface CommunityMember {
 export default function Community() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -124,6 +125,19 @@ export default function Community() {
       setSelectedVisibility(selectedCommunity.visibility);
     }
   }, [selectedCommunity]);
+
+  // Restore community view from URL on page load
+  useEffect(() => {
+    const communityId = searchParams.get('communityId');
+    
+    if (communityId && communities.length > 0 && !selectedCommunity) {
+      const community = communities.find(c => c.id === communityId);
+      
+      if (community) {
+        handleViewCommunity(community);
+      }
+    }
+  }, [searchParams, communities]);
 
   const fetchCommunities = async () => {
     const { data, error } = await supabase
@@ -473,6 +487,9 @@ export default function Community() {
   const handleViewCommunity = async (community: Community) => {
     setSelectedCommunity(community);
     setViewMode("posts");
+    const params = new URLSearchParams(searchParams);
+    params.set('communityId', community.id);
+    setSearchParams(params);
     
     // If community is archived and has a game_id, fetch game data and show revive dialog
     if (community.archived && community.game_id) {
@@ -511,6 +528,9 @@ export default function Community() {
     setViewMode("list");
     setShowNewPost(false);
     setShowMembersPanel(false);
+    const params = new URLSearchParams(searchParams);
+    params.delete('communityId');
+    setSearchParams(params);
   };
 
   const fetchCommunityMembers = async (communityId: string) => {
