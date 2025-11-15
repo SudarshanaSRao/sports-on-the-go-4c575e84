@@ -48,6 +48,8 @@ export type Database = {
       }
       communities: {
         Row: {
+          archived: boolean
+          archived_at: string | null
           created_at: string | null
           created_by: string
           description: string | null
@@ -60,6 +62,8 @@ export type Database = {
           visibility: Database["public"]["Enums"]["community_visibility"] | null
         }
         Insert: {
+          archived?: boolean
+          archived_at?: string | null
           created_at?: string | null
           created_by: string
           description?: string | null
@@ -74,6 +78,8 @@ export type Database = {
             | null
         }
         Update: {
+          archived?: boolean
+          archived_at?: string | null
           created_at?: string | null
           created_by?: string
           description?: string | null

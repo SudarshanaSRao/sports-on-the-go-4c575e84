@@ -615,7 +615,8 @@ export default function HostGame() {
                       placeholder="0" 
                       value={formData.durationMinutes} 
                       onChange={handleInputChange} 
-                      min="0" 
+                      min="0"
+                      max="99999" 
                       required 
                       className="w-full text-sm px-2 py-2" 
                     />
@@ -625,7 +626,7 @@ export default function HostGame() {
                 {/* Players */}
                 <div className="space-y-2">
                   <Label htmlFor="maxPlayers">Max Players</Label>
-                  <Input type="number" id="maxPlayers" name="maxPlayers" placeholder="10" value={formData.maxPlayers} onChange={handleInputChange} min="2" required />
+                  <Input type="number" id="maxPlayers" name="maxPlayers" placeholder="10" value={formData.maxPlayers} onChange={handleInputChange} min="2" max="99999" required />
                 </div>
 
                 {/* Location */}
