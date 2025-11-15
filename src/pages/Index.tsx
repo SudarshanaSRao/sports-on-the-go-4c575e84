@@ -311,7 +311,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen min-h-screen-mobile bg-background">
+    <div className="min-h-screen min-h-screen-mobile mobile-scroll-container bg-background">
       <SEO
         title="SquadUp - Find Pickup Games & Connect with Athletes Near You"
         description="Join thousands of athletes discovering pickup games in their area. Find basketball, soccer, volleyball, tennis, cricket games and more. Build trust through our reputation system and never play alone again."

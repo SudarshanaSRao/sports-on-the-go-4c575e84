@@ -499,7 +499,7 @@ export default function HostGame() {
   };
 
   return (
-    <div className="min-h-screen min-h-screen-mobile bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen min-h-screen-mobile bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
       <SEO
         title="Host a Pickup Game"
         description="Create and host your own pickup game. Set the date, time, location, and skill level. Connect with athletes in your area looking for games to join."
@@ -507,8 +507,8 @@ export default function HostGame() {
         canonicalUrl="https://squadup.app/host-game"
       />
       <Navbar />
-      <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 safe-bottom">
-        <div className="container mx-auto max-w-3xl">
+      <div className="mobile-page-padding px-4 sm:px-6 lg:px-8">
+        <div className="container mx-auto max-w-3xl mobile-container">
           <Card>
             <CardHeader>
               <CardTitle className="text-3xl font-black">Host a Game</CardTitle>
@@ -517,7 +517,7 @@ export default function HostGame() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Sport & Skill Level */}
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mobile-form-grid">
                   <div className="space-y-2">
                     <Label htmlFor="sport">Sport *</Label>
                     <Select name="sport" value={formData.sport} onValueChange={(value) => handleSelectChange("sport", value)} required>
@@ -572,7 +572,7 @@ export default function HostGame() {
                 </div>
 
                 {/* Date & Time */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mobile-form-grid">
                   <div className="space-y-2">
                     <Label htmlFor="gameDate" className="text-sm">Date *</Label>
                     <Input 
