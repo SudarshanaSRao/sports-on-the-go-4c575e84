@@ -15,6 +15,8 @@ import { Navbar } from "@/components/Navbar";
 import { getAllSportsDisplayNames, toDbSportValue } from "@/utils/sportsUtils";
 import { AlertTriangle } from "lucide-react";
 import { z } from "zod";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { EmojiPicker } from "@/components/EmojiPicker";
 
 // Field validation limits
 const FIELD_LIMITS = {
@@ -85,6 +87,7 @@ export default function HostGame() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [loading, setLoading] = useState(false);
   const [hostLiabilityAcknowledged, setHostLiabilityAcknowledged] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
@@ -581,20 +584,43 @@ export default function HostGame() {
                         <Label htmlFor="customEmoji" className="text-sm">
                           Custom Emoji <span className="text-muted-foreground">(Optional)</span>
                         </Label>
-                        <Input
-                          type="text"
-                          id="customEmoji"
-                          name="customEmoji"
-                          placeholder="🎯 (default if empty)"
-                          value={formData.customEmoji}
-                          onChange={handleInputChange}
-                          maxLength={2}
-                          className={validationErrors.customEmoji ? 'border-destructive' : ''}
-                        />
+                        
+                        {isMobile ? (
+                          <Input
+                            type="text"
+                            id="customEmoji"
+                            name="customEmoji"
+                            placeholder="🎯 (tap to add emoji)"
+                            value={formData.customEmoji}
+                            onChange={handleInputChange}
+                            maxLength={2}
+                            inputMode="text"
+                            className={validationErrors.customEmoji ? 'border-destructive' : ''}
+                          />
+                        ) : (
+                          <EmojiPicker
+                            value={formData.customEmoji}
+                            onEmojiSelect={(emoji) => {
+                              setFormData(prev => ({ ...prev, customEmoji: emoji }));
+                              // Clear any validation errors when an emoji is selected
+                              if (validationErrors.customEmoji) {
+                                setValidationErrors(prev => ({ ...prev, customEmoji: '' }));
+                              }
+                            }}
+                            onClear={() => {
+                              setFormData(prev => ({ ...prev, customEmoji: '' }));
+                            }}
+                          />
+                        )}
+                        
                         {validationErrors.customEmoji && (
                           <p className="text-sm text-destructive">{validationErrors.customEmoji}</p>
                         )}
-                        <p className="text-xs text-muted-foreground">Enter a single emoji to represent your sport</p>
+                        <p className="text-xs text-muted-foreground">
+                          {isMobile 
+                            ? "Use your keyboard to add an emoji" 
+                            : "Click to choose an emoji to represent your sport"}
+                        </p>
                       </div>
                     </>
                   )}
