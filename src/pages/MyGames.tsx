@@ -159,34 +159,34 @@ const PastGameCard = ({ game, userId, onReviewSubmitted }: { game: Game; userId:
               </div>
               
               <div className="flex-1 min-w-0">
-                <h3 className="text-xl font-bold mb-1">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
-                <div className="flex items-center text-muted-foreground text-sm mb-3">
-                  <MapPin className="w-4 h-4 mr-1" />
+                <h3 className="text-lg sm:text-xl font-bold mb-1 truncate">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
+                <div className="flex items-center text-muted-foreground text-xs sm:text-sm mb-2 sm:mb-3">
+                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
                   <span className="truncate">{game.location_name}</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-medium">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                    <span className="font-medium truncate">
                       {format(new Date(game.game_date), 'MMM dd, yyyy')}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-medium">{game.start_time}</span>
+                  <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                    <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                    <span className="font-medium truncate">{game.start_time}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col space-y-2 md:min-w-[160px]">
+            <div className="flex flex-col space-y-1.5 sm:space-y-2 md:min-w-[160px]">
               <Button 
                 variant="outline" 
-                className="w-full"
+                className="w-full text-xs sm:text-sm h-8 sm:h-9"
                 onClick={handleShowAttendees}
               >
-                <Users className="w-4 h-4 mr-2" />
+                <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                 {showAttendees ? 'Hide' : 'Review'} Players
               </Button>
             </div>
@@ -214,16 +214,16 @@ const PastGameCard = ({ game, userId, onReviewSubmitted }: { game: Game; userId:
                     const hasReviewed = myReviews.has(attendee.user_id);
 
                     return (
-                      <div key={attendee.user_id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-semibold">
+                      <div key={attendee.user_id} className="flex items-center justify-between p-2 sm:p-3 bg-muted rounded-lg gap-2">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full gradient-primary flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
                             {name[0].toUpperCase()}
                           </div>
-                          <div>
-                            <p className="font-medium">{name}</p>
+                          <div className="min-w-0">
+                            <p className="font-medium text-sm sm:text-base truncate">{name}</p>
                             {profile.overall_rating > 0 && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 flex-shrink-0" />
                                 <span>{profile.overall_rating.toFixed(1)}</span>
                               </div>
                             )}
@@ -231,12 +231,13 @@ const PastGameCard = ({ game, userId, onReviewSubmitted }: { game: Game; userId:
                         </div>
                         
                         {hasReviewed ? (
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs whitespace-nowrap flex-shrink-0">
                             Reviewed
                           </Badge>
                         ) : (
                           <Button
                             size="sm"
+                            className="text-xs h-7 sm:h-8 whitespace-nowrap flex-shrink-0"
                             onClick={() => handleReviewClick(attendee.user_id, name)}
                           >
                             <MessageSquare className="w-3 h-3 mr-1" />
@@ -1425,44 +1426,44 @@ const MyGames = () => {
                           
                           {/* Game Info */}
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2 mb-3">
-                              <div>
-                                <h3 className="text-xl font-bold mb-1">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
-                                <div className="flex items-center text-muted-foreground text-sm">
-                                  <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                            <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-lg sm:text-xl font-bold mb-1 truncate">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
+                                <div className="flex items-center text-muted-foreground text-xs sm:text-sm">
+                                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
                                   <span className="truncate">{game.location_name}</span>
                                 </div>
                               </div>
-                              <div className="flex gap-2">
-                                {isHost && (
-                                  <Badge className="gradient-secondary text-white">Host</Badge>
-                                )}
+                              <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
                                 {game.visibility === 'PUBLIC' && (
-                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Public</Badge>
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs sm:text-sm whitespace-nowrap">Public</Badge>
                                 )}
                                 {game.visibility === 'FRIENDS_ONLY' && (
-                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Friends Only</Badge>
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs sm:text-sm whitespace-nowrap">Friends Only</Badge>
                                 )}
                                 {game.visibility === 'INVITE_ONLY' && (
-                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Invite Only</Badge>
+                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-xs sm:text-sm whitespace-nowrap">Invite Only</Badge>
+                                )}
+                                {isHost && (
+                                  <Badge className="gradient-secondary text-white text-xs sm:text-sm whitespace-nowrap">Host</Badge>
                                 )}
                               </div>
                             </div>
 
                             {/* Details */}
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                              <div className="flex items-center space-x-2 text-sm">
-                                <Calendar className="w-4 h-4 text-muted-foreground" />
-                                <span className="font-medium">
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                              <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                                <span className="font-medium truncate">
                                   {format(new Date(game.game_date), 'MMM dd, yyyy')}
                                 </span>
                               </div>
-                              <div className="flex items-center space-x-2 text-sm">
-                                <Clock className="w-4 h-4 text-muted-foreground" />
-                                <span className="font-medium">{game.start_time}</span>
+                              <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                                <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                                <span className="font-medium truncate">{game.start_time}</span>
                               </div>
-                              <div className="flex items-center space-x-2 text-sm">
-                                <Users className="w-4 h-4 text-muted-foreground" />
+                              <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm col-span-2">
+                                <Users className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
                                 <span className="font-medium">
                                   {game.current_players}/{game.max_players} players
                                 </span>
@@ -1472,10 +1473,10 @@ const MyGames = () => {
                         </div>
 
                         {/* Right Section - Actions */}
-                        <div className="flex flex-col space-y-2 md:min-w-[140px]">
+                        <div className="flex flex-col space-y-1.5 sm:space-y-2 md:min-w-[140px]">
                           <Button 
                             variant="outline" 
-                            className="w-full"
+                            className="w-full text-xs sm:text-sm h-8 sm:h-9"
                             onClick={() => handleViewDetails(game.id)}
                           >
                             View Details
@@ -1484,14 +1485,14 @@ const MyGames = () => {
                             <>
                               <Button 
                                 variant="outline" 
-                                className="w-full"
+                                className="w-full text-xs sm:text-sm h-8 sm:h-9"
                                 onClick={() => handleManageGame(game.id)}
                               >
                                 Manage
                               </Button>
                               <Button 
                                 variant="ghost" 
-                                className="w-full text-destructive hover:text-destructive"
+                                className="w-full text-destructive hover:text-destructive text-xs sm:text-sm h-8 sm:h-9"
                                 onClick={() => handleCancelGame(game.id, game.sport)}
                               >
                                 Cancel Game
@@ -1501,14 +1502,14 @@ const MyGames = () => {
                             <>
                               <Button 
                                 variant="outline" 
-                                className="w-full"
+                                className="w-full text-xs sm:text-sm h-8 sm:h-9"
                                 onClick={() => handleMessageHost(game.id, hostName)}
                               >
                                 Message Host
                               </Button>
                               <Button 
                                 variant="ghost" 
-                                className="w-full text-muted-foreground"
+                                className="w-full text-muted-foreground text-xs sm:text-sm h-8 sm:h-9"
                                 onClick={() => handleLeaveGame(game.id, game.sport)}
                               >
                                 Leave Game
@@ -1551,41 +1552,41 @@ const MyGames = () => {
                           </div>
                           
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2 mb-3">
-                              <div>
-                                <h3 className="text-xl font-bold mb-1">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
-                                <div className="flex items-center text-muted-foreground text-sm">
-                                  <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                            <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-lg sm:text-xl font-bold mb-1 truncate">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
+                                <div className="flex items-center text-muted-foreground text-xs sm:text-sm">
+                                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
                                   <span className="truncate">{game.location_name}</span>
                                 </div>
                               </div>
-                              <div className="flex gap-2">
-                                <Badge className="gradient-secondary text-white">Host</Badge>
+                              <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
                                 {game.visibility === 'PUBLIC' && (
-                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Public</Badge>
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs sm:text-sm whitespace-nowrap">Public</Badge>
                                 )}
                                 {game.visibility === 'FRIENDS_ONLY' && (
-                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Friends Only</Badge>
+                                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 text-xs sm:text-sm whitespace-nowrap">Friends Only</Badge>
                                 )}
                                 {game.visibility === 'INVITE_ONLY' && (
-                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Invite Only</Badge>
+                                  <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 text-xs sm:text-sm whitespace-nowrap">Invite Only</Badge>
                                 )}
+                                <Badge className="gradient-secondary text-white text-xs sm:text-sm whitespace-nowrap">Host</Badge>
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                              <div className="flex items-center space-x-2 text-sm">
-                                <Calendar className="w-4 h-4 text-muted-foreground" />
-                                <span className="font-medium">
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                              <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                                <span className="font-medium truncate">
                                   {format(new Date(game.game_date), 'MMM dd, yyyy')}
                                 </span>
                               </div>
-                              <div className="flex items-center space-x-2 text-sm">
-                                <Clock className="w-4 h-4 text-muted-foreground" />
-                                <span className="font-medium">{game.start_time}</span>
+                              <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                                <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                                <span className="font-medium truncate">{game.start_time}</span>
                               </div>
-                              <div className="flex items-center space-x-2 text-sm">
-                                <Users className="w-4 h-4 text-muted-foreground" />
+                              <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm col-span-2">
+                                <Users className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
                                 <span className="font-medium">
                                   {game.current_players}/{game.max_players} players
                                 </span>
@@ -1594,24 +1595,24 @@ const MyGames = () => {
                           </div>
                         </div>
 
-                        <div className="flex flex-col space-y-2 md:min-w-[140px]">
+                        <div className="flex flex-col space-y-1.5 sm:space-y-2 md:min-w-[140px]">
                           <Button 
                             variant="outline" 
-                            className="w-full"
+                            className="w-full text-xs sm:text-sm h-8 sm:h-9"
                             onClick={() => handleViewDetails(game.id)}
                           >
                             View Details
                           </Button>
                           <Button 
                             variant="outline" 
-                            className="w-full"
+                            className="w-full text-xs sm:text-sm h-8 sm:h-9"
                             onClick={() => handleManageGame(game.id)}
                           >
                             Manage
                           </Button>
                           <Button 
                             variant="ghost" 
-                            className="w-full text-destructive hover:text-destructive"
+                            className="w-full text-destructive hover:text-destructive text-xs sm:text-sm h-8 sm:h-9"
                             onClick={() => handleCancelGame(game.id, game.sport)}
                           >
                             Cancel Game
@@ -1648,44 +1649,44 @@ const MyGames = () => {
                           </div>
                           
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-xl font-bold mb-1">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
-                            <div className="flex items-center text-muted-foreground text-sm mb-3">
-                              <MapPin className="w-4 h-4 mr-1" />
+                            <h3 className="text-lg sm:text-xl font-bold mb-1 truncate">{formatSportDisplay(game.sport, game.custom_sport_name)}</h3>
+                            <div className="flex items-center text-muted-foreground text-xs sm:text-sm mb-2 sm:mb-3">
+                              <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 flex-shrink-0" />
                               <span className="truncate">{game.location_name}</span>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="flex items-center space-x-2 text-sm">
-                                <Calendar className="w-4 h-4 text-muted-foreground" />
-                                <span className="font-medium">
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                              <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                                <span className="font-medium truncate">
                                   {format(new Date(game.game_date), 'MMM dd, yyyy')}
                                 </span>
                               </div>
-                              <div className="flex items-center space-x-2 text-sm">
-                                <Clock className="w-4 h-4 text-muted-foreground" />
-                                <span className="font-medium">{game.start_time}</span>
+                              <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                                <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+                                <span className="font-medium truncate">{game.start_time}</span>
                               </div>
-                              <div className="flex items-center space-x-2 text-sm">
-                                <Users className="w-4 h-4 text-muted-foreground" />
+                              <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                                <Users className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
                                 <span className="font-medium">
                                   {game.current_players}/{game.max_players} players
                                 </span>
                               </div>
-                              <div className="flex items-center space-x-2 text-sm">
-                                <Badge variant="secondary">{game.skill_level.replace('_', ' ')}</Badge>
+                              <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm">
+                                <Badge variant="secondary" className="text-xs">{game.skill_level.replace('_', ' ')}</Badge>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex flex-col space-y-2 md:min-w-[160px]">
+                        <div className="flex flex-col space-y-1.5 sm:space-y-2 md:min-w-[160px]">
                           {/* Show different buttons based on game state */}
                           {game.host_id === user?.id ? (
-                            <Badge variant="secondary" className="w-full justify-center py-2">
+                            <Badge variant="secondary" className="w-full justify-center py-1.5 sm:py-2 text-xs sm:text-sm">
                               You're hosting
                             </Badge>
                           ) : userRSVPs.has(game.id) ? (
-                            <Badge variant="secondary" className="w-full justify-center py-2">
+                            <Badge variant="secondary" className="w-full justify-center py-1.5 sm:py-2 text-xs sm:text-sm">
                               ✓ Already joined
                             </Badge>
                           ) : (() => {
@@ -1695,17 +1696,17 @@ const MyGames = () => {
                             const isFull = game.current_players >= game.max_players;
                             
                             return isPastGame ? (
-                              <Badge variant="outline" className="w-full justify-center py-2">
+                              <Badge variant="outline" className="w-full justify-center py-1.5 sm:py-2 text-xs sm:text-sm">
                                 Game ended
                               </Badge>
                             ) : isFull ? (
-                              <Badge variant="outline" className="w-full justify-center py-2">
+                              <Badge variant="outline" className="w-full justify-center py-1.5 sm:py-2 text-xs sm:text-sm">
                                 Game full
                               </Badge>
                             ) : (
                               <Button 
                                 variant="default" 
-                                className="w-full"
+                                className="w-full text-xs sm:text-sm h-8 sm:h-9"
                                 onClick={() => handleJoinSavedGame(game)}
                                 disabled={joiningGameId === game.id}
                               >
@@ -1716,7 +1717,7 @@ const MyGames = () => {
                           
                           <Button 
                             variant="outline" 
-                            className="w-full"
+                            className="w-full text-xs sm:text-sm h-8 sm:h-9"
                             asChild
                           >
                             <Link to={`/game/${game.id}`}>
@@ -1726,7 +1727,7 @@ const MyGames = () => {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            className="w-full"
+                            className="w-full text-xs sm:text-sm h-8 sm:h-9"
                             onClick={() => {
                               unsaveGame(game.id);
                               setSavedGames(prev => prev.filter(g => g.id !== game.id));
