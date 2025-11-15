@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { ShareGameButton } from "@/components/ShareGameButton";
 import { SEO } from "@/components/SEO";
 import { GameReminderBanner } from "@/components/GameReminderBanner";
-import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink, Bookmark, BookmarkCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { toDisplaySportName, getSportEmoji, formatSportDisplay } from "@/utils/sportsUtils";
 import { useSavedGames } from "@/hooks/useSavedGames";
-import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 
 interface Game {
   id: string;
@@ -530,17 +528,6 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     }
   }, [toast, transformGame]);
 
-  // Pull-to-refresh functionality
-  const pullToRefreshState = usePullToRefresh({
-    onRefresh: async () => {
-      await fetchGames();
-      toast({
-        title: "Games refreshed!",
-        description: "Latest games loaded",
-      });
-    },
-    enabled: true,
-  });
 
   useEffect(() => {
     fetchGames();
@@ -1082,7 +1069,6 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
 
   return (
     <div className="min-h-screen min-h-screen-mobile bg-gradient-to-br from-blue-50 to-indigo-50">
-      <PullToRefreshIndicator {...pullToRefreshState} />
       <SEO
         title="Discover Pickup Games Near You"
         description="Browse and join pickup games in your area. Find basketball, soccer, volleyball, tennis, cricket and more sports games nearby. Filter by sport, skill level, and location to find the perfect game for you."
