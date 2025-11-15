@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SEO } from "@/components/SEO";
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 import { ThumbsUp, ThumbsDown, MessageSquare, Send, Users, Plus, ArrowLeft, Filter, Trash2, Search, Calendar } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -16,6 +17,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { getAllSportsDbValues, toDisplaySportName } from "@/utils/sportsUtils";
 import { format } from "date-fns";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 
 interface Community {
   id: string;
@@ -141,7 +143,7 @@ export default function Community() {
     }
   }, [searchParams, communities, selectedCommunity]);
 
-  const fetchCommunities = async () => {
+  const fetchCommunities = useCallback(async () => {
     const { data, error } = await supabase
       .from("communities")
       .select("*")
@@ -153,32 +155,9 @@ export default function Community() {
       setCommunities((data || []) as Community[]);
       setFilteredCommunities((data || []) as Community[]);
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    let filtered = communities;
-    
-    // Filter by archived status
-    filtered = filtered.filter(c => c.archived === showArchived);
-    
-    // Filter by sport
-    if (sportFilter !== "ALL") {
-      filtered = filtered.filter(c => c.sport === sportFilter);
-    }
-    
-    // Filter by search query
-    if (communitySearchQuery.trim()) {
-      const query = communitySearchQuery.toLowerCase();
-      filtered = filtered.filter(c => 
-        c.name.toLowerCase().includes(query) || 
-        c.description?.toLowerCase().includes(query)
-      );
-    }
-    
-    setFilteredCommunities(filtered);
-  }, [sportFilter, communitySearchQuery, communities, showArchived]);
-
-  const fetchPosts = async (communityId: string) => {
+  const fetchPosts = useCallback(async (communityId: string) => {
     const { data: postsData, error: postsError } = await supabase
       .from("posts")
       .select("*")
@@ -209,7 +188,44 @@ export default function Community() {
     } else {
       setPosts([]);
     }
-  };
+  }, []);
+
+  // Pull-to-refresh functionality
+  const pullToRefreshState = usePullToRefresh({
+    onRefresh: async () => {
+      if (selectedCommunity) {
+        await Promise.all([fetchPosts(selectedCommunity.id), fetchCommunities()]);
+        toast({ title: "Refreshed!", description: "Community feed updated" });
+      } else {
+        await fetchCommunities();
+        toast({ title: "Refreshed!", description: "Communities list updated" });
+      }
+    },
+    enabled: !!user,
+  });
+
+  useEffect(() => {
+    let filtered = communities;
+    
+    // Filter by archived status
+    filtered = filtered.filter(c => c.archived === showArchived);
+    
+    // Filter by sport
+    if (sportFilter !== "ALL") {
+      filtered = filtered.filter(c => c.sport === sportFilter);
+    }
+    
+    // Filter by search query
+    if (communitySearchQuery.trim()) {
+      const query = communitySearchQuery.toLowerCase();
+      filtered = filtered.filter(c => 
+        c.name.toLowerCase().includes(query) || 
+        c.description?.toLowerCase().includes(query)
+      );
+    }
+    
+    setFilteredCommunities(filtered);
+  }, [sportFilter, communitySearchQuery, communities, showArchived]);
 
   const checkMembership = async (communityId: string) => {
     if (!user) return;
@@ -695,6 +711,7 @@ export default function Community() {
 
   return (
     <div className="min-h-screen min-h-screen-mobile bg-background">
+      <PullToRefreshIndicator {...pullToRefreshState} />
       <SEO
         title="Sports Communities & Discussion Forums"
         description="Join sport-specific communities, connect with fellow athletes, share tips and strategies. Participate in discussions about games, training, and local sports events."

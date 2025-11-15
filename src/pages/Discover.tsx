@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ShareGameButton } from "@/components/ShareGameButton";
 import { SEO } from "@/components/SEO";
 import { GameReminderBanner } from "@/components/GameReminderBanner";
+import { PullToRefreshIndicator } from "@/components/PullToRefreshIndicator";
 import { Calendar, Clock, Users, MapPin, Navigation, Share2, ExternalLink, Bookmark, BookmarkCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { toDisplaySportName, getSportEmoji, formatSportDisplay } from "@/utils/sportsUtils";
 import { useSavedGames } from "@/hooks/useSavedGames";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 
 interface Game {
   id: string;
@@ -478,57 +480,69 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   }, [user]);
 
   // Fetch games from database and set up realtime subscription
-  useEffect(() => {
-    const fetchGames = async () => {
-      console.log('🎮 [Discover] Fetching games from database...');
-      setLoading(true);
-      
-      try {
-        const { data: gamesData, error } = await supabase
-          .from('games')
-          .select(`
-            id,
-            sport,
-            custom_sport_name,
-            location_name,
-            address,
-            city,
-            game_date,
-            start_time,
-            max_players,
-            current_players,
-            skill_level,
-            latitude,
-            longitude,
-            host_id,
-            visibility,
-            profiles!games_host_id_fkey(username)
-          `)
-          .eq('status', 'UPCOMING')
-          .order('game_date', { ascending: true });
+  const fetchGames = useCallback(async () => {
+    console.log('🎮 [Discover] Fetching games from database...');
+    setLoading(true);
+    
+    try {
+      const { data: gamesData, error } = await supabase
+        .from('games')
+        .select(`
+          id,
+          sport,
+          custom_sport_name,
+          location_name,
+          address,
+          city,
+          game_date,
+          start_time,
+          max_players,
+          current_players,
+          skill_level,
+          latitude,
+          longitude,
+          host_id,
+          visibility,
+          profiles!games_host_id_fkey(username)
+        `)
+        .eq('status', 'UPCOMING')
+        .order('game_date', { ascending: true });
 
-        if (error) {
-          console.error('❌ [Discover] Error fetching games:', error);
-          throw error;
-        }
-
-        console.log('✅ [Discover] Games fetched:', gamesData?.length || 0);
-
-        const transformedGames: Game[] = (gamesData || []).map(transformGame);
-        setDbGames(transformedGames);
-      } catch (error) {
-        console.error('❌ [Discover] Error:', error);
-        toast({
-          title: 'Error loading games',
-          description: 'Could not load games from database',
-          variant: 'destructive',
-        });
-        setDbGames(sampleGames);
-      } finally {
-        setLoading(false);
+      if (error) {
+        console.error('❌ [Discover] Error fetching games:', error);
+        throw error;
       }
-    };
 
+      console.log('✅ [Discover] Games fetched:', gamesData?.length || 0);
+
+      const transformedGames: Game[] = (gamesData || []).map(transformGame);
+      setDbGames(transformedGames);
+    } catch (error) {
+      console.error('❌ [Discover] Error:', error);
+      toast({
+        title: 'Error loading games',
+        description: 'Could not load games from database',
+        variant: 'destructive',
+      });
+      setDbGames(sampleGames);
+    } finally {
+      setLoading(false);
+    }
+  }, [toast, transformGame]);
+
+  // Pull-to-refresh functionality
+  const pullToRefreshState = usePullToRefresh({
+    onRefresh: async () => {
+      await fetchGames();
+      toast({
+        title: "Games refreshed!",
+        description: "Latest games loaded",
+      });
+    },
+    enabled: true,
+  });
+
+  useEffect(() => {
     fetchGames();
 
     // Set up realtime subscription for game changes
@@ -1068,6 +1082,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
 
   return (
     <div className="min-h-screen min-h-screen-mobile bg-gradient-to-br from-blue-50 to-indigo-50">
+      <PullToRefreshIndicator {...pullToRefreshState} />
       <SEO
         title="Discover Pickup Games Near You"
         description="Browse and join pickup games in your area. Find basketball, soccer, volleyball, tennis, cricket and more sports games nearby. Filter by sport, skill level, and location to find the perfect game for you."
