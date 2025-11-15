@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Share2, Link as LinkIcon, MessageCircle, Facebook, Twitter, Mail } from "lucide-react";
+import { Share2, Link as LinkIcon, MessageCircle, MessageSquare, Facebook, Twitter, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ShareGameButtonProps {
@@ -59,6 +59,11 @@ export const ShareGameButton = ({ gameId, gameName, variant = "outline", size = 
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
 
+  const shareViaSMS = () => {
+    const body = encodeURIComponent(`${shareText}\n\n${shareUrl}`);
+    window.location.href = `sms:?body=${body}`;
+  };
+
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
@@ -101,6 +106,11 @@ export const ShareGameButton = ({ gameId, gameName, variant = "outline", size = 
         )}
 
         <DropdownMenuSeparator />
+
+        <DropdownMenuItem onClick={shareViaSMS}>
+          <MessageSquare className="w-4 h-4 mr-2" />
+          Text Message
+        </DropdownMenuItem>
 
         <DropdownMenuItem onClick={shareViaWhatsApp}>
           <MessageCircle className="w-4 h-4 mr-2" />
