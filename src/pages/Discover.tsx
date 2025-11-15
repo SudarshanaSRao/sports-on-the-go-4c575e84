@@ -428,7 +428,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
     emoji: getSportEmoji(game.sport),
     location: game.location_name,
     address: `${game.address}, ${game.city}`,
-    date: new Date(game.game_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    date: new Date(game.game_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     time: new Date(`2000-01-01T${game.start_time}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
     distance: '0 mi',
     players: { current: game.current_players, max: game.max_players },
