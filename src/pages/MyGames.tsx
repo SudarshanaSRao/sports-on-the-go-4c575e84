@@ -879,7 +879,7 @@ const MyGames = () => {
         setSearchParams(params);
       }
     }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] dialog-content-scroll">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             <span className="text-3xl">{selectedGame && getSportEmoji(selectedGame.sport)}</span>
@@ -1012,7 +1012,7 @@ const MyGames = () => {
         setSearchParams(params);
       }
     }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] dialog-content-scroll">
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center justify-between">
             <span>Manage Game</span>
@@ -1305,9 +1305,9 @@ const MyGames = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen min-h-screen-mobile bg-background">
         <Navbar />
-        <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 safe-bottom">
           <div className="container mx-auto max-w-5xl">
             <div className="text-center py-12">Loading...</div>
           </div>
@@ -1346,12 +1346,12 @@ const MyGames = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen min-h-screen-mobile bg-background">
       <Navbar />
       {renderDetailsDialog()}
       {renderManageDialog()}
       
-      <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 safe-bottom">
         <div className="container mx-auto max-w-5xl">
           {/* Game Reminder Banner */}
           <div className="mb-6">

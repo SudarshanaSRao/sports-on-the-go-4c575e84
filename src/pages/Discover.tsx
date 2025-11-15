@@ -1067,7 +1067,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen min-h-screen-mobile bg-gradient-to-br from-blue-50 to-indigo-50">
       <SEO
         title="Discover Pickup Games Near You"
         description="Browse and join pickup games in your area. Find basketball, soccer, volleyball, tennis, cricket and more sports games nearby. Filter by sport, skill level, and location to find the perfect game for you."
@@ -1085,7 +1085,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
         </div>
       )}
       
-      <div className={`${user ? 'pt-2' : 'pt-20'} px-2 sm:px-4 pb-4 flex justify-center`}>
+      <div className={`${user ? 'pt-2' : 'pt-20'} px-2 sm:px-4 pb-4 safe-bottom flex justify-center`}>
         <div className="w-full max-w-7xl">
           <div className="mb-4 sm:mb-6">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Find Your Game</h1>
@@ -1244,7 +1244,7 @@ export default function GameMap({ games: propGames, center: propCenter, zoom = 4
           </div>
 
           {/* Game Details Panel - Scrollable on mobile and desktop */}
-          <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-4 sm:p-6 overflow-y-auto max-h-[600px] lg:max-h-[calc(100vh-200px)]">
+          <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-4 sm:p-6 overflow-y-auto max-h-[calc(100vh-12rem)] lg:max-h-[calc(100vh-200px)]">
             {selectedGame ? (
               <div>
                 <div className="flex items-start justify-between mb-4">

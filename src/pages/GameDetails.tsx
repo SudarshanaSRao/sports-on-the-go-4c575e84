@@ -297,9 +297,9 @@ const GameDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="min-h-screen min-h-screen-mobile bg-gradient-to-b from-background to-muted/20">
         <Navbar />
-        <main className="container mx-auto px-4 pt-24 pb-12">
+        <main className="container mx-auto px-4 pt-24 pb-12 safe-bottom">
           <p className="text-center text-muted-foreground">Loading game details...</p>
         </main>
       </div>
@@ -308,9 +308,9 @@ const GameDetails = () => {
 
   if (!game) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="min-h-screen min-h-screen-mobile bg-gradient-to-b from-background to-muted/20">
         <Navbar />
-        <main className="container mx-auto px-4 pt-24 pb-12">
+        <main className="container mx-auto px-4 pt-24 pb-12 safe-bottom">
           <Card className="p-8 text-center">
             <h2 className="text-2xl font-bold mb-4">Game Not Found</h2>
             <p className="text-muted-foreground mb-6">
@@ -346,9 +346,9 @@ const GameDetails = () => {
   const canJoin = Boolean(user && !isHost && !hasRSVP && !isFull && !isPastGame);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <div className="min-h-screen min-h-screen-mobile bg-gradient-to-b from-background to-muted/20">
       <Navbar />
-      <main className="container mx-auto px-4 pt-24 pb-12">
+      <main className="container mx-auto px-4 pt-24 pb-12 safe-bottom">
         <div className="max-w-4xl mx-auto">
           <Button
             variant="ghost"

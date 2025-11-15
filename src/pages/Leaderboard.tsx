@@ -66,7 +66,7 @@ export default function Leaderboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen min-h-screen-mobile bg-background">
       <SEO
         title="Player Rankings & Leaderboard"
         description="View top-rated players in your area. See player rankings based on ratings, games hosted, and attendance. Compete to climb the leaderboard and earn your reputation."
