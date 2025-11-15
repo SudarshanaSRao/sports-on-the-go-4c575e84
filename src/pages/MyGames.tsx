@@ -1361,12 +1361,12 @@ const MyGames = () => {
           </div>
 
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-4xl font-black mb-2">My Games</h1>
-              <p className="text-lg text-muted-foreground">Manage your upcoming and past games</p>
+              <h1 className="text-3xl sm:text-4xl font-black mb-1 sm:mb-2">My Games</h1>
+              <p className="text-sm sm:text-lg text-muted-foreground">Manage your upcoming and past games</p>
             </div>
-            <Button className="gradient-primary text-white shadow-primary hover:opacity-90" asChild>
+            <Button className="gradient-primary text-white shadow-primary hover:opacity-90 w-full sm:w-auto text-sm sm:text-base h-9 sm:h-10" asChild>
               <Link to="/host-game">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Game
@@ -1376,17 +1376,17 @@ const MyGames = () => {
 
           {/* Tabs */}
           <Tabs defaultValue="upcoming" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 mb-8">
-              <TabsTrigger value="upcoming">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1 sm:gap-0 mb-6 sm:mb-8 h-auto p-1">
+              <TabsTrigger value="upcoming" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-4 whitespace-nowrap">
                 Upcoming ({allUpcomingGames.length})
               </TabsTrigger>
-              <TabsTrigger value="hosting">
+              <TabsTrigger value="hosting" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-4 whitespace-nowrap">
                 Hosting ({hostedGames.length})
               </TabsTrigger>
-              <TabsTrigger value="saved">
+              <TabsTrigger value="saved" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-4 whitespace-nowrap">
                 Saved ({savedGames.length})
               </TabsTrigger>
-              <TabsTrigger value="past">
+              <TabsTrigger value="past" className="text-xs sm:text-sm py-2 sm:py-2.5 px-2 sm:px-4 whitespace-nowrap">
                 Past ({pastGames.length})
               </TabsTrigger>
             </TabsList>

@@ -43,10 +43,10 @@ const Friends = () => {
       <Navbar />
       <main className="container mx-auto px-4 pt-24 pb-12 safe-bottom">
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Friends</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-3xl sm:text-4xl font-bold mb-1 sm:mb-2">Friends</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Connect with other players and build your squad
               </p>
             </div>
@@ -54,18 +54,18 @@ const Friends = () => {
           </div>
 
           <Tabs defaultValue="friends" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="friends" className="gap-2">
-                <Users className="w-4 h-4" />
-                Friends ({friends.length})
+            <TabsList className="grid w-full grid-cols-3 gap-1 sm:gap-0 h-auto p-1">
+              <TabsTrigger value="friends" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 sm:py-2.5 px-1.5 sm:px-3">
+                <Users className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate">Friends ({friends.length})</span>
               </TabsTrigger>
-              <TabsTrigger value="pending" className="gap-2">
-                <UserPlus className="w-4 h-4" />
-                Requests ({pendingRequests.length})
+              <TabsTrigger value="pending" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 sm:py-2.5 px-1.5 sm:px-3">
+                <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate">Requests ({pendingRequests.length})</span>
               </TabsTrigger>
-              <TabsTrigger value="sent" className="gap-2">
-                <Send className="w-4 h-4" />
-                Sent ({sentRequests.length})
+              <TabsTrigger value="sent" className="gap-1 sm:gap-2 text-xs sm:text-sm py-2 sm:py-2.5 px-1.5 sm:px-3">
+                <Send className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                <span className="truncate">Sent ({sentRequests.length})</span>
               </TabsTrigger>
             </TabsList>
 

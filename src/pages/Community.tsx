@@ -707,15 +707,15 @@ export default function Community() {
         <div className="max-w-7xl mx-auto">
           {viewMode === "list" ? (
             <>
-              <div className="mb-6">
-                <h1 className="text-3xl font-bold text-foreground mb-2">Communities</h1>
-                <p className="text-muted-foreground">Join communities and connect with players</p>
+              <div className="mb-4 sm:mb-6">
+                <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">Communities</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">Join communities and connect with players</p>
               </div>
-              <div className="flex justify-between items-center mb-4 gap-4">
-                <div className="flex items-center gap-2 flex-1 max-w-2xl">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3 sm:gap-4">
+                <div className="flex items-center gap-2 flex-1 w-full sm:max-w-2xl">
                   <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   <Select value={sportFilter} onValueChange={setSportFilter}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-full sm:w-[180px] text-sm">
                       <SelectValue placeholder="Filter by sport" />
                     </SelectTrigger>
                     <SelectContent>

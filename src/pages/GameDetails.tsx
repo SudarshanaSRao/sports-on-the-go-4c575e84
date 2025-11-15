@@ -359,17 +359,17 @@ const GameDetails = () => {
             Back
           </Button>
 
-          <Card className="p-6">
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-3xl font-bold">{formatSportDisplay(game.sport, game.custom_sport_name)}</h1>
-                  <Badge variant="secondary">{game.skill_level}</Badge>
+          <Card className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start justify-between mb-4 sm:mb-6 gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <h1 className="text-2xl sm:text-3xl font-bold truncate">{formatSportDisplay(game.sport, game.custom_sport_name)}</h1>
+                  <Badge variant="secondary" className="text-xs sm:text-sm whitespace-nowrap">{game.skill_level}</Badge>
                   {game.visibility !== "PUBLIC" && (
-                    <Badge variant="outline">{game.visibility}</Badge>
+                    <Badge variant="outline" className="text-xs sm:text-sm whitespace-nowrap">{game.visibility}</Badge>
                   )}
                 </div>
-                <p className="text-muted-foreground">Hosted by {hostName}</p>
+                <p className="text-sm sm:text-base text-muted-foreground">Hosted by {hostName}</p>
               </div>
               <ShareGameButton gameId={game.id} gameName={`${formatSportDisplay(game.sport, game.custom_sport_name)} Game`} />
             </div>
