@@ -21,6 +21,7 @@ interface Notification {
   related_game_id: string | null;
   is_read: boolean;
   action_url: string | null;
+  notification_count?: number;
   created_at: string;
 }
 
@@ -48,7 +49,7 @@ export function NotificationCenter() {
       return;
     }
 
-    setNotifications(data || []);
+    setNotifications((data || []) as Notification[]);
     setUnreadCount(data?.filter(n => !n.is_read).length || 0);
   };
 
@@ -310,11 +311,18 @@ export function NotificationCenter() {
                     <div className="flex-shrink-0 mt-1">
                       {getNotificationIcon(notification.type)}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm font-medium leading-tight">
-                          {notification.title}
-                        </p>
+                     <div className="flex-1 min-w-0">
+                       <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium leading-tight">
+                            {notification.title}
+                          </p>
+                          {notification.notification_count && notification.notification_count > 1 && (
+                            <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                              {notification.notification_count}
+                            </Badge>
+                          )}
+                        </div>
                         {!notification.is_read && (
                           <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1" />
                         )}
@@ -322,9 +330,26 @@ export function NotificationCenter() {
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {getTimeAgo(notification.created_at)}
-                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <p className="text-xs text-muted-foreground">
+                          {getTimeAgo(notification.created_at)}
+                        </p>
+                        {(notification.type === 'new_post' || notification.type === 'new_comment') && notification.related_community_id && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-xs text-primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsRead(notification.id);
+                              navigate(`/community?id=${notification.related_community_id}`);
+                              setIsOpen(false);
+                            }}
+                          >
+                            View thread →
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     <Button
                       variant="ghost"
