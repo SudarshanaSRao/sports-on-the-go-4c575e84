@@ -352,21 +352,24 @@ export function NotificationCenter() {
                         <p className="text-xs text-muted-foreground">
                           {getTimeAgo(notification.created_at)}
                         </p>
-                        {(notification.type === 'new_post' || notification.type === 'new_comment') && notification.related_community_id && (
-                          <Button
-                            variant="link"
-                            size="sm"
-                            className="h-auto p-0 text-xs text-primary"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              markAsRead(notification.id);
-                              navigate(`/community?id=${notification.related_community_id}`);
-                              setIsOpen(false);
-                            }}
-                          >
-                            View thread →
-                          </Button>
-                        )}
+                    {(notification.type === 'new_post' || notification.type === 'new_comment') && notification.related_community_id && (
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0 text-xs text-primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          markAsRead(notification.id);
+                          const url = notification.related_post_id 
+                            ? `/community?id=${notification.related_community_id}&postId=${notification.related_post_id}`
+                            : `/community?id=${notification.related_community_id}`;
+                          navigate(url);
+                          setIsOpen(false);
+                        }}
+                      >
+                        View thread →
+                      </Button>
+                    )}
                       </div>
                     </div>
                     <Button
