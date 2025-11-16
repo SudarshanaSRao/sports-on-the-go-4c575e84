@@ -507,10 +507,7 @@ export default function Community() {
   }, [sportFilter, communitySearchQuery, communities, showArchived]);
 
   const checkMembership = async (communityId: string) => {
-    if (!user) {
-      console.log('checkMembership: No user');
-      return;
-    }
+    if (!user) return;
     
     const { data, error } = await supabase
       .from("community_members")
@@ -523,7 +520,6 @@ export default function Community() {
       console.error('checkMembership error:', error);
     }
 
-    console.log('checkMembership result:', { data, isMember: !!data, isAdmin: data?.role === 'admin' });
     setIsMember(!!data);
     setIsAdmin(data?.role === 'admin');
   };
@@ -592,8 +588,6 @@ export default function Community() {
   const handleJoinCommunity = async (communityId: string) => {
     if (!user) return;
 
-    console.log('Attempting to join community:', communityId);
-
     const { error } = await supabase
       .from("community_members")
       .insert({
@@ -610,7 +604,6 @@ export default function Community() {
         variant: "destructive"
       });
     } else {
-      console.log('Successfully joined community');
       toast({ title: "Joined community!" });
       checkMembership(communityId);
       fetchCommunities();
@@ -648,13 +641,6 @@ export default function Community() {
       return;
     }
 
-    console.log('Creating post with:', { 
-      user_id: user.id, 
-      community_id: selectedCommunity.id, 
-      isMember,
-      title: newPost.title.substring(0, 20) 
-    });
-
     const { data, error } = await supabase.from("posts").insert({
       user_id: user.id,
       community_id: selectedCommunity.id,
@@ -670,7 +656,6 @@ export default function Community() {
         variant: "destructive"
       });
     } else {
-      console.log('Post created successfully:', data);
       toast({ title: "Post created!" });
       setNewPost({ title: "", content: "" });
       setShowNewPost(false);
