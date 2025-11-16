@@ -641,25 +641,61 @@ export default function Community() {
       return;
     }
 
-    const { data, error } = await supabase.from("posts").insert({
-      user_id: user.id,
-      community_id: selectedCommunity.id,
-      title: newPost.title,
-      content: newPost.content
-    }).select();
+    try {
+      // Profanity check on title
+      const { data: titleModerationData } = await supabase.functions.invoke('moderate-content', {
+        body: { content: newPost.title }
+      });
+      if (titleModerationData?.isFlagged) {
+        toast({
+          title: "Post title blocked",
+          description: titleModerationData.reason || "Please keep it respectful.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (error) {
-      console.error('Post creation error:', error);
+      // Profanity check on content
+      const { data: contentModerationData } = await supabase.functions.invoke('moderate-content', {
+        body: { content: newPost.content }
+      });
+      if (contentModerationData?.isFlagged) {
+        toast({
+          title: "Post content blocked",
+          description: contentModerationData.reason || "Please keep it respectful.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // If moderation passes, create the post
+      const { data, error } = await supabase.from("posts").insert({
+        user_id: user.id,
+        community_id: selectedCommunity.id,
+        title: newPost.title,
+        content: newPost.content
+      }).select();
+
+      if (error) {
+        console.error('Post creation error:', error);
+        toast({
+          title: "Error creating post",
+          description: error.message || "Failed to create post.",
+          variant: "destructive"
+        });
+      } else {
+        toast({ title: "Post created!" });
+        setNewPost({ title: "", content: "" });
+        setShowNewPost(false);
+        fetchPosts(selectedCommunity.id);
+      }
+    } catch (error) {
+      console.error('Error in post creation:', error);
       toast({
-        title: "Error creating post",
-        description: error.message || "Failed to create post. Make sure you're a member of this community.",
+        title: "Error",
+        description: "Failed to create post. Please try again.",
         variant: "destructive"
       });
-    } else {
-      toast({ title: "Post created!" });
-      setNewPost({ title: "", content: "" });
-      setShowNewPost(false);
-      fetchPosts(selectedCommunity.id);
     }
   };
 
@@ -964,6 +1000,42 @@ export default function Community() {
     } else {
       toast({ title: "Comment deleted!" });
       fetchComments(postId);
+    }
+  };
+
+  const handleDeletePost = async (postId: string, postUserId: string) => {
+    if (!user) return;
+
+    if (postUserId !== user.id && !isAdmin) {
+      toast({
+        title: "Permission denied",
+        description: "You can only delete your own posts or be an admin.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const confirmDelete = window.confirm("Are you sure you want to delete this post? This action cannot be undone.");
+    if (!confirmDelete) return;
+
+    const { error } = await supabase
+      .from("posts")
+      .delete()
+      .eq("id", postId);
+
+    if (error) {
+      console.error('Delete post error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete post.",
+        variant: "destructive"
+      });
+    } else {
+      toast({ title: "Post deleted successfully!" });
+      if (selectedCommunity) {
+        fetchPosts(selectedCommunity.id);
+      }
+      setSelectedPost(null);
     }
   };
 
@@ -1340,10 +1412,24 @@ export default function Community() {
                   }`}
                 >
                   <CardHeader>
-                    <CardTitle className="text-xl">{post.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      by {getDisplayName(post.profiles, post.user_id)} • {new Date(post.created_at).toLocaleDateString()}
-                    </p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-xl">{post.title}</CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          by {getDisplayName(post.profiles, post.user_id)} • {new Date(post.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      {(post.user_id === user?.id || isAdmin) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeletePost(post.id, post.user_id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-foreground mb-4">{post.content}</p>
