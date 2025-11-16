@@ -640,21 +640,82 @@ export default function Community() {
     if (!user) return;
 
     const currentVote = userVotes[postId];
+    
+    // Optimistically update the UI immediately
+    setPosts(prevPosts => 
+      prevPosts.map(post => {
+        if (post.id !== postId) return post;
+        
+        let newUpvotes = post.upvotes;
+        let newDownvotes = post.downvotes;
+        
+        if (currentVote === voteType) {
+          // Removing vote
+          if (voteType === "up") {
+            newUpvotes = Math.max(0, newUpvotes - 1);
+          } else {
+            newDownvotes = Math.max(0, newDownvotes - 1);
+          }
+        } else if (currentVote) {
+          // Changing vote
+          if (currentVote === "up") {
+            newUpvotes = Math.max(0, newUpvotes - 1);
+            newDownvotes = newDownvotes + 1;
+          } else {
+            newDownvotes = Math.max(0, newDownvotes - 1);
+            newUpvotes = newUpvotes + 1;
+          }
+        } else {
+          // Adding new vote
+          if (voteType === "up") {
+            newUpvotes = newUpvotes + 1;
+          } else {
+            newDownvotes = newDownvotes + 1;
+          }
+        }
+        
+        return { ...post, upvotes: newUpvotes, downvotes: newDownvotes };
+      })
+    );
+    
+    // Update userVotes state optimistically
+    setUserVotes(prev => {
+      const newVotes = { ...prev };
+      if (currentVote === voteType) {
+        delete newVotes[postId];
+      } else {
+        newVotes[postId] = voteType;
+      }
+      return newVotes;
+    });
 
-    if (currentVote === voteType) {
-      // Remove vote
-      await supabase.from("post_votes").delete().match({ post_id: postId, user_id: user.id });
-    } else if (currentVote) {
-      // Update vote
-      await supabase.from("post_votes").update({ vote_type: voteType }).match({ post_id: postId, user_id: user.id });
-    } else {
-      // Create vote
-      await supabase.from("post_votes").insert({ post_id: postId, user_id: user.id, vote_type: voteType });
-    }
-
-    fetchUserVotes();
-    if (selectedCommunity) {
-      fetchPosts(selectedCommunity.id);
+    // Perform database operation
+    try {
+      if (currentVote === voteType) {
+        // Remove vote
+        await supabase.from("post_votes").delete().match({ post_id: postId, user_id: user.id });
+      } else if (currentVote) {
+        // Update vote
+        await supabase.from("post_votes").update({ vote_type: voteType }).match({ post_id: postId, user_id: user.id });
+      } else {
+        // Create vote
+        await supabase.from("post_votes").insert({ post_id: postId, user_id: user.id, vote_type: voteType });
+      }
+      
+      // Refetch in background to ensure consistency
+      setTimeout(() => {
+        fetchUserVotes();
+        if (selectedCommunity) {
+          fetchPosts(selectedCommunity.id);
+        }
+      }, 500);
+    } catch (error) {
+      console.error("Error voting:", error);
+      // Revert optimistic update on error
+      fetchUserVotes();
+      if (selectedCommunity) {
+        fetchPosts(selectedCommunity.id);
+      }
     }
   };
 
@@ -1333,7 +1394,7 @@ export default function Community() {
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="relative">
                         <MessageSquare className="w-4 h-4 mr-1" />
-                        Comments
+                        Comments {comments[post.id]?.length || 0}
                         {post.unreadCount && post.unreadCount > 0 && (
                           <Badge 
                             variant="destructive" 
