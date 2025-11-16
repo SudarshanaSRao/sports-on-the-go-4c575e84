@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -102,6 +102,8 @@ export default function Community() {
   const [searchQuery, setSearchQuery] = useState("");
   const [communitySearchQuery, setCommunitySearchQuery] = useState("");
   const [editingVisibility, setEditingVisibility] = useState(false);
+  const [highlightedPostId, setHighlightedPostId] = useState<string | null>(null);
+  const postRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [selectedVisibility, setSelectedVisibility] = useState<'PUBLIC' | 'FRIENDS_ONLY' | 'INVITE_ONLY'>('PUBLIC');
   const [showArchived, setShowArchived] = useState(false);
   const [showReviveDialog, setShowReviveDialog] = useState(false);
@@ -141,6 +143,29 @@ export default function Community() {
       }
     }
   }, [searchParams, communities, selectedCommunity]);
+
+  // Auto-scroll and highlight post when postId is in URL
+  useEffect(() => {
+    const postId = searchParams.get('postId');
+    if (postId && posts.length > 0) {
+      const postRef = postRefs.current.get(postId);
+      if (postRef) {
+        // Scroll to the post with smooth behavior
+        setTimeout(() => {
+          postRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setHighlightedPostId(postId);
+          
+          // Open comments for the post
+          setSelectedPost(postId);
+          
+          // Remove highlight after 3 seconds
+          setTimeout(() => {
+            setHighlightedPostId(null);
+          }, 3000);
+        }, 300); // Small delay to ensure DOM is ready
+      }
+    }
+  }, [posts, searchParams]);
 
   const fetchCommunities = useCallback(async () => {
     const { data, error } = await supabase
@@ -1263,7 +1288,21 @@ export default function Community() {
               )}
 
               {isMember && posts.map(post => (
-                <Card key={post.id}>
+                <Card 
+                  key={post.id}
+                  ref={(el) => {
+                    if (el) {
+                      postRefs.current.set(post.id, el);
+                    } else {
+                      postRefs.current.delete(post.id);
+                    }
+                  }}
+                  className={`transition-all duration-300 ${
+                    highlightedPostId === post.id 
+                      ? 'ring-2 ring-primary shadow-lg bg-accent/20' 
+                      : ''
+                  }`}
+                >
                   <CardHeader>
                     <CardTitle className="text-xl">{post.title}</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">
