@@ -19,6 +19,7 @@ interface Notification {
   related_community_id: string | null;
   related_user_id: string | null;
   related_game_id: string | null;
+  related_friendship_id: string | null;
   is_read: boolean;
   action_url: string | null;
   notification_count?: number;
@@ -227,6 +228,38 @@ export function NotificationCenter() {
     }
   };
 
+  const handleFriendRequestAction = async (
+    friendshipId: string,
+    notificationId: string,
+    action: 'accept' | 'decline'
+  ) => {
+    if (!user) return;
+
+    const newStatus = action === 'accept' ? 'ACCEPTED' : 'DECLINED';
+    
+    const { error } = await supabase
+      .from('friendships')
+      .update({ status: newStatus })
+      .eq('id', friendshipId);
+
+    if (error) {
+      console.error(`Error ${action}ing friend request:`, error);
+      toast({
+        title: "Error",
+        description: `Failed to ${action} friend request`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Delete the notification after action
+    await deleteNotification(notificationId);
+
+    toast({
+      title: action === 'accept' ? "Friend request accepted!" : "Friend request declined",
+    });
+  };
+
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'new_comment':
@@ -352,25 +385,59 @@ export function NotificationCenter() {
                         <p className="text-xs text-muted-foreground">
                           {getTimeAgo(notification.created_at)}
                         </p>
-                    {(notification.type === 'new_post' || notification.type === 'new_comment') && notification.related_community_id && (
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="h-auto p-0 text-xs text-primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          markAsRead(notification.id);
-                          const url = notification.related_post_id 
-                            ? `/community?id=${notification.related_community_id}&postId=${notification.related_post_id}`
-                            : `/community?id=${notification.related_community_id}`;
-                          navigate(url);
-                          setIsOpen(false);
-                        }}
-                      >
-                        View thread →
-                      </Button>
-                    )}
+                        {(notification.type === 'new_post' || notification.type === 'new_comment') && notification.related_community_id && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-xs text-primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markAsRead(notification.id);
+                              const url = notification.related_post_id 
+                                ? `/community?id=${notification.related_community_id}&postId=${notification.related_post_id}`
+                                : `/community?id=${notification.related_community_id}`;
+                              navigate(url);
+                              setIsOpen(false);
+                            }}
+                          >
+                            View thread →
+                          </Button>
+                        )}
                       </div>
+                      {notification.type === 'friend_request' && notification.related_friendship_id && (
+                        <div className="flex gap-2 mt-3">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="flex-1 h-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFriendRequestAction(
+                                notification.related_friendship_id!,
+                                notification.id,
+                                'accept'
+                              );
+                            }}
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 h-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFriendRequestAction(
+                                notification.related_friendship_id!,
+                                notification.id,
+                                'decline'
+                              );
+                            }}
+                          >
+                            Decline
+                          </Button>
+                        </div>
+                      )}
                     </div>
                     <Button
                       variant="ghost"
