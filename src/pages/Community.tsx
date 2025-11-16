@@ -188,6 +188,39 @@ export default function Community() {
     }
   }, []);
 
+  const fetchComments = useCallback(async (postId: string) => {
+    const { data: commentsData, error: commentsError } = await supabase
+      .from("comments")
+      .select("*")
+      .eq("post_id", postId)
+      .order("created_at", { ascending: true });
+
+    if (commentsError) {
+      console.error("Error fetching comments:", commentsError);
+      return;
+    }
+
+    // Fetch profiles separately
+    if (commentsData && commentsData.length > 0) {
+      const userIds = [...new Set(commentsData.map(c => c.user_id))];
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("id, username, first_name, last_name")
+        .in("id", userIds);
+
+      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      
+      const commentsWithProfiles = commentsData.map(comment => ({
+        ...comment,
+        profiles: profilesMap.get(comment.user_id) || { username: null, first_name: "Unknown", last_name: "User" }
+      }));
+
+      setComments(prev => ({ ...prev, [postId]: commentsWithProfiles as Comment[] }));
+    } else {
+      setComments(prev => ({ ...prev, [postId]: [] }));
+    }
+  }, []);
+
   // Real-time subscription for new posts in the selected community
   useEffect(() => {
     if (!selectedCommunity || !user) return;
@@ -235,6 +268,54 @@ export default function Community() {
     };
   }, [selectedCommunity, user, toast, fetchPosts]);
 
+  // Real-time subscription for new comments on the selected post
+  useEffect(() => {
+    if (!selectedPost || !user) return;
+
+    const channel = supabase
+      .channel(`post-comments-${selectedPost}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'comments',
+          filter: `post_id=eq.${selectedPost}`
+        },
+        async (payload) => {
+          // Don't show notification for user's own comments
+          if (payload.new.user_id === user.id) return;
+
+          // Fetch the author's profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username, first_name, last_name')
+            .eq('id', payload.new.user_id)
+            .maybeSingle();
+
+          const authorName = profile?.username || 
+                            `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() ||
+                            'Someone';
+
+          // Find the post title for context
+          const post = posts.find(p => p.id === selectedPost);
+          const postTitle = post?.title || 'a post';
+
+          toast({
+            title: "New comment",
+            description: `${authorName} replied to "${postTitle}"`,
+          });
+
+          // Refresh comments for this post
+          fetchComments(selectedPost);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedPost, user, toast, posts, fetchComments]);
 
   useEffect(() => {
     let filtered = communities;
@@ -302,39 +383,6 @@ export default function Community() {
         votesMap[vote.post_id] = vote.vote_type;
       });
       setUserVotes(votesMap);
-    }
-  };
-
-  const fetchComments = async (postId: string) => {
-    const { data: commentsData, error: commentsError } = await supabase
-      .from("comments")
-      .select("*")
-      .eq("post_id", postId)
-      .order("created_at", { ascending: true });
-
-    if (commentsError) {
-      console.error("Error fetching comments:", commentsError);
-      return;
-    }
-
-    // Fetch profiles separately
-    if (commentsData && commentsData.length > 0) {
-      const userIds = [...new Set(commentsData.map(c => c.user_id))];
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("id, username, first_name, last_name")
-        .in("id", userIds);
-
-      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
-      
-      const commentsWithProfiles = commentsData.map(comment => ({
-        ...comment,
-        profiles: profilesMap.get(comment.user_id) || { username: null, first_name: "Unknown", last_name: "User" }
-      }));
-
-      setComments(prev => ({ ...prev, [postId]: commentsWithProfiles as Comment[] }));
-    } else {
-      setComments(prev => ({ ...prev, [postId]: [] }));
     }
   };
 
