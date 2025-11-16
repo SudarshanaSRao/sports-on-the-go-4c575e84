@@ -120,22 +120,22 @@ const Auth = () => {
       </Link>
 
       <Card className="w-full max-w-md shadow-elevated border-2">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-14 h-14 rounded-xl gradient-primary flex items-center justify-center shadow-primary">
-              <MapPin className="w-7 h-7 text-white" />
+        <CardHeader className="space-y-1 pb-4">
+          <div className="flex items-center justify-center mb-3">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl gradient-primary flex items-center justify-center shadow-primary">
+              <MapPin className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-black text-center">Welcome to SquadUp</CardTitle>
-          <CardDescription className="text-center">
+          <CardTitle className="text-xl sm:text-2xl font-black text-center">Welcome to SquadUp</CardTitle>
+          <CardDescription className="text-center text-sm">
             Sign in to discover games or create your account
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-4 h-9 sm:h-10">
+              <TabsTrigger value="signin" className="text-xs sm:text-sm px-2">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="text-xs sm:text-sm px-2">Sign Up</TabsTrigger>
             </TabsList>
 
             {/* Sign In Tab */}
@@ -284,17 +284,17 @@ const Auth = () => {
                   {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="dob">Date of Birth</Label>
+                  <Label htmlFor="dob" className="text-sm">Date of Birth</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
                         className={cn(
-                          "w-full justify-start text-left font-normal pl-10",
+                          "w-full justify-start text-left font-normal pl-10 h-10 text-sm",
                           !dateOfBirth && "text-muted-foreground"
                         )}
                       >
-                        <CalendarIcon className="absolute left-3 w-4 h-4" />
+                        <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
                         {dateOfBirth ? format(dateOfBirth, "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
@@ -314,25 +314,25 @@ const Auth = () => {
                 </div>
 
             {/* Legal Consent Checkbox - MANDATORY */}
-            <div className="space-y-3 border-2 border-destructive/20 rounded-lg p-4 bg-destructive/5">
-              <div className="flex items-start space-x-3">
-                <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+            <div className="space-y-3 border-2 border-destructive/20 rounded-lg p-3 sm:p-4 bg-destructive/5">
+              <div className="flex items-start space-x-2 sm:space-x-3">
+                <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-destructive flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-foreground mb-2">
+                  <p className="text-xs sm:text-sm font-semibold text-foreground mb-1 sm:mb-2">
                     IMPORTANT LEGAL AGREEMENT
                   </p>
-                  <p className="text-xs text-muted-foreground mb-3">
+                  <p className="text-xs text-muted-foreground mb-2 sm:mb-3">
                     By creating an account, you are entering into a legally binding agreement. Please read carefully:
                   </p>
                 </div>
               </div>
               
-              <div className="flex items-start space-x-3">
+              <div className="flex items-start space-x-2 sm:space-x-3">
                 <Checkbox
                   id="agree-terms"
                   checked={agreeToTerms}
                   onCheckedChange={(checked) => setAgreeToTerms(checked === true)}
-                  className="mt-1"
+                  className="mt-0.5 sm:mt-1 flex-shrink-0"
                 />
                 <div className="flex-1">
                   <Label
@@ -348,9 +348,9 @@ const Auth = () => {
                       Privacy Policy
                     </Link>
                     , including:
-                    <ul className="list-disc pl-5 mt-2 space-y-1 text-muted-foreground">
-                      <li><strong className="text-foreground">Assumption of all risks</strong> of injury, disability, or death from sports activities</li>
-                      <li><strong className="text-foreground">Release of all claims</strong> against the operator and waiver of right to sue</li>
+                    <ul className="list-disc pl-4 sm:pl-5 mt-1.5 sm:mt-2 space-y-0.5 sm:space-y-1 text-muted-foreground">
+                      <li className="text-xs"><strong className="text-foreground">Assumption of all risks</strong> of injury, disability, or death from sports activities</li>
+                      <li className="text-xs"><strong className="text-foreground">Release of all claims</strong> against the operator and waiver of right to sue</li>
                     </ul>
                   </Label>
                   {errors.agreeToTerms && (
