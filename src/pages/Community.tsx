@@ -640,124 +640,96 @@ export default function Community() {
     if (!user) return;
 
     const currentVote = userVotes[postId];
-    
-    // Optimistically update the UI immediately
-    setPosts(prevPosts => 
-      prevPosts.map(post => {
-        if (post.id !== postId) return post;
-        
-        let newUpvotes = post.upvotes;
-        let newDownvotes = post.downvotes;
-        
-        if (currentVote === voteType) {
-          // Removing vote
-          if (voteType === "up") {
-            newUpvotes = Math.max(0, newUpvotes - 1);
-          } else {
-            newDownvotes = Math.max(0, newDownvotes - 1);
-          }
-        } else if (currentVote) {
-          // Changing vote
-          if (currentVote === "up") {
-            newUpvotes = Math.max(0, newUpvotes - 1);
-            newDownvotes = newDownvotes + 1;
-          } else {
-            newDownvotes = Math.max(0, newDownvotes - 1);
-            newUpvotes = newUpvotes + 1;
-          }
-        } else {
-          // Adding new vote
-          if (voteType === "up") {
-            newUpvotes = newUpvotes + 1;
-          } else {
-            newDownvotes = newDownvotes + 1;
-          }
-        }
-        
-        return { ...post, upvotes: newUpvotes, downvotes: newDownvotes };
-      })
-    );
-    
-    // Update userVotes state optimistically
-    setUserVotes(prev => {
-      const newVotes = { ...prev };
-      if (currentVote === voteType) {
-        delete newVotes[postId];
-      } else {
-        newVotes[postId] = voteType;
-      }
-      return newVotes;
-    });
 
-    // Perform database operation
     try {
       if (currentVote === voteType) {
-        // Remove vote
-        await supabase.from("post_votes").delete().match({ post_id: postId, user_id: user.id });
-      } else if (currentVote) {
-        // Update vote
-        await supabase.from("post_votes").update({ vote_type: voteType }).match({ post_id: postId, user_id: user.id });
+        // Remove existing vote
+        const { error: delErr } = await supabase
+          .from("post_votes")
+          .delete()
+          .match({ post_id: postId, user_id: user.id });
+        if (delErr) throw delErr;
       } else {
-        // Create vote
-        await supabase.from("post_votes").insert({ post_id: postId, user_id: user.id, vote_type: voteType });
+        // Insert or update vote atomically (unique index on post_id,user_id)
+        const { error: upsertErr } = await supabase
+          .from("post_votes")
+          .upsert(
+            { post_id: postId, user_id: user.id, vote_type: voteType },
+            { onConflict: "post_id,user_id" }
+          );
+        if (upsertErr) throw upsertErr;
       }
-      
-      // Refetch in background to ensure consistency
-      setTimeout(() => {
-        fetchUserVotes();
-        if (selectedCommunity) {
-          fetchPosts(selectedCommunity.id);
+
+      // Refresh just this post's counts from the server (source of truth)
+      const { data: updatedPost } = await supabase
+        .from("posts")
+        .select("id, upvotes, downvotes")
+        .eq("id", postId)
+        .maybeSingle();
+
+      if (updatedPost) {
+        setPosts(prev => prev.map(p => (p.id === postId ? { ...p, ...updatedPost } : p)));
+      }
+
+      // Update local user vote map
+      setUserVotes(prev => {
+        const next = { ...prev } as Record<string, string>;
+        if (currentVote === voteType) {
+          delete next[postId];
+        } else {
+          next[postId] = voteType;
         }
-      }, 500);
+        return next;
+      });
     } catch (error) {
       console.error("Error voting:", error);
-      // Revert optimistic update on error
+      toast({ title: "Vote failed", description: "Please try again.", variant: "destructive" });
+      // Fallback: refetch posts & votes for consistency
+      if (selectedCommunity) fetchPosts(selectedCommunity.id);
       fetchUserVotes();
-      if (selectedCommunity) {
-        fetchPosts(selectedCommunity.id);
-      }
     }
   };
 
   const handleAddComment = async (postId: string) => {
     if (!user || !newComment.trim()) return;
 
-    // Moderate content first
     try {
-      const { data: moderationData, error: moderationError } = await supabase.functions.invoke('moderate-content', {
-        body: { content: newComment }
-      });
-
-      if (moderationError) {
-        console.error("Moderation error:", moderationError);
-        // Continue with adding comment if moderation fails
+      // 1) Optional moderation (non-blocking on network issues)
+      try {
+        const { data: moderationData } = await supabase.functions.invoke('moderate-content', {
+          body: { content: newComment }
+        });
+        if (moderationData?.isFlagged) {
+          toast({
+            title: "Comment blocked",
+            description: moderationData.reason || "Please keep it respectful.",
+            variant: "destructive",
+          });
+          return;
+        }
+      } catch (e) {
+        console.warn('Moderation unavailable, proceeding.');
       }
 
-      // Block the comment if flagged
-      if (moderationData?.isFlagged) {
-        toast({
-          title: "⚠️ Comment Blocked",
-          description: `Your comment was blocked: ${moderationData.reason}. Please keep the conversation respectful.`,
-          variant: "destructive"
-        });
+      // 2) Insert comment
+      const { data, error } = await supabase
+        .from("comments")
+        .insert({ post_id: postId, user_id: user.id, content: newComment })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Insert comment error:', error);
+        toast({ title: "Error", description: "Failed to add comment.", variant: "destructive" });
         return;
       }
 
-      const { error } = await supabase.from("comments").insert({
-        post_id: postId,
-        user_id: user.id,
-        content: newComment
-      });
-
-      if (error) {
-        toast({ title: "Error", description: "Failed to add comment.", variant: "destructive" });
-      } else {
-        setNewComment("");
-        toast({ title: "Comment added successfully!" });
-        fetchComments(postId);
-      }
-    } catch (error) {
-      console.error("Error adding comment:", error);
+      // 3) Clear input and refresh list from server for accuracy
+      setNewComment("");
+      fetchComments(postId);
+      toast({ title: "Comment added!" });
+    } catch (err) {
+      console.error("Error adding comment:", err);
       toast({ title: "Error", description: "Failed to add comment.", variant: "destructive" });
     }
   };
