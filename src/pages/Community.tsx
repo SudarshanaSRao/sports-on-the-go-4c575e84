@@ -108,6 +108,8 @@ export default function Community() {
   const [showArchived, setShowArchived] = useState(false);
   const [showReviveDialog, setShowReviveDialog] = useState(false);
   const [gameData, setGameData] = useState<any>(null);
+  const [votingPostId, setVotingPostId] = useState<string | null>(null);
+  const [commentSubmitting, setCommentSubmitting] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -447,6 +449,96 @@ export default function Community() {
     };
   }, [selectedCommunity, user, posts, selectedPost]);
 
+  // Real-time subscription for post_votes to update counts live
+  useEffect(() => {
+    if (!selectedCommunity || !user || !posts.length) return;
+
+    const postIds = posts.map(p => p.id);
+
+    const channel = supabase
+      .channel(`community-votes-${selectedCommunity.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'post_votes'
+        },
+        async (payload: any) => {
+          const votePostId = payload.new?.post_id || payload.old?.post_id;
+          
+          // Only process votes for posts in this community
+          if (!votePostId || !postIds.includes(votePostId)) return;
+
+          // Refetch just this post's counts from the server
+          const { data: updatedPost } = await supabase
+            .from("posts")
+            .select("id, upvotes, downvotes")
+            .eq("id", votePostId)
+            .maybeSingle();
+
+          if (updatedPost) {
+            setPosts(prev => prev.map(p => (p.id === votePostId ? { ...p, ...updatedPost } : p)));
+          }
+
+          // If it's the current user's vote, update their vote map
+          if (payload.new?.user_id === user.id || payload.old?.user_id === user.id) {
+            fetchUserVotes();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedCommunity, user, posts]);
+
+  // Real-time subscription for comment count updates
+  useEffect(() => {
+    if (!selectedCommunity || !user || !posts.length) return;
+
+    const postIds = posts.map(p => p.id);
+
+    const channel = supabase
+      .channel(`community-comment-counts-${selectedCommunity.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'comments'
+        },
+        async (payload: any) => {
+          const commentPostId = payload.new?.post_id || payload.old?.post_id;
+          
+          // Only process comments for posts in this community
+          if (!commentPostId || !postIds.includes(commentPostId)) return;
+
+          // Refetch comments for this post to get accurate count
+          if (selectedPost === commentPostId) {
+            fetchComments(commentPostId);
+          } else {
+            // Just update the cached comment count
+            const { data: commentData } = await supabase
+              .from("comments")
+              .select("id")
+              .eq("post_id", commentPostId);
+            
+            setComments(prev => ({
+              ...prev,
+              [commentPostId]: commentData || []
+            }));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedCommunity, user, posts, selectedPost, fetchComments]);
+
   useEffect(() => {
     let filtered = communities;
     
@@ -637,9 +729,10 @@ export default function Community() {
   };
 
   const handleVote = async (postId: string, voteType: "up" | "down") => {
-    if (!user) return;
+    if (!user || votingPostId) return;
 
     const currentVote = userVotes[postId];
+    setVotingPostId(postId);
 
     try {
       if (currentVote === voteType) {
@@ -687,12 +780,15 @@ export default function Community() {
       // Fallback: refetch posts & votes for consistency
       if (selectedCommunity) fetchPosts(selectedCommunity.id);
       fetchUserVotes();
+    } finally {
+      setVotingPostId(null);
     }
   };
 
   const handleAddComment = async (postId: string) => {
-    if (!user || !newComment.trim()) return;
+    if (!user || !newComment.trim() || commentSubmitting) return;
 
+    setCommentSubmitting(postId);
     try {
       // 1) Optional moderation (non-blocking on network issues)
       try {
@@ -731,6 +827,8 @@ export default function Community() {
     } catch (err) {
       console.error("Error adding comment:", err);
       toast({ title: "Error", description: "Failed to add comment.", variant: "destructive" });
+    } finally {
+      setCommentSubmitting(null);
     }
   };
 
@@ -1350,6 +1448,7 @@ export default function Community() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleVote(post.id, "up")}
+                        disabled={votingPostId === post.id}
                         className={userVotes[post.id] === "up" ? "text-blue-600" : ""}
                       >
                         <ThumbsUp className="w-4 h-4 mr-1" />
@@ -1359,6 +1458,7 @@ export default function Community() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleVote(post.id, "down")}
+                        disabled={votingPostId === post.id}
                         className={userVotes[post.id] === "down" ? "text-red-600" : ""}
                       >
                         <ThumbsDown className="w-4 h-4 mr-1" />
@@ -1366,11 +1466,12 @@ export default function Community() {
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="relative">
                         <MessageSquare className="w-4 h-4 mr-1" />
-                        Comments {comments[post.id]?.length || 0}
+                        Comments
+                        <Badge variant="secondary" className="ml-2">{comments[post.id]?.length || 0}</Badge>
                         {post.unreadCount && post.unreadCount > 0 && (
                           <Badge 
                             variant="destructive" 
-                            className="ml-2 h-5 min-w-[20px] px-1.5 text-xs"
+                            className="absolute -top-2 -right-2"
                           >
                             {post.unreadCount}
                           </Badge>
@@ -1410,8 +1511,19 @@ export default function Community() {
                             placeholder="Add a comment..."
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
+                            disabled={commentSubmitting === post.id}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleAddComment(post.id);
+                              }
+                            }}
                           />
-                          <Button size="sm" onClick={() => handleAddComment(post.id)}>
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleAddComment(post.id)}
+                            disabled={commentSubmitting === post.id || !newComment.trim()}
+                          >
                             <Send className="w-4 h-4" />
                           </Button>
                         </div>
