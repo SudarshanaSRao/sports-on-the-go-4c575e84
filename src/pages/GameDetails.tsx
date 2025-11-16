@@ -466,7 +466,7 @@ const GameDetails = () => {
 
             <Separator className="my-6" />
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               {!user && (
                 <Button
                   className="gradient-primary text-white flex-1"

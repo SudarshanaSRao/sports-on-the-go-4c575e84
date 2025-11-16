@@ -902,7 +902,7 @@ const MyGames = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-muted-foreground" />
                   <div>
@@ -1040,7 +1040,7 @@ const MyGames = () => {
             {isEditMode ? (
               /* Edit Mode */
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="sport">Sport</Label>
                     <Select value={editForm.sport} onValueChange={(value) => setEditForm({ ...editForm, sport: value })}>
@@ -1092,7 +1092,7 @@ const MyGames = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="city">City</Label>
                     <Input
@@ -1122,7 +1122,7 @@ const MyGames = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="game_date">Date</Label>
                     <Input
@@ -1144,7 +1144,7 @@ const MyGames = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="duration_minutes">Duration (minutes)</Label>
                     <Input
@@ -1172,7 +1172,7 @@ const MyGames = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                   <div className="space-y-2">
                     <Label htmlFor="visibility">Visibility</Label>
@@ -1234,7 +1234,7 @@ const MyGames = () => {
               /* View Mode */
               <>
                 {/* Game Stats */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   <Card className="p-4 text-center">
                     <p className="text-2xl font-bold">{selectedGame.current_players}</p>
                     <p className="text-sm text-muted-foreground">Players</p>
