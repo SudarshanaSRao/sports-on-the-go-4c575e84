@@ -4,6 +4,7 @@ import { MapPin, User, Calendar, LogOut, Menu, X, MessageSquare, Trophy, Grid3x3
 import { useAuth } from "@/contexts/AuthContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { FriendRequestNotification } from "@/components/FriendRequestNotification";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { useFriends } from "@/hooks/useFriends";
 import { useState } from "react";
 import {
@@ -87,6 +88,7 @@ export const Navbar = () => {
             <ThemeToggle />
             {user ? (
               <>
+                <NotificationCenter />
                 <Button 
                   size="sm"
                   className="gradient-primary text-white shadow-primary hover:opacity-90 transition-smooth"

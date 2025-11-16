@@ -292,6 +292,28 @@ export default function Community() {
                             `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() ||
                             'Someone';
 
+          // Create notification for community members
+          const { data: members } = await supabase
+            .from('community_members')
+            .select('user_id')
+            .eq('community_id', selectedCommunity.id)
+            .neq('user_id', payload.new.user_id);
+
+          if (members) {
+            const notifications = members.map(member => ({
+              user_id: member.user_id,
+              type: 'new_post',
+              title: 'New post in community',
+              message: `${authorName} posted: "${payload.new.title}"`,
+              related_post_id: payload.new.id,
+              related_community_id: selectedCommunity.id,
+              related_user_id: payload.new.user_id,
+              action_url: `/community?id=${selectedCommunity.id}`
+            }));
+
+            await supabase.from('notifications').insert(notifications);
+          }
+
           toast({
             title: "New post in community",
             description: `${authorName} posted: "${payload.new.title}"`,
@@ -343,6 +365,37 @@ export default function Community() {
           const post = posts.find(p => p.id === selectedPost);
           const postTitle = post?.title || 'a post';
 
+          // Create notification for post author and other commenters
+          const usersToNotify = new Set<string>();
+          
+          // Add post author
+          if (post && post.user_id !== payload.new.user_id) {
+            usersToNotify.add(post.user_id);
+          }
+
+          // Add other commenters
+          const postComments = comments[selectedPost] || [];
+          postComments.forEach(comment => {
+            if (comment.user_id !== payload.new.user_id && comment.user_id !== user.id) {
+              usersToNotify.add(comment.user_id);
+            }
+          });
+
+          if (usersToNotify.size > 0) {
+            const notifications = Array.from(usersToNotify).map(userId => ({
+              user_id: userId,
+              type: 'new_comment',
+              title: 'New comment',
+              message: `${authorName} replied to "${postTitle}"`,
+              related_post_id: selectedPost,
+              related_community_id: selectedCommunity?.id,
+              related_user_id: payload.new.user_id,
+              action_url: `/community?id=${selectedCommunity?.id}`
+            }));
+
+            await supabase.from('notifications').insert(notifications);
+          }
+
           toast({
             title: "New comment",
             description: `${authorName} replied to "${postTitle}"`,
@@ -357,7 +410,7 @@ export default function Community() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [selectedPost, user, toast, posts, fetchComments]);
+  }, [selectedPost, user, toast, posts, fetchComments, comments, selectedCommunity]);
 
   // Real-time subscription for ALL comments in the community to update unread counts
   useEffect(() => {
