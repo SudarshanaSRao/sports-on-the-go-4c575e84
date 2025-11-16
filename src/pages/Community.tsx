@@ -293,26 +293,8 @@ export default function Community() {
                             'Someone';
 
           // Create notification for community members
-          const { data: members } = await supabase
-            .from('community_members')
-            .select('user_id')
-            .eq('community_id', selectedCommunity.id)
-            .neq('user_id', payload.new.user_id);
+          // Server-side triggers now create notifications for members. Only show local toast.
 
-          if (members) {
-            const notifications = members.map(member => ({
-              user_id: member.user_id,
-              type: 'new_post',
-              title: 'New post in community',
-              message: `${authorName} posted: "${payload.new.title}"`,
-              related_post_id: payload.new.id,
-              related_community_id: selectedCommunity.id,
-              related_user_id: payload.new.user_id,
-              action_url: `/community?id=${selectedCommunity.id}`
-            }));
-
-            await supabase.from('notifications').insert(notifications);
-          }
 
           toast({
             title: "New post in community",
@@ -381,20 +363,8 @@ export default function Community() {
             }
           });
 
-          if (usersToNotify.size > 0) {
-            const notifications = Array.from(usersToNotify).map(userId => ({
-              user_id: userId,
-              type: 'new_comment',
-              title: 'New comment',
-              message: `${authorName} replied to "${postTitle}"`,
-              related_post_id: selectedPost,
-              related_community_id: selectedCommunity?.id,
-              related_user_id: payload.new.user_id,
-              action_url: `/community?id=${selectedCommunity?.id}`
-            }));
+          // Server-side triggers now create notifications for post author and commenters.
 
-            await supabase.from('notifications').insert(notifications);
-          }
 
           toast({
             title: "New comment",
