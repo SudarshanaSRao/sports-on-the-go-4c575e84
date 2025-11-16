@@ -1370,7 +1370,7 @@ export default function Community() {
                       </Badge>
                       <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="relative">
                         <MessageSquare className="w-4 h-4 mr-1" />
-                        Comments
+                        <span>Comments</span>
                         {post.unreadCount && post.unreadCount > 0 && (
                           <Badge 
                             variant="destructive" 
