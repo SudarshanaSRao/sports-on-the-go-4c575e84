@@ -261,7 +261,7 @@ export function ReviewPlayerDialog({
           <Button
             onClick={handleSubmitClick}
             disabled={submitting}
-            className="flex-1 gradient-primary text-white"
+            className="flex-1"
           >
             {submitting ? "Submitting..." : "Submit Review"}
           </Button>
