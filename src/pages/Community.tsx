@@ -188,6 +188,53 @@ export default function Community() {
     }
   }, []);
 
+  // Real-time subscription for new posts in the selected community
+  useEffect(() => {
+    if (!selectedCommunity || !user) return;
+
+    const channel = supabase
+      .channel(`community-posts-${selectedCommunity.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'posts',
+          filter: `community_id=eq.${selectedCommunity.id}`
+        },
+        async (payload) => {
+          // Don't show notification for user's own posts
+          if (payload.new.user_id === user.id) return;
+
+          // Fetch the author's profile
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username, first_name, last_name')
+            .eq('id', payload.new.user_id)
+            .maybeSingle();
+
+          const authorName = profile?.username || 
+                            `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() ||
+                            'Someone';
+
+          toast({
+            title: "New post in community",
+            description: `${authorName} posted: "${payload.new.title}"`,
+          });
+
+          // Refresh posts list to show the new post
+          if (selectedCommunity) {
+            fetchPosts(selectedCommunity.id);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedCommunity, user, toast, fetchPosts]);
+
 
   useEffect(() => {
     let filtered = communities;
