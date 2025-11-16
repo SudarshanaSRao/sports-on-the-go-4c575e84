@@ -1368,6 +1368,9 @@ export default function Community() {
                       <Badge variant="secondary" className="px-3 py-1">
                         Score: {post.score}
                       </Badge>
+                      <Badge variant="outline" className="px-3 py-1">
+                        {post.comment_count} {post.comment_count === 1 ? 'comment' : 'comments'}
+                      </Badge>
                       <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="relative">
                         <MessageSquare className="w-4 h-4 mr-1" />
                         <span>Comments</span>
