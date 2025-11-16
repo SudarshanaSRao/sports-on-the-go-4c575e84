@@ -360,34 +360,34 @@ export function NotificationCenter() {
         align="end"
         sideOffset={8}
       >
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="font-semibold text-lg">Notifications</h3>
-          <div className="flex gap-2">
-            {notifications.length > 0 && (
-              <>
-                {unreadCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={markAllAsRead}
-                    className="h-8 text-xs"
-                  >
-                    <Check className="w-3 h-3 mr-1" />
-                    Mark all read
-                  </Button>
-                )}
+        <div className="flex flex-col gap-3 p-4 border-b">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-lg">Notifications</h3>
+          </div>
+          {notifications.length > 0 && (
+            <div className="mobile-stack-tight w-full">
+              {unreadCount > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={clearAll}
-                  className="h-8 text-xs text-destructive hover:text-destructive"
+                  onClick={markAllAsRead}
+                  className="h-8 text-xs flex-1 sm:flex-none"
                 >
-                  <Trash2 className="w-3 h-3 mr-1" />
-                  Clear all
+                  <Check className="w-3 h-3 mr-1" />
+                  Mark all read
                 </Button>
-              </>
-            )}
-          </div>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAll}
+                className="h-8 text-xs text-destructive hover:text-destructive flex-1 sm:flex-none"
+              >
+                <Trash2 className="w-3 h-3 mr-1" />
+                Clear all
+              </Button>
+            </div>
+          )}
         </div>
 
         <ScrollArea className="h-[400px]">
