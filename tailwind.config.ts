@@ -84,10 +84,30 @@ export default {
             height: "0",
           },
         },
+        "ripple": {
+          "0%": {
+            transform: "scale(0)",
+            opacity: "0.6",
+          },
+          "100%": {
+            transform: "scale(2.5)",
+            opacity: "0",
+          },
+        },
+        "vote-pulse": {
+          "0%, 100%": {
+            transform: "scale(1)",
+          },
+          "50%": {
+            transform: "scale(1.15)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "ripple": "ripple 0.6s ease-out",
+        "vote-pulse": "vote-pulse 0.3s ease-out",
       },
     },
   },

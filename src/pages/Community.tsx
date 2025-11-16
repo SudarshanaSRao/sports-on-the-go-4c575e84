@@ -110,6 +110,7 @@ export default function Community() {
   const [gameData, setGameData] = useState<any>(null);
   const [votingPostId, setVotingPostId] = useState<string | null>(null);
   const [commentSubmitting, setCommentSubmitting] = useState<string | null>(null);
+  const [voteAnimation, setVoteAnimation] = useState<{ postId: string; type: 'up' | 'down' } | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -741,6 +742,10 @@ export default function Community() {
     const currentVotes = userVotes[postId] || { up: false, down: false };
     const isCurrentlyVoted = voteType === "up" ? currentVotes.up : currentVotes.down;
     setVotingPostId(postId);
+    
+    // Trigger animation
+    setVoteAnimation({ postId, type: voteType });
+    setTimeout(() => setVoteAnimation(null), 600);
 
     try {
       if (isCurrentlyVoted) {
@@ -1457,20 +1462,38 @@ export default function Community() {
                         size="sm"
                         onClick={() => handleVote(post.id, "up")}
                         disabled={votingPostId === post.id}
-                        className={userVotes[post.id]?.up ? "text-blue-600" : ""}
+                        className={`
+                          transition-all duration-200 relative overflow-hidden
+                          ${userVotes[post.id]?.up ? "text-blue-600 font-semibold" : ""}
+                          ${voteAnimation?.postId === post.id && voteAnimation?.type === 'up' 
+                            ? "animate-vote-pulse before:absolute before:inset-0 before:rounded-md before:bg-blue-500/30 before:animate-ripple" 
+                            : ""
+                          }
+                        `}
                       >
-                        <ThumbsUp className="w-4 h-4 mr-1" />
-                        {post.upvotes}
+                        <ThumbsUp className={`w-4 h-4 mr-1 transition-transform ${voteAnimation?.postId === post.id && voteAnimation?.type === 'up' ? 'scale-125' : ''}`} />
+                        <span className={`transition-all ${voteAnimation?.postId === post.id && voteAnimation?.type === 'up' ? 'font-bold' : ''}`}>
+                          {post.upvotes}
+                        </span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleVote(post.id, "down")}
                         disabled={votingPostId === post.id}
-                        className={userVotes[post.id]?.down ? "text-red-600" : ""}
+                        className={`
+                          transition-all duration-200 relative overflow-hidden
+                          ${userVotes[post.id]?.down ? "text-red-600 font-semibold" : ""}
+                          ${voteAnimation?.postId === post.id && voteAnimation?.type === 'down' 
+                            ? "animate-vote-pulse before:absolute before:inset-0 before:rounded-md before:bg-red-500/30 before:animate-ripple" 
+                            : ""
+                          }
+                        `}
                       >
-                        <ThumbsDown className="w-4 h-4 mr-1" />
-                        {post.downvotes}
+                        <ThumbsDown className={`w-4 h-4 mr-1 transition-transform ${voteAnimation?.postId === post.id && voteAnimation?.type === 'down' ? 'scale-125' : ''}`} />
+                        <span className={`transition-all ${voteAnimation?.postId === post.id && voteAnimation?.type === 'down' ? 'font-bold' : ''}`}>
+                          {post.downvotes}
+                        </span>
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="relative">
                         <MessageSquare className="w-4 h-4 mr-1" />
