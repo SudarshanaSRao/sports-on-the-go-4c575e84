@@ -120,8 +120,8 @@ const Auth = () => {
       </Link>
 
       <Card className="w-full max-w-md shadow-elevated border-2">
-        <CardHeader className="space-y-1 pb-4">
-          <div className="flex items-center justify-center mb-3">
+        <CardHeader className="space-y-1 pb-2 sm:pb-4">
+          <div className="flex items-center justify-center mb-1 sm:mb-3">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl gradient-primary flex items-center justify-center shadow-primary">
               <MapPin className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
             </div>
@@ -287,16 +287,16 @@ const Auth = () => {
                   <Label htmlFor="dob" className="text-sm">Date of Birth</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal pl-10 h-10 text-sm",
-                          !dateOfBirth && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-                        {dateOfBirth ? format(dateOfBirth, "PPP") : <span>Pick a date</span>}
-                      </Button>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal pl-10 h-10 text-sm relative",
+                        !dateOfBirth && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
+                      {dateOfBirth ? format(dateOfBirth, "PPP") : <span>Pick a date</span>}
+                    </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0 bg-background z-50" align="start">
                       <Calendar
