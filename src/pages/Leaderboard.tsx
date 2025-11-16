@@ -101,7 +101,7 @@ export default function Leaderboard() {
               return (
                 <Card key={leader.id} className={`${getMedalBg(rank)} border-2`}>
                   <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                    <div className="mobile-stack-center">
                       {/* Rank */}
                       <div className={`text-3xl font-bold ${getMedalColor(rank)} w-12 text-center`}>
                         {rank <= 3 ? (
@@ -127,7 +127,7 @@ export default function Leaderboard() {
                       </div>
 
                       {/* Stats */}
-                      <div className="flex gap-4 w-full sm:w-auto justify-between">
+                      <div className="mobile-stack w-full sm:w-auto justify-between">
                         <div className="text-center">
                           <div className="text-xl font-bold text-primary">{leader.games_hosted}</div>
                           <div className="text-xs text-muted-foreground">Hosted</div>
