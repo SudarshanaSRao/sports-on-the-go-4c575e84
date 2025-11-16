@@ -47,7 +47,39 @@ export function ReviewPlayerDialog({
     setShowConfirmDialog(false);
     setSubmitting(true);
     try {
-      // Insert review (overall_rating is calculated by database)
+      // Ensure reviewer is marked as attended for this game (required by backend policy)
+      const { data: rsvp, error: rsvpFetchError } = await supabase
+        .from("rsvps")
+        .select("id, attended")
+        .eq("game_id", gameId)
+        .eq("user_id", reviewerId)
+        .maybeSingle();
+
+      if (rsvpFetchError) {
+        console.error("Error fetching RSVP:", rsvpFetchError);
+      }
+
+      if (!rsvp) {
+        toast({
+          title: "Cannot submit review",
+          description:
+            "You need to be marked as attended for this game before submitting a review.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (rsvp && !rsvp.attended) {
+        const { error: rsvpUpdateError } = await supabase
+          .from("rsvps")
+          .update({ attended: true })
+          .eq("id", rsvp.id);
+        if (rsvpUpdateError) {
+          throw rsvpUpdateError;
+        }
+      }
+
+      // Insert review (overall_rating may be computed later/elsewhere)
       const { error: reviewError } = await supabase.from("reviews").insert({
         game_id: gameId,
         reviewer_id: reviewerId,
@@ -63,23 +95,31 @@ export function ReviewPlayerDialog({
       if (reviewError) throw reviewError;
 
       // Update reviewee's profile stats
-      const { data: allReviews } = await supabase
+      const { data: allReviews, error: fetchReviewsError } = await supabase
         .from("reviews")
         .select("overall_rating")
         .eq("reviewee_id", revieweeId);
+
+      if (fetchReviewsError) {
+        console.error("Error fetching reviews:", fetchReviewsError);
+      }
 
       if (allReviews && allReviews.length > 0) {
         const avgRating =
           allReviews.reduce((sum, r) => sum + Number(r.overall_rating), 0) /
           allReviews.length;
 
-        await supabase
+        const { error: profileUpdateError } = await supabase
           .from("profiles")
           .update({
             overall_rating: avgRating,
             total_reviews: allReviews.length,
           })
           .eq("id", revieweeId);
+
+        if (profileUpdateError) {
+          console.error("Error updating profile:", profileUpdateError);
+        }
       }
 
       toast({
@@ -93,7 +133,7 @@ export function ReviewPlayerDialog({
       console.error("Error submitting review:", error);
       toast({
         title: "Error submitting review",
-        description: error.message,
+        description: error.message ?? "Please try again later.",
         variant: "destructive",
       });
     } finally {
