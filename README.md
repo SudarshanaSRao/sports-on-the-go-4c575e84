@@ -225,7 +225,6 @@ If you encounter any issues or have questions:
 Future features we're considering:
 - [ ] Mobile app (React Native)
 - [ ] Team tournaments
-- [ ] Payment integration for paid games
 - [ ] Weather integration
 - [ ] Push notifications
 - [ ] Multi-language support
