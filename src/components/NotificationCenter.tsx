@@ -253,7 +253,7 @@ export function NotificationCenter() {
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-80 md:w-96 p-0 bg-background border shadow-lg" 
+        className="z-50 w-80 md:w-96 p-0 bg-background border shadow-lg" 
         align="end"
         sideOffset={8}
       >
