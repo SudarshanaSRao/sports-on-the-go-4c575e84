@@ -36,8 +36,8 @@ interface Post {
   id: string;
   title: string;
   content: string;
-  upvotes: number;
-  downvotes: number;
+  score: number;
+  comment_count: number;
   created_at: string;
   user_id: string;
   community_id: string;
