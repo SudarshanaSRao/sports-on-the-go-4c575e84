@@ -93,7 +93,7 @@ export default function Community() {
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [newComment, setNewComment] = useState("");
-  const [userVotes, setUserVotes] = useState<Record<string, string>>({});
+  const [userVotes, setUserVotes] = useState<Record<string, { up: boolean; down: boolean }>>({});
   const [viewMode, setViewMode] = useState<"list" | "posts">("list");
   const [sportFilter, setSportFilter] = useState<string>("ALL");
   const [showMembersPanel, setShowMembersPanel] = useState(false);
@@ -600,9 +600,16 @@ export default function Community() {
       .eq("user_id", user.id);
 
     if (data) {
-      const votesMap: Record<string, string> = {};
+      const votesMap: Record<string, { up: boolean; down: boolean }> = {};
       data.forEach((vote: any) => {
-        votesMap[vote.post_id] = vote.vote_type;
+        if (!votesMap[vote.post_id]) {
+          votesMap[vote.post_id] = { up: false, down: false };
+        }
+        if (vote.vote_type === "up") {
+          votesMap[vote.post_id].up = true;
+        } else if (vote.vote_type === "down") {
+          votesMap[vote.post_id].down = true;
+        }
       });
       setUserVotes(votesMap);
     }
@@ -731,26 +738,24 @@ export default function Community() {
   const handleVote = async (postId: string, voteType: "up" | "down") => {
     if (!user || votingPostId) return;
 
-    const currentVote = userVotes[postId];
+    const currentVotes = userVotes[postId] || { up: false, down: false };
+    const isCurrentlyVoted = voteType === "up" ? currentVotes.up : currentVotes.down;
     setVotingPostId(postId);
 
     try {
-      if (currentVote === voteType) {
-        // Remove existing vote
+      if (isCurrentlyVoted) {
+        // Remove this specific vote type
         const { error: delErr } = await supabase
           .from("post_votes")
           .delete()
-          .match({ post_id: postId, user_id: user.id });
+          .match({ post_id: postId, user_id: user.id, vote_type: voteType });
         if (delErr) throw delErr;
       } else {
-        // Insert or update vote atomically (unique index on post_id,user_id)
-        const { error: upsertErr } = await supabase
+        // Add this vote type (can coexist with the other)
+        const { error: insertErr } = await supabase
           .from("post_votes")
-          .upsert(
-            { post_id: postId, user_id: user.id, vote_type: voteType },
-            { onConflict: "post_id,user_id" }
-          );
-        if (upsertErr) throw upsertErr;
+          .insert({ post_id: postId, user_id: user.id, vote_type: voteType });
+        if (insertErr) throw insertErr;
       }
 
       // Refresh just this post's counts from the server (source of truth)
@@ -766,13 +771,16 @@ export default function Community() {
 
       // Update local user vote map
       setUserVotes(prev => {
-        const next = { ...prev } as Record<string, string>;
-        if (currentVote === voteType) {
-          delete next[postId];
-        } else {
-          next[postId] = voteType;
+        const newVotes = { ...prev };
+        if (!newVotes[postId]) {
+          newVotes[postId] = { up: false, down: false };
         }
-        return next;
+        if (voteType === "up") {
+          newVotes[postId].up = !isCurrentlyVoted;
+        } else {
+          newVotes[postId].down = !isCurrentlyVoted;
+        }
+        return newVotes;
       });
     } catch (error) {
       console.error("Error voting:", error);
@@ -1449,7 +1457,7 @@ export default function Community() {
                         size="sm"
                         onClick={() => handleVote(post.id, "up")}
                         disabled={votingPostId === post.id}
-                        className={userVotes[post.id] === "up" ? "text-blue-600" : ""}
+                        className={userVotes[post.id]?.up ? "text-blue-600" : ""}
                       >
                         <ThumbsUp className="w-4 h-4 mr-1" />
                         {post.upvotes}
@@ -1459,7 +1467,7 @@ export default function Community() {
                         size="sm"
                         onClick={() => handleVote(post.id, "down")}
                         disabled={votingPostId === post.id}
-                        className={userVotes[post.id] === "down" ? "text-red-600" : ""}
+                        className={userVotes[post.id]?.down ? "text-red-600" : ""}
                       >
                         <ThumbsDown className="w-4 h-4 mr-1" />
                         {post.downvotes}
