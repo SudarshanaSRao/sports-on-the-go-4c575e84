@@ -507,15 +507,23 @@ export default function Community() {
   }, [sportFilter, communitySearchQuery, communities, showArchived]);
 
   const checkMembership = async (communityId: string) => {
-    if (!user) return;
+    if (!user) {
+      console.log('checkMembership: No user');
+      return;
+    }
     
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("community_members")
       .select("id, role")
       .eq("community_id", communityId)
       .eq("user_id", user.id)
       .maybeSingle();
 
+    if (error) {
+      console.error('checkMembership error:', error);
+    }
+
+    console.log('checkMembership result:', { data, isMember: !!data, isAdmin: data?.role === 'admin' });
     setIsMember(!!data);
     setIsAdmin(data?.role === 'admin');
   };
@@ -584,6 +592,8 @@ export default function Community() {
   const handleJoinCommunity = async (communityId: string) => {
     if (!user) return;
 
+    console.log('Attempting to join community:', communityId);
+
     const { error } = await supabase
       .from("community_members")
       .insert({
@@ -593,14 +603,17 @@ export default function Community() {
       });
 
     if (error) {
+      console.error('Join community error:', error);
       toast({
-        title: "Error",
-        description: "Failed to join community.",
+        title: "Error joining community",
+        description: error.message || "Failed to join community.",
         variant: "destructive"
       });
     } else {
+      console.log('Successfully joined community');
       toast({ title: "Joined community!" });
       checkMembership(communityId);
+      fetchCommunities();
     }
   };
 
@@ -635,20 +648,29 @@ export default function Community() {
       return;
     }
 
-    const { error } = await supabase.from("posts").insert({
+    console.log('Creating post with:', { 
+      user_id: user.id, 
+      community_id: selectedCommunity.id, 
+      isMember,
+      title: newPost.title.substring(0, 20) 
+    });
+
+    const { data, error } = await supabase.from("posts").insert({
       user_id: user.id,
       community_id: selectedCommunity.id,
       title: newPost.title,
       content: newPost.content
-    });
+    }).select();
 
     if (error) {
+      console.error('Post creation error:', error);
       toast({
-        title: "Error",
-        description: "Failed to create post.",
+        title: "Error creating post",
+        description: error.message || "Failed to create post. Make sure you're a member of this community.",
         variant: "destructive"
       });
     } else {
+      console.log('Post created successfully:', data);
       toast({ title: "Post created!" });
       setNewPost({ title: "", content: "" });
       setShowNewPost(false);
