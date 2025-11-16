@@ -174,6 +174,7 @@ export const Navbar = () => {
           {/* Mobile Menu Button */}
           <div className="flex md:hidden items-center space-x-2">
             <ThemeToggle />
+            {user && <NotificationCenter />}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="sm">
