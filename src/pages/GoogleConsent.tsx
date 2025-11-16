@@ -145,7 +145,7 @@ const GoogleConsent = () => {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+          <div className="mobile-stack pt-4">
             <Button 
               onClick={handleContinue}
               className="flex-1 gradient-primary text-white shadow-primary hover:opacity-90"

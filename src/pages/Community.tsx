@@ -1434,7 +1434,7 @@ export default function Community() {
                   <CardContent>
                     <p className="text-foreground mb-4">{post.content}</p>
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full">
+                    <div className="mobile-stack-full">
                       <Button
                         variant="ghost"
                         size="sm"
