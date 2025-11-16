@@ -41,6 +41,7 @@ interface Post {
   created_at: string;
   user_id: string;
   community_id: string;
+  unreadCount?: number;
   profiles: {
     username: string | null;
     first_name: string;
@@ -156,6 +157,8 @@ export default function Community() {
   }, []);
 
   const fetchPosts = useCallback(async (communityId: string) => {
+    if (!user) return;
+
     const { data: postsData, error: postsError } = await supabase
       .from("posts")
       .select("*")
@@ -177,16 +180,55 @@ export default function Community() {
 
       const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
       
+      // Fetch unread counts for each post
+      const postIds = postsData.map(p => p.id);
+      
+      // Get user's last view times for these posts
+      const { data: viewData } = await supabase
+        .from("post_views")
+        .select("post_id, last_viewed_at")
+        .eq("user_id", user.id)
+        .in("post_id", postIds);
+
+      const viewMap = new Map(viewData?.map(v => [v.post_id, v.last_viewed_at]) || []);
+
+      // Count unread comments for each post
+      const unreadCountsMap = new Map<string, number>();
+      
+      for (const post of postsData) {
+        const lastViewed = viewMap.get(post.id);
+        
+        if (lastViewed) {
+          // Count comments created after last view
+          const { count } = await supabase
+            .from("comments")
+            .select("*", { count: 'exact', head: true })
+            .eq("post_id", post.id)
+            .gt("created_at", lastViewed);
+          
+          unreadCountsMap.set(post.id, count || 0);
+        } else {
+          // Never viewed - count all comments
+          const { count } = await supabase
+            .from("comments")
+            .select("*", { count: 'exact', head: true })
+            .eq("post_id", post.id);
+          
+          unreadCountsMap.set(post.id, count || 0);
+        }
+      }
+      
       const postsWithProfiles = postsData.map(post => ({
         ...post,
-        profiles: profilesMap.get(post.user_id) || { username: null, first_name: "Unknown", last_name: "User" }
+        profiles: profilesMap.get(post.user_id) || { username: null, first_name: "Unknown", last_name: "User" },
+        unreadCount: unreadCountsMap.get(post.id) || 0
       }));
 
       setPosts(postsWithProfiles as Post[]);
     } else {
       setPosts([]);
     }
-  }, []);
+  }, [user]);
 
   const fetchComments = useCallback(async (postId: string) => {
     const { data: commentsData, error: commentsError } = await supabase
@@ -316,6 +358,46 @@ export default function Community() {
       supabase.removeChannel(channel);
     };
   }, [selectedPost, user, toast, posts, fetchComments]);
+
+  // Real-time subscription for ALL comments in the community to update unread counts
+  useEffect(() => {
+    if (!selectedCommunity || !user || !posts.length) return;
+
+    const postIds = posts.map(p => p.id);
+
+    const channel = supabase
+      .channel(`community-all-comments-${selectedCommunity.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'comments'
+        },
+        async (payload) => {
+          const commentPostId = payload.new.post_id;
+          
+          // Only process if it's for a post in this community and not the user's own comment
+          if (!postIds.includes(commentPostId) || payload.new.user_id === user.id) return;
+          
+          // If the post is NOT currently being viewed, increment unread count
+          if (selectedPost !== commentPostId) {
+            setPosts(prevPosts =>
+              prevPosts.map(p =>
+                p.id === commentPostId
+                  ? { ...p, unreadCount: (p.unreadCount || 0) + 1 }
+                  : p
+              )
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedCommunity, user, posts, selectedPost]);
 
   useEffect(() => {
     let filtered = communities;
@@ -571,11 +653,45 @@ export default function Community() {
     }
   };
 
+  const markPostAsViewed = async (postId: string) => {
+    if (!user) return;
+
+    try {
+      // Upsert: update if exists, insert if not
+      const { error } = await supabase
+        .from("post_views")
+        .upsert(
+          {
+            post_id: postId,
+            user_id: user.id,
+            last_viewed_at: new Date().toISOString()
+          },
+          {
+            onConflict: 'post_id,user_id'
+          }
+        );
+
+      if (error) {
+        console.error("Error marking post as viewed:", error);
+      }
+
+      // Update the unread count in the local state
+      setPosts(prevPosts =>
+        prevPosts.map(p =>
+          p.id === postId ? { ...p, unreadCount: 0 } : p
+        )
+      );
+    } catch (error) {
+      console.error("Error marking post as viewed:", error);
+    }
+  };
+
   const toggleComments = (postId: string) => {
     if (selectedPost === postId) {
       setSelectedPost(null);
     } else {
       setSelectedPost(postId);
+      markPostAsViewed(postId);
       if (!comments[postId]) {
         fetchComments(postId);
       }
@@ -1153,9 +1269,17 @@ export default function Community() {
                         <ThumbsDown className="w-4 h-4 mr-1" />
                         {post.downvotes}
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)}>
+                      <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="relative">
                         <MessageSquare className="w-4 h-4 mr-1" />
                         Comments
+                        {post.unreadCount && post.unreadCount > 0 && (
+                          <Badge 
+                            variant="destructive" 
+                            className="ml-2 h-5 min-w-[20px] px-1.5 text-xs"
+                          >
+                            {post.unreadCount}
+                          </Badge>
+                        )}
                       </Button>
                     </div>
 
