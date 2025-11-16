@@ -382,36 +382,42 @@ export type Database = {
       }
       posts: {
         Row: {
+          comment_count: number
           community_id: string | null
           content: string
           created_at: string | null
           downvotes: number | null
           game_id: string | null
           id: string
+          score: number
           sport: string | null
           title: string
           upvotes: number | null
           user_id: string
         }
         Insert: {
+          comment_count?: number
           community_id?: string | null
           content: string
           created_at?: string | null
           downvotes?: number | null
           game_id?: string | null
           id?: string
+          score?: number
           sport?: string | null
           title: string
           upvotes?: number | null
           user_id: string
         }
         Update: {
+          comment_count?: number
           community_id?: string | null
           content?: string
           created_at?: string | null
           downvotes?: number | null
           game_id?: string | null
           id?: string
+          score?: number
           sport?: string | null
           title?: string
           upvotes?: number | null
@@ -727,6 +733,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      adjust_post_score: {
+        Args: { p_delta: number; p_post_id: string }
+        Returns: number
+      }
       get_friendship_status: {
         Args: { user_id_1: string; user_id_2: string }
         Returns: Database["public"]["Enums"]["friendship_status"]
