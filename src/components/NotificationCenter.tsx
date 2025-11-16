@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -34,7 +34,7 @@ export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
 
   // Fetch notifications
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!user) return;
 
     const { data, error } = await supabase
@@ -51,7 +51,7 @@ export function NotificationCenter() {
 
     setNotifications((data || []) as Notification[]);
     setUnreadCount(data?.filter(n => !n.is_read).length || 0);
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchNotifications();
@@ -61,8 +61,14 @@ export function NotificationCenter() {
   useEffect(() => {
     if (!user) return;
 
+    console.log('[NotificationCenter] Setting up real-time subscription for user:', user.id);
+
     const channel = supabase
-      .channel(`user-notifications-${user.id}`)
+      .channel(`user-notifications-${user.id}`, {
+        config: {
+          broadcast: { self: true },
+        },
+      })
       .on(
         'postgres_changes',
         {
@@ -72,6 +78,7 @@ export function NotificationCenter() {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
+          console.log('[NotificationCenter] Received INSERT event:', payload);
           const newNotification = payload.new as Notification;
           setNotifications(prev => [newNotification, ...prev]);
           setUnreadCount(prev => prev + 1);
@@ -91,7 +98,8 @@ export function NotificationCenter() {
           table: 'notifications',
           filter: `user_id=eq.${user.id}`
         },
-        () => {
+        (payload) => {
+          console.log('[NotificationCenter] Received UPDATE event:', payload);
           fetchNotifications();
         }
       )
@@ -103,16 +111,26 @@ export function NotificationCenter() {
           table: 'notifications',
           filter: `user_id=eq.${user.id}`
         },
-        () => {
+        (payload) => {
+          console.log('[NotificationCenter] Received DELETE event:', payload);
           fetchNotifications();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log('[NotificationCenter] Subscription status:', status, err);
+        if (status === 'SUBSCRIBED') {
+          console.log('[NotificationCenter] Successfully subscribed to notifications');
+        }
+        if (err) {
+          console.error('[NotificationCenter] Subscription error:', err);
+        }
+      });
 
     return () => {
+      console.log('[NotificationCenter] Cleaning up subscription');
       supabase.removeChannel(channel);
     };
-  }, [user, toast]);
+  }, [user, toast, fetchNotifications]);
 
   const markAsRead = async (notificationId: string) => {
     const { error } = await supabase
