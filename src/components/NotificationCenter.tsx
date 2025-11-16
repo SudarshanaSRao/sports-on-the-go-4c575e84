@@ -24,6 +24,10 @@ interface Notification {
   action_url: string | null;
   notification_count?: number;
   created_at: string;
+  community_name?: string;
+  post_title?: string;
+  game_sport?: string;
+  game_location?: string;
 }
 
 export function NotificationCenter() {
@@ -33,6 +37,44 @@ export function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+
+  // Helper function to enrich a notification with related data
+  const enrichNotification = useCallback(async (notification: any): Promise<Notification> => {
+    const enriched: any = { ...notification };
+
+    // Fetch community name if related_community_id exists
+    if (notification.related_community_id) {
+      const { data: community } = await supabase
+        .from("communities")
+        .select("name")
+        .eq("id", notification.related_community_id)
+        .maybeSingle();
+      enriched.community_name = community?.name;
+    }
+
+    // Fetch post title if related_post_id exists
+    if (notification.related_post_id) {
+      const { data: post } = await supabase
+        .from("posts")
+        .select("title")
+        .eq("id", notification.related_post_id)
+        .maybeSingle();
+      enriched.post_title = post?.title;
+    }
+
+    // Fetch game details if related_game_id exists
+    if (notification.related_game_id) {
+      const { data: game } = await supabase
+        .from("games")
+        .select("sport, location_name")
+        .eq("id", notification.related_game_id)
+        .maybeSingle();
+      enriched.game_sport = game?.sport;
+      enriched.game_location = game?.location_name;
+    }
+
+    return enriched;
+  }, []);
 
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
@@ -50,13 +92,18 @@ export function NotificationCenter() {
       return;
     }
 
-    setNotifications((data || []) as Notification[]);
-    setUnreadCount(data?.filter(n => !n.is_read).length || 0);
-  }, [user]);
+    // Fetch additional details for each notification
+    const enrichedNotifications = await Promise.all(
+      (data || []).map(enrichNotification)
+    );
+
+    setNotifications(enrichedNotifications as Notification[]);
+    setUnreadCount(enrichedNotifications?.filter(n => !n.is_read).length || 0);
+  }, [user, enrichNotification]);
 
   useEffect(() => {
     fetchNotifications();
-  }, [user]);
+  }, [fetchNotifications]);
 
   // Real-time subscription
   useEffect(() => {
@@ -78,16 +125,20 @@ export function NotificationCenter() {
           table: 'notifications',
           filter: `user_id=eq.${user.id}`
         },
-        (payload) => {
+        async (payload) => {
           console.log('[NotificationCenter] Received INSERT event:', payload);
-          const newNotification = payload.new as Notification;
-          setNotifications(prev => [newNotification, ...prev]);
+          const newNotification = await enrichNotification(payload.new);
+          setNotifications(prev => [newNotification as Notification, ...prev]);
           setUnreadCount(prev => prev + 1);
           
-          // Show toast for new notification
+          // Show toast for new notification with community info if available
+          const description = newNotification.community_name 
+            ? `${newNotification.message} • ${newNotification.community_name}`
+            : newNotification.message;
+          
           toast({
             title: newNotification.title,
-            description: newNotification.message,
+            description,
           });
         }
       )
@@ -131,7 +182,7 @@ export function NotificationCenter() {
       console.log('[NotificationCenter] Cleaning up subscription');
       supabase.removeChannel(channel);
     };
-  }, [user, toast, fetchNotifications]);
+  }, [user, toast, fetchNotifications, enrichNotification]);
 
   const markAsRead = async (notificationId: string) => {
     const { error } = await supabase
@@ -359,18 +410,23 @@ export function NotificationCenter() {
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex gap-3">
-                    <div className="flex-shrink-0 mt-1">
+                     <div className="flex-shrink-0 mt-1">
                       {getNotificationIcon(notification.type)}
                     </div>
                      <div className="flex-1 min-w-0">
                        <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <p className="text-sm font-medium leading-tight">
                             {notification.title}
                           </p>
                           {notification.notification_count && notification.notification_count > 1 && (
                             <Badge variant="secondary" className="h-5 px-1.5 text-xs">
                               {notification.notification_count}
+                            </Badge>
+                          )}
+                          {notification.community_name && (
+                            <Badge variant="outline" className="h-5 px-1.5 text-xs">
+                              {notification.community_name}
                             </Badge>
                           )}
                         </div>
@@ -380,8 +436,18 @@ export function NotificationCenter() {
                       </div>
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                         {notification.message}
+                        {notification.post_title && (
+                          <span className="block text-xs font-medium text-foreground mt-0.5">
+                            "{notification.post_title}"
+                          </span>
+                        )}
+                        {notification.game_sport && notification.game_location && (
+                          <span className="block text-xs font-medium text-foreground mt-0.5">
+                            {notification.game_sport} • {notification.game_location}
+                          </span>
+                        )}
                       </p>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
                         <p className="text-xs text-muted-foreground">
                           {getTimeAgo(notification.created_at)}
                         </p>
