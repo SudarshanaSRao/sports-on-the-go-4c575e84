@@ -93,7 +93,6 @@ export default function Community() {
   const [selectedPost, setSelectedPost] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [newComment, setNewComment] = useState("");
-  const [userVotes, setUserVotes] = useState<Record<string, { up: boolean; down: boolean }>>({});
   const [viewMode, setViewMode] = useState<"list" | "posts">("list");
   const [sportFilter, setSportFilter] = useState<string>("ALL");
   const [showMembersPanel, setShowMembersPanel] = useState(false);
@@ -108,9 +107,7 @@ export default function Community() {
   const [showArchived, setShowArchived] = useState(false);
   const [showReviveDialog, setShowReviveDialog] = useState(false);
   const [gameData, setGameData] = useState<any>(null);
-  const [votingPostId, setVotingPostId] = useState<string | null>(null);
   const [commentSubmitting, setCommentSubmitting] = useState<string | null>(null);
-  const [voteAnimation, setVoteAnimation] = useState<{ postId: string; type: 'up' | 'down' } | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -126,7 +123,6 @@ export default function Community() {
     if (selectedCommunity) {
       fetchPosts(selectedCommunity.id);
       checkMembership(selectedCommunity.id);
-      fetchUserVotes();
       fetchCommunityMembers(selectedCommunity.id);
       setSelectedVisibility(selectedCommunity.visibility);
     }
@@ -189,7 +185,7 @@ export default function Community() {
 
     const { data: postsData, error: postsError } = await supabase
       .from("posts")
-      .select("*")
+      .select("id, title, content, score, comment_count, created_at, user_id, community_id")
       .eq("community_id", communityId)
       .order("created_at", { ascending: false });
 
@@ -450,42 +446,33 @@ export default function Community() {
     };
   }, [selectedCommunity, user, posts, selectedPost]);
 
-  // Real-time subscription for post_votes to update counts live
+  // Real-time subscription for posts to update score and comment_count live
   useEffect(() => {
     if (!selectedCommunity || !user || !posts.length) return;
 
     const postIds = posts.map(p => p.id);
 
     const channel = supabase
-      .channel(`community-votes-${selectedCommunity.id}`)
+      .channel(`community-posts-${selectedCommunity.id}`)
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'UPDATE',
           schema: 'public',
-          table: 'post_votes'
+          table: 'posts'
         },
         async (payload: any) => {
-          const votePostId = payload.new?.post_id || payload.old?.post_id;
+          const postId = payload.new?.id;
           
-          // Only process votes for posts in this community
-          if (!votePostId || !postIds.includes(votePostId)) return;
+          // Only process posts in this community
+          if (!postId || !postIds.includes(postId)) return;
 
-          // Refetch just this post's counts from the server
-          const { data: updatedPost } = await supabase
-            .from("posts")
-            .select("id, upvotes, downvotes")
-            .eq("id", votePostId)
-            .maybeSingle();
-
-          if (updatedPost) {
-            setPosts(prev => prev.map(p => (p.id === votePostId ? { ...p, ...updatedPost } : p)));
-          }
-
-          // If it's the current user's vote, update their vote map
-          if (payload.new?.user_id === user.id || payload.old?.user_id === user.id) {
-            fetchUserVotes();
-          }
+          // Update local state with new score and comment_count
+          setPosts(prev => prev.map(p => 
+            p.id === postId 
+              ? { ...p, score: payload.new.score, comment_count: payload.new.comment_count }
+              : p
+          ));
         }
       )
       .subscribe();
@@ -495,50 +482,6 @@ export default function Community() {
     };
   }, [selectedCommunity, user, posts]);
 
-  // Real-time subscription for comment count updates
-  useEffect(() => {
-    if (!selectedCommunity || !user || !posts.length) return;
-
-    const postIds = posts.map(p => p.id);
-
-    const channel = supabase
-      .channel(`community-comment-counts-${selectedCommunity.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'comments'
-        },
-        async (payload: any) => {
-          const commentPostId = payload.new?.post_id || payload.old?.post_id;
-          
-          // Only process comments for posts in this community
-          if (!commentPostId || !postIds.includes(commentPostId)) return;
-
-          // Refetch comments for this post to get accurate count
-          if (selectedPost === commentPostId) {
-            fetchComments(commentPostId);
-          } else {
-            // Just update the cached comment count
-            const { data: commentData } = await supabase
-              .from("comments")
-              .select("id")
-              .eq("post_id", commentPostId);
-            
-            setComments(prev => ({
-              ...prev,
-              [commentPostId]: commentData || []
-            }));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [selectedCommunity, user, posts, selectedPost, fetchComments]);
 
   useEffect(() => {
     let filtered = communities;
@@ -592,29 +535,6 @@ export default function Community() {
     return "Member";
   };
 
-  const fetchUserVotes = async () => {
-    if (!user) return;
-    
-    const { data } = await supabase
-      .from("post_votes")
-      .select("post_id, vote_type")
-      .eq("user_id", user.id);
-
-    if (data) {
-      const votesMap: Record<string, { up: boolean; down: boolean }> = {};
-      data.forEach((vote: any) => {
-        if (!votesMap[vote.post_id]) {
-          votesMap[vote.post_id] = { up: false, down: false };
-        }
-        if (vote.vote_type === "up") {
-          votesMap[vote.post_id].up = true;
-        } else if (vote.vote_type === "down") {
-          votesMap[vote.post_id].down = true;
-        }
-      });
-      setUserVotes(votesMap);
-    }
-  };
 
   const handleCreateCommunity = async () => {
     if (!user || !newCommunity.name || !newCommunity.sport) {
@@ -736,65 +656,30 @@ export default function Community() {
     }
   };
 
-  const handleVote = async (postId: string, voteType: "up" | "down") => {
-    if (!user || votingPostId) return;
-
-    const currentVotes = userVotes[postId] || { up: false, down: false };
-    const isCurrentlyVoted = voteType === "up" ? currentVotes.up : currentVotes.down;
-    setVotingPostId(postId);
-    
-    // Trigger animation
-    setVoteAnimation({ postId, type: voteType });
-    setTimeout(() => setVoteAnimation(null), 600);
+  const handleVote = async (postId: string, delta: number) => {
+    if (!user) return;
 
     try {
-      if (isCurrentlyVoted) {
-        // Remove this specific vote type
-        const { error: delErr } = await supabase
-          .from("post_votes")
-          .delete()
-          .match({ post_id: postId, user_id: user.id, vote_type: voteType });
-        if (delErr) throw delErr;
-      } else {
-        // Add this vote type (can coexist with the other)
-        const { error: insertErr } = await supabase
-          .from("post_votes")
-          .insert({ post_id: postId, user_id: user.id, vote_type: voteType });
-        if (insertErr) throw insertErr;
-      }
+      const { data, error } = await supabase.rpc('adjust_post_score', {
+        p_post_id: postId,
+        p_delta: delta
+      });
 
-      // Refresh just this post's counts from the server (source of truth)
-      const { data: updatedPost } = await supabase
-        .from("posts")
-        .select("id, upvotes, downvotes")
-        .eq("id", postId)
-        .maybeSingle();
+      if (error) throw error;
 
-      if (updatedPost) {
-        setPosts(prev => prev.map(p => (p.id === postId ? { ...p, ...updatedPost } : p)));
-      }
+      // Update local state optimistically
+      setPosts(prev => prev.map(p => 
+        p.id === postId ? { ...p, score: data } : p
+      ));
 
-      // Update local user vote map
-      setUserVotes(prev => {
-        const newVotes = { ...prev };
-        if (!newVotes[postId]) {
-          newVotes[postId] = { up: false, down: false };
-        }
-        if (voteType === "up") {
-          newVotes[postId].up = !isCurrentlyVoted;
-        } else {
-          newVotes[postId].down = !isCurrentlyVoted;
-        }
-        return newVotes;
+      toast({ 
+        title: delta > 0 ? "Liked!" : "Disliked!",
+        description: `Post score is now ${data}`
       });
     } catch (error) {
       console.error("Error voting:", error);
       toast({ title: "Vote failed", description: "Please try again.", variant: "destructive" });
-      // Fallback: refetch posts & votes for consistency
       if (selectedCommunity) fetchPosts(selectedCommunity.id);
-      fetchUserVotes();
-    } finally {
-      setVotingPostId(null);
     }
   };
 
@@ -1460,45 +1345,26 @@ export default function Community() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleVote(post.id, "up")}
-                        disabled={votingPostId === post.id}
-                        className={`
-                          transition-all duration-200 relative overflow-hidden
-                          ${userVotes[post.id]?.up ? "text-blue-600 font-semibold" : ""}
-                          ${voteAnimation?.postId === post.id && voteAnimation?.type === 'up' 
-                            ? "animate-vote-pulse before:absolute before:inset-0 before:rounded-md before:bg-blue-500/30 before:animate-ripple" 
-                            : ""
-                          }
-                        `}
+                        onClick={() => handleVote(post.id, 1)}
                       >
-                        <ThumbsUp className={`w-4 h-4 mr-1 transition-transform ${voteAnimation?.postId === post.id && voteAnimation?.type === 'up' ? 'scale-125' : ''}`} />
-                        <span className={`transition-all ${voteAnimation?.postId === post.id && voteAnimation?.type === 'up' ? 'font-bold' : ''}`}>
-                          {post.upvotes}
-                        </span>
+                        <ThumbsUp className="w-4 h-4 mr-1" />
+                        Like
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleVote(post.id, "down")}
-                        disabled={votingPostId === post.id}
-                        className={`
-                          transition-all duration-200 relative overflow-hidden
-                          ${userVotes[post.id]?.down ? "text-red-600 font-semibold" : ""}
-                          ${voteAnimation?.postId === post.id && voteAnimation?.type === 'down' 
-                            ? "animate-vote-pulse before:absolute before:inset-0 before:rounded-md before:bg-red-500/30 before:animate-ripple" 
-                            : ""
-                          }
-                        `}
+                        onClick={() => handleVote(post.id, -1)}
                       >
-                        <ThumbsDown className={`w-4 h-4 mr-1 transition-transform ${voteAnimation?.postId === post.id && voteAnimation?.type === 'down' ? 'scale-125' : ''}`} />
-                        <span className={`transition-all ${voteAnimation?.postId === post.id && voteAnimation?.type === 'down' ? 'font-bold' : ''}`}>
-                          {post.downvotes}
-                        </span>
+                        <ThumbsDown className="w-4 h-4 mr-1" />
+                        Dislike
                       </Button>
+                      <Badge variant="secondary" className="px-3 py-1">
+                        Score: {post.score}
+                      </Badge>
                       <Button variant="ghost" size="sm" onClick={() => toggleComments(post.id)} className="relative">
                         <MessageSquare className="w-4 h-4 mr-1" />
                         Comments
-                        <Badge variant="secondary" className="ml-2">{comments[post.id]?.length || 0}</Badge>
+                        <Badge variant="secondary" className="ml-2">{post.comment_count}</Badge>
                         {post.unreadCount && post.unreadCount > 0 && (
                           <Badge 
                             variant="destructive" 
