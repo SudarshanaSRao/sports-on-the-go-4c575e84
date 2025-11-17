@@ -707,7 +707,7 @@ const Index = () => {
             {/* Disclaimer */}
             <div className="max-w-4xl text-center pt-4 border-t border-border w-full">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <span className="font-semibold text-foreground">Personal Project Disclaimer:</span> SquadUp is a non-commercial hobby project created for educational and recreational purposes. Not affiliated with any sports organization or athletic association. No payments, ads, or monetization. User data (name, photo, location, preferences) is collected solely for in-app matching and securely stored. You may request data deletion anytime by contacting us.
+                <span className="font-semibold text-foreground">Personal Project Disclaimer:</span> SquadUp is a non-commercial hobby project created for educational and recreational purposes. Not affiliated with any sports organization or athletic association. No payments, ads, or monetization. User data (name, photo, location, preferences) is collected solely for in-app matching and securely stored. You can delete your data at any time directly through your account settings.
               </p>
             </div>
           </div>
