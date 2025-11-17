@@ -1225,7 +1225,7 @@ export default function Community() {
 
               <Card>
                 <CardHeader>
-                  <div className="flex items-start justify-between">
+                  <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-3 sm:gap-0">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <CardTitle className="text-2xl">{selectedCommunity?.name}</CardTitle>
@@ -1282,7 +1282,7 @@ export default function Community() {
                         </div>
                       )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                       <Sheet open={showMembersPanel} onOpenChange={(open) => {
                         setShowMembersPanel(open);
                         if (open && selectedCommunity) {
@@ -1290,7 +1290,7 @@ export default function Community() {
                         }
                       }}>
                         <SheetTrigger asChild>
-                          <Button variant="outline">
+                          <Button variant="outline" className="w-full sm:w-auto text-sm h-9">
                             <Users className="w-4 h-4 mr-2" />
                             Members
                           </Button>
@@ -1324,7 +1324,7 @@ export default function Community() {
                       </Sheet>
                       {isMember ? (
                         <>
-                          <Button onClick={() => setShowNewPost(!showNewPost)}>
+                          <Button onClick={() => setShowNewPost(!showNewPost)} className="w-full sm:w-auto text-sm h-9">
                             {showNewPost ? "Cancel" : "New Post"}
                           </Button>
                           {selectedCommunity?.created_by === user?.id && (
@@ -1339,12 +1339,13 @@ export default function Community() {
                           <Button 
                             variant="outline" 
                             onClick={() => selectedCommunity && handleLeaveCommunity(selectedCommunity.id)}
+                            className="w-full sm:w-auto text-sm h-9"
                           >
                             Leave
                           </Button>
                         </>
                       ) : (
-                        <Button onClick={() => selectedCommunity && handleJoinCommunity(selectedCommunity.id)}>
+                        <Button onClick={() => selectedCommunity && handleJoinCommunity(selectedCommunity.id)} className="w-full sm:w-auto text-sm h-9">
                           Join Community
                         </Button>
                       )}
