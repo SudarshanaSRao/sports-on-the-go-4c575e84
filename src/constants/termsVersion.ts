@@ -18,3 +18,23 @@ export const TERMS_VERSION_HISTORY = [
   //   description: "Updated liability provisions and dispute resolution",
   // },
 ];
+
+// Helper function to get the latest version info
+export const getLatestVersionInfo = () => {
+  return TERMS_VERSION_HISTORY[TERMS_VERSION_HISTORY.length - 1];
+};
+
+// Helper function to format date for display
+export const formatVersionDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+// Helper function to get version info by version number
+export const getVersionInfo = (version: string) => {
+  return TERMS_VERSION_HISTORY.find((v) => v.version === version);
+};
