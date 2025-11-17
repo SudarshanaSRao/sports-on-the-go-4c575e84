@@ -7,7 +7,7 @@ export const CURRENT_TERMS_VERSION = "1.0";
 export const TERMS_VERSION_HISTORY = [
   {
     version: "1.0",
-    date: "2025-01-15",
+    date: "2025-11-16",
     description: "Initial version of Terms and Conditions",
   },
   // Add new versions here when terms are updated
