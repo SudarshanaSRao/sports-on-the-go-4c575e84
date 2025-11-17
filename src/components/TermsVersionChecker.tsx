@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { TermsUpdateDialog } from "./TermsUpdateDialog";
-import { CURRENT_TERMS_VERSION } from "@/constants/termsVersion";
+import { CURRENT_TERMS_VERSION, getVersionInfo, formatVersionDate } from "@/constants/termsVersion";
 import { toast } from "sonner";
 
 interface TermsVersionCheckerProps {
@@ -61,7 +61,8 @@ export const TermsVersionChecker = ({ children }: TermsVersionCheckerProps) => {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase
+      // Update user's accepted terms version
+      const { error: updateError } = await supabase
         .from("profiles")
         .update({
           accepted_terms_version: CURRENT_TERMS_VERSION,
@@ -69,7 +70,29 @@ export const TermsVersionChecker = ({ children }: TermsVersionCheckerProps) => {
         })
         .eq("id", user.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // Get version info for notification
+      const versionInfo = getVersionInfo(CURRENT_TERMS_VERSION);
+      const formattedDate = versionInfo ? formatVersionDate(versionInfo.date) : new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+      const description = versionInfo?.description || "Terms and Conditions have been updated";
+
+      // Create notification for the user
+      const { error: notificationError } = await supabase
+        .from("notifications")
+        .insert({
+          user_id: user.id,
+          type: "terms_update",
+          title: `Terms Updated to v${CURRENT_TERMS_VERSION}`,
+          message: `You accepted the updated Terms and Conditions (v${CURRENT_TERMS_VERSION}) on ${formattedDate}. Changes include: ${description}`,
+          action_url: "/terms",
+          is_read: false,
+        });
+
+      if (notificationError) {
+        console.error("Error creating notification:", notificationError);
+        // Don't throw here - terms acceptance is more critical than notification
+      }
 
       setShowTermsUpdate(false);
       toast.success("Terms accepted. Thank you for staying up to date!");

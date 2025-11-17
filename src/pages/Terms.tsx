@@ -2,8 +2,12 @@ import { Navbar } from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { getLatestVersionInfo, formatVersionDate } from "@/constants/termsVersion";
 
 const Terms = () => {
+  const latestVersion = getLatestVersionInfo();
+  const lastUpdatedDate = formatVersionDate(latestVersion.date);
+
   return (
     <div className="min-h-screen min-h-screen-mobile bg-background">
       <Navbar />
@@ -21,7 +25,7 @@ const Terms = () => {
           
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Last Updated: January 15, 2025</CardTitle>
+              <CardTitle>Last Updated: {lastUpdatedDate}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <section>
