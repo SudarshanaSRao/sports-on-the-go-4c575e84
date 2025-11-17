@@ -42,13 +42,40 @@ export const TermsVersionChecker = ({ children }: TermsVersionCheckerProps) => {
       }
 
       const userVersion = profile?.accepted_terms_version || "1.0";
-      
+
       // Compare versions - if user's version is older, show update dialog
       if (userVersion !== CURRENT_TERMS_VERSION) {
         setPreviousVersion(userVersion);
         setShowTermsUpdate(true);
+
+        // Create a one-time notification about the update for this user if it doesn't exist yet
+        const versionInfo = getVersionInfo(CURRENT_TERMS_VERSION);
+        const formattedDate = versionInfo
+          ? formatVersionDate(versionInfo.date)
+          : new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }).format(new Date());
+        const description = versionInfo?.description || "Terms and Conditions have been updated";
+        const title = `Terms Updated to v${CURRENT_TERMS_VERSION}`;
+
+        const { data: existing } = await supabase
+          .from("notifications")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("type", "terms_update")
+          .eq("title", title)
+          .maybeSingle();
+
+        if (!existing) {
+          await supabase.from("notifications").insert({
+            user_id: user.id,
+            type: "terms_update",
+            title,
+            message: `We've updated our Terms and Privacy Policy to v${CURRENT_TERMS_VERSION} on ${formattedDate}. Changes include: ${description}`,
+            action_url: "/terms",
+            is_read: false,
+          });
+        }
       }
-      
+
       setIsChecking(false);
     } catch (error) {
       console.error("Error in terms version check:", error);
