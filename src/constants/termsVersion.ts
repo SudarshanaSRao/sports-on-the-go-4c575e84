@@ -24,14 +24,17 @@ export const getLatestVersionInfo = () => {
   return TERMS_VERSION_HISTORY[TERMS_VERSION_HISTORY.length - 1];
 };
 
-// Helper function to format date for display
+// Helper function to format date for display (UTC-safe to avoid timezone shifts)
 export const formatVersionDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
+  // Expecting YYYY-MM-DD; format using UTC to prevent off-by-one day in some timezones
+  const [year, month, day] = dateString.split("-").map(Number);
+  const date = new Date(Date.UTC(year, (month || 1) - 1, day || 1));
+  return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "long",
     day: "numeric",
-  });
+    timeZone: "UTC",
+  }).format(date);
 };
 
 // Helper function to get version info by version number
