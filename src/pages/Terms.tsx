@@ -554,7 +554,8 @@ const Terms = () => {
                     are authorized to act on behalf of the copyright owner
                   </li>
                 </ul>
-                <p>
+
+                <p className="text-muted-foreground mb-2">
                   Upon receiving a request, we will review it promptly and take appropriate action, which may include
                   removing or disabling access to the reported content. We may also contact the user who posted the
                   material for clarification. This process is intended to help resolve copyright concerns in good faith
