@@ -69,6 +69,34 @@ const Terms = () => {
               </section>
 
               <section>
+                <h2 className="text-2xl font-bold mb-3">2.6 Minimum Age Requirement</h2>
+                <Alert className="mb-4 border-destructive bg-destructive/10">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                  <AlertDescription className="text-sm font-bold text-destructive ml-2">
+                    CRITICAL: YOU MUST BE AT LEAST 18 YEARS OLD TO USE SQUADUP
+                  </AlertDescription>
+                </Alert>
+                <p className="text-muted-foreground mb-2 font-semibold">
+                  SquadUp is intended solely for users who are 18 years of age or older. By using this Service, you represent and warrant that:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>You are at least 18 years old</li>
+                  <li>You have the legal capacity to enter into these Terms</li>
+                  <li>You will not allow persons under 18 to use your account</li>
+                  <li>You understand that providing false age information is grounds for immediate account termination</li>
+                </ul>
+                <p className="text-muted-foreground mt-3">
+                  <strong>Age Verification:</strong> We reserve the right to request proof of age at any time. Failure to provide verification or discovery that you are under 18 will result in immediate account termination without notice.
+                </p>
+                <p className="text-muted-foreground mt-3">
+                  <strong>Parental Responsibility:</strong> Parents and guardians are solely responsible for supervising minors' internet use. If a minor accesses SquadUp, the parent/guardian accepts full liability for any consequences arising from such unauthorized use.
+                </p>
+                <p className="text-muted-foreground mt-3 font-semibold">
+                  IF YOU ARE UNDER 18 YEARS OLD, YOU MUST NOT USE THIS SERVICE UNDER ANY CIRCUMSTANCES.
+                </p>
+              </section>
+
+              <section>
                 <h2 className="text-2xl font-bold mb-3">3. User Responsibilities</h2>
                 <p className="text-muted-foreground mb-2">By using SquadUp, you agree to:</p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-2">
@@ -152,6 +180,25 @@ const Terms = () => {
               </section>
 
               <section>
+                <h2 className="text-2xl font-bold mb-3">3.6 User Representations and Warranties</h2>
+                <p className="text-muted-foreground mb-2">
+                  By using SquadUp, you represent, warrant, and covenant that:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li><strong>Accuracy:</strong> All information you provide is accurate, current, and complete</li>
+                  <li><strong>Ownership:</strong> You own or have the necessary rights, licenses, and permissions to all content you post</li>
+                  <li><strong>Legal Compliance:</strong> Your use of the Service complies with all applicable local, state, national, and international laws and regulations</li>
+                  <li><strong>No Unauthorized Access:</strong> You will not attempt to gain unauthorized access to any portion of the Service, other users' accounts, or any systems or networks connected to the Service</li>
+                  <li><strong>No Interference:</strong> You will not interfere with or disrupt the Service or servers or networks connected to the Service</li>
+                  <li><strong>Authentic Identity:</strong> You will not impersonate any person or entity or misrepresent your affiliation with any person or entity</li>
+                  <li><strong>Legal Age:</strong> You are at least 18 years old and have the legal capacity to enter into these Terms</li>
+                </ul>
+                <p className="text-muted-foreground mt-3 font-semibold">
+                  You acknowledge that any breach of these representations and warranties may result in immediate termination of your account and potential legal action.
+                </p>
+              </section>
+
+              <section>
                 <h2 className="text-2xl font-bold mb-3">4. Assumption of Risk, Disclaimer of Liability, and Release of Claims</h2>
                 
                 <h3 className="text-xl font-semibold mb-2 mt-4">4.1 ASSUMPTION OF RISK</h3>
@@ -214,7 +261,37 @@ const Terms = () => {
               <section>
                 <h2 className="text-2xl font-bold mb-3">6. Data Collection and Bot Prevention</h2>
                 <p className="text-muted-foreground">
-                  We collect minimal user data solely for account creation and to filter out automated bots and potential scammers. This includes basic profile information provided during signup. See our Privacy Policy for details.
+                  We collect basic user data necessary for Service functionality, including email, location data for finding nearby games, and activity history. We implement CAPTCHA and rate limiting to prevent automated abuse. By using the Service, you consent to data collection as outlined in our Privacy Policy. We do not sell your data to third parties.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-3">6.5 Data Retention and Deletion</h2>
+                <p className="text-muted-foreground mb-2">
+                  <strong>Data Retention:</strong> Upon account deletion, your data will be retained for up to 90 days for backup, security, and legal compliance purposes, after which it will be permanently deleted from our systems.
+                </p>
+                <p className="text-muted-foreground mb-2">
+                  <strong>What Gets Deleted:</strong>
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Your profile information and personal data</li>
+                  <li>Your game participation history and RSVPs</li>
+                  <li>Your posted content, comments, and interactions</li>
+                  <li>Your account credentials and authentication data</li>
+                </ul>
+                <p className="text-muted-foreground mb-2 mt-3">
+                  <strong>What May Be Retained:</strong>
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Anonymized usage statistics and analytics data</li>
+                  <li>Records required for legal compliance (e.g., transaction logs, abuse reports)</li>
+                  <li>Backup copies in our disaster recovery systems (automatically purged after 90 days)</li>
+                </ul>
+                <p className="text-muted-foreground mt-3">
+                  <strong>Right to Request Deletion:</strong> You may request immediate data deletion at any time by contacting us through the channels specified in Section 21. We will comply with your request within 30 days, subject to legal obligations.
+                </p>
+                <p className="text-muted-foreground mt-3">
+                  <strong>GDPR Compliance:</strong> For users in the European Economic Area, we comply with GDPR requirements including the right to be forgotten, data portability, and access to your personal data.
                 </p>
               </section>
 
@@ -266,7 +343,100 @@ const Terms = () => {
               <section>
                 <h2 className="text-2xl font-bold mb-3">11. Open Source License</h2>
                 <p className="text-muted-foreground">
-                  SquadUp is open-source software. The source code may be freely used, modified, and distributed according to the applicable open-source license. Contributing to or forking the project does not create any commercial relationship or liability.
+                  SquadUp's source code is available under an open-source license. While you may view, fork, and modify the code according to the license terms, you may not use the SquadUp name, branding, or hold the operator liable for any issues arising from your modifications or deployments.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-3">11.5 Intellectual Property and User Content</h2>
+                
+                <h3 className="text-xl font-semibold mb-2 mt-4">11.5.1 Your Content Ownership</h3>
+                <p className="text-muted-foreground mb-2">
+                  You retain all ownership rights to content you create, upload, post, or share on SquadUp ("Your Content"). This includes but is not limited to:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Posts, comments, and community discussions</li>
+                  <li>Game descriptions and event details</li>
+                  <li>Profile information, photos, and biographical content</li>
+                  <li>Reviews and ratings you provide</li>
+                </ul>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">11.5.2 License Grant to SquadUp</h3>
+                <p className="text-muted-foreground mb-2">
+                  By posting Your Content on SquadUp, you grant us a non-exclusive, worldwide, royalty-free, perpetual, irrevocable, and fully sublicensable license to:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Use, reproduce, modify, adapt, and publish Your Content</li>
+                  <li>Display, perform, and distribute Your Content on and through the Service</li>
+                  <li>Create derivative works from Your Content for Service improvement</li>
+                  <li>Store Your Content in our backup and archival systems</li>
+                </ul>
+                <p className="text-muted-foreground mt-2">
+                  This license is necessary for us to operate the Service and make Your Content available to other users as intended. The license continues even after you delete Your Content or terminate your account, to the extent Your Content has been shared with or viewed by other users.
+                </p>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">11.5.3 Your Warranty Regarding Content</h3>
+                <p className="text-muted-foreground mb-2 font-semibold">
+                  You represent and warrant that:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>You own or have the necessary rights, licenses, and permissions to grant the above license</li>
+                  <li>Your Content does not infringe any third party's intellectual property rights, privacy rights, or other proprietary rights</li>
+                  <li>Your Content complies with these Terms and all applicable laws</li>
+                  <li>You have obtained all necessary consents from individuals depicted in photos or content you upload</li>
+                </ul>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">11.5.4 Our Right to Remove Content</h3>
+                <p className="text-muted-foreground">
+                  We reserve the right to remove, modify, or refuse to display any of Your Content at any time, for any reason, without prior notice. We are not obligated to store, maintain, or provide you with copies of Your Content. You are solely responsible for backing up Your Content.
+                </p>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">11.5.5 Third-Party Content and Trademarks</h3>
+                <p className="text-muted-foreground">
+                  SquadUp and its associated logos, designs, and branding are the property of the operator. All other trademarks, service marks, and trade names mentioned on the Service are the property of their respective owners. You may not use our trademarks or branding without express written permission.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-3">11.6 DMCA Copyright Compliance</h2>
+                <p className="text-muted-foreground mb-2">
+                  SquadUp respects the intellectual property rights of others and expects users to do the same. In accordance with the Digital Millennium Copyright Act (DMCA), we will respond to valid notices of copyright infringement.
+                </p>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">11.6.1 Filing a DMCA Takedown Notice</h3>
+                <p className="text-muted-foreground mb-2">
+                  If you believe your copyrighted work has been infringed on SquadUp, please send a written notice to our designated DMCA agent (contact information in Section 21) that includes:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>A physical or electronic signature of the copyright owner or authorized agent</li>
+                  <li>Identification of the copyrighted work claimed to have been infringed</li>
+                  <li>Identification of the infringing material and information reasonably sufficient to locate it (e.g., URL, username, post ID)</li>
+                  <li>Your contact information (address, phone number, email)</li>
+                  <li>A statement that you have a good faith belief that the use is not authorized by the copyright owner, its agent, or the law</li>
+                  <li>A statement that the information in the notice is accurate and, under penalty of perjury, that you are authorized to act on behalf of the copyright owner</li>
+                </ul>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">11.6.2 Counter-Notice Procedure</h3>
+                <p className="text-muted-foreground mb-2">
+                  If you believe your content was removed in error, you may file a counter-notice with our DMCA agent that includes:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Your physical or electronic signature</li>
+                  <li>Identification of the removed material and its prior location</li>
+                  <li>A statement under penalty of perjury that you have a good faith belief the material was removed due to mistake or misidentification</li>
+                  <li>Your name, address, and phone number</li>
+                  <li>A statement that you consent to the jurisdiction of the federal district court for your judicial district (or the jurisdiction where the operator is located)</li>
+                  <li>A statement that you will accept service of process from the person who filed the original DMCA notice</li>
+                </ul>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">11.6.3 Repeat Infringer Policy</h3>
+                <p className="text-muted-foreground mb-2">
+                  SquadUp has a policy of terminating, in appropriate circumstances, the accounts of users who are repeat copyright infringers. Users who receive multiple valid DMCA takedown notices may have their accounts permanently terminated without further warning.
+                </p>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">11.6.4 No Liability for User Content</h3>
+                <p className="text-muted-foreground">
+                  We act as a service provider under the DMCA safe harbor provisions. We are not liable for copyright infringement by our users, provided we comply with DMCA procedures. Filing a false or fraudulent DMCA notice or counter-notice may result in legal liability, including damages and attorney's fees.
                 </p>
               </section>
 
@@ -394,31 +564,66 @@ const Terms = () => {
 
               <section>
                 <h2 className="text-2xl font-bold mb-3">19. Third-Party Venues, Services, and Equipment</h2>
-                
-                <h3 className="text-xl font-semibold mb-2 mt-4">19.1 NO CONTROL OR RESPONSIBILITY</h3>
                 <p className="text-muted-foreground mb-2">
-                  SquadUp does not own, operate, inspect, maintain, approve, or have any control over:
+                  SquadUp is a platform that connects users for sports activities. We DO NOT own, operate, inspect, supervise, or have any control over:
                 </p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                  <li>Any venues, facilities, parks, gyms, or locations where games take place</li>
-                  <li>Any equipment, sports gear, or materials used during activities</li>
-                  <li>Any third-party services, websites, or platforms linked from the Service</li>
-                  <li>Any transportation services users may use to travel to games</li>
+                  <li>Sports venues, fields, courts, gyms, or facilities where games take place</li>
+                  <li>Equipment used during games (balls, nets, protective gear, etc.)</li>
+                  <li>The conduct, qualifications, or safety practices of game hosts or participants</li>
+                  <li>Transportation to or from game locations</li>
+                  <li>Any third-party services or products you may use in connection with SquadUp</li>
                 </ul>
+                <p className="text-muted-foreground mb-2 mt-3 font-semibold">
+                  YOU ASSUME ALL RISKS associated with third-party venues, services, and equipment. The operator has no responsibility or liability for:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Safety, condition, or suitability of venues or equipment</li>
+                  <li>Rules, policies, or restrictions imposed by third-party venue operators</li>
+                  <li>Injuries or damages caused by defective equipment or unsafe facilities</li>
+                  <li>Compliance with local ordinances, permits, or regulations for using public or private spaces</li>
+                  <li>Access restrictions, closures, or changes to third-party venues</li>
+                </ul>
+                <p className="text-muted-foreground mt-3">
+                  It is YOUR responsibility to verify the suitability, safety, and legality of any venue or equipment before participating in any game organized through SquadUp.
+                </p>
+              </section>
 
-                <h3 className="text-xl font-semibold mb-2 mt-4">19.2 DISCLAIMER</h3>
-                <p className="text-muted-foreground mb-2">
-                  The operator makes no representations or warranties regarding the safety, condition, suitability, legality, or quality of any third-party venues, services, or equipment. <strong>Users are SOLELY RESPONSIBLE</strong> for assessing and ensuring:
+              <section>
+                <h2 className="text-2xl font-bold mb-3">19.3 Publicity Rights and User Images</h2>
+                <p className="text-muted-foreground mb-2 font-semibold">
+                  By uploading photos, videos, or other media containing images of yourself or others, you represent and warrant that:
                 </p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                  <li>Venue safety and suitability for intended activities</li>
-                  <li>Equipment quality and proper functioning</li>
-                  <li>Compliance with local laws, regulations, and venue rules</li>
-                  <li>Obtaining necessary permissions, permits, or insurance</li>
-                  <li>Availability of emergency services and medical facilities</li>
+                  <li>You have obtained express consent from all identifiable individuals depicted in the media</li>
+                  <li>You have the right to grant SquadUp the license specified in Section 11.5.2</li>
+                  <li>The use of such images does not violate any person's privacy, publicity, or other personal rights</li>
+                  <li>No individual depicted is a minor under 18 years of age, or if they are, you have obtained verifiable parental/guardian consent</li>
                 </ul>
-                <p className="text-muted-foreground mt-3 font-semibold">
-                  THE OPERATOR SHALL NOT BE LIABLE for any injuries, damages, or losses arising from third-party venues, services, or equipment.
+                <p className="text-muted-foreground mb-2 mt-3">
+                  <strong>Unauthorized Use of Likeness:</strong> SquadUp is not responsible for unauthorized use of your image or likeness by other users. If someone uploads media containing your image without your consent, you may request removal by contacting us through the channels in Section 21.
+                </p>
+                <p className="text-muted-foreground mt-3">
+                  <strong>Removal Requests:</strong> To request removal of media containing your likeness, provide: (1) identification of the specific content, (2) proof of your identity, and (3) an explanation of why the content should be removed. We will review requests at our sole discretion but are not obligated to remove content.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-3">19.5 Third-Party Links and External Services</h2>
+                <p className="text-muted-foreground mb-2">
+                  SquadUp may contain links to third-party websites, services, or integrations (e.g., mapping services, social media, payment processors). These links are provided for your convenience only.
+                </p>
+                <p className="text-muted-foreground mb-2 font-semibold">
+                  WE DO NOT ENDORSE, CONTROL, OR ASSUME RESPONSIBILITY FOR:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>The content, privacy policies, or practices of any third-party websites or services</li>
+                  <li>Any products, services, or information offered by third parties</li>
+                  <li>The accuracy, legality, or appropriateness of third-party content</li>
+                  <li>Any damages or losses arising from your use of third-party services</li>
+                </ul>
+                <p className="text-muted-foreground mt-3">
+                  Your interactions with third-party services are solely between you and the third party. You should review the terms and privacy policies of any third-party services you access through SquadUp.
                 </p>
               </section>
 
@@ -440,14 +645,30 @@ const Terms = () => {
 
               <section>
                 <h2 className="text-2xl font-bold mb-3">21. Notice and Contact Information</h2>
-                <p className="text-muted-foreground mb-3">
-                  For questions, concerns, or legal notices regarding these Terms, please contact the project maintainers through the official GitHub repository or community channels.
+                <p className="text-muted-foreground mb-2">
+                  For questions, notices, or concerns regarding these Terms or the Service, please contact us through:
                 </p>
-                <p className="text-muted-foreground mb-3">
-                  Any legal notices must be sent in writing to the official project contact address. Notices sent via other methods may not be considered legally effective.
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>GitHub Issues: <a href="https://github.com/yourusername/squadup" className="text-primary hover:underline">github.com/yourusername/squadup</a></li>
+                  <li>Community Discord/Slack channel (if available)</li>
+                  <li>In-app feedback or contact form</li>
+                </ul>
+                
+                <h3 className="text-xl font-semibold mb-2 mt-4">DMCA Designated Agent</h3>
+                <p className="text-muted-foreground mb-2">
+                  For copyright infringement claims under the DMCA (Section 11.6), contact our designated agent:
                 </p>
-                <p className="text-muted-foreground">
-                  By continuing to use the Service after receiving notice of changes to these Terms, you agree to the updated Terms.
+                <p className="text-muted-foreground ml-4">
+                  [Contact information will be provided - email address or mailing address]
+                </p>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">Age Verification and Account Issues</h3>
+                <p className="text-muted-foreground mb-2">
+                  For age verification inquiries, account termination appeals, or serious policy violations, use the contact methods above and mark your message as "URGENT: [Issue Type]".
+                </p>
+
+                <p className="text-muted-foreground mt-4">
+                  As this is a volunteer-operated project, response times may vary. We will make reasonable efforts to respond to inquiries but do not guarantee specific response timeframes. DMCA notices and urgent legal matters will be prioritized.
                 </p>
               </section>
             </CardContent>
