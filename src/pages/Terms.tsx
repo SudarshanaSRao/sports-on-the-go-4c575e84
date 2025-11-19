@@ -84,6 +84,74 @@ const Terms = () => {
               </section>
 
               <section>
+                <h2 className="text-2xl font-bold mb-3">3.5 Prohibited Content and User Conduct</h2>
+                
+                <h3 className="text-xl font-semibold mb-2 mt-4">3.5.1 PROHIBITED CONTENT</h3>
+                <p className="text-muted-foreground mb-2 font-semibold">
+                  To maintain a safe, respectful, and inclusive community, the following types of content are STRICTLY PROHIBITED on SquadUp:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li><strong>Profanity and Vulgar Language:</strong> Excessive use of profanity, obscene language, or vulgar expressions in any public-facing content including posts, comments, game descriptions, community discussions, usernames, or profile information</li>
+                  <li><strong>Hate Speech and Discrimination:</strong> Content that promotes hatred, violence, or discrimination based on race, ethnicity, national origin, religion, gender, sexual orientation, disability, age, or any other protected characteristic</li>
+                  <li><strong>Harassment and Bullying:</strong> Targeted harassment, bullying, intimidation, threats, or sustained unwanted contact directed at any user</li>
+                  <li><strong>Sexual Content:</strong> Sexually explicit content, pornography, sexual solicitation, or unwanted sexual advances</li>
+                  <li><strong>Violence and Threats:</strong> Content promoting or glorifying violence, threats of violence, or graphic violent imagery</li>
+                  <li><strong>Illegal Activities:</strong> Content promoting or facilitating illegal activities, drug use, or criminal behavior</li>
+                  <li><strong>Spam and Misinformation:</strong> Spam, scams, phishing attempts, deliberate misinformation, or deceptive content</li>
+                  <li><strong>Personal Information:</strong> Sharing private or personal information about others without their consent (doxxing)</li>
+                  <li><strong>Impersonation:</strong> Impersonating other users, public figures, or organizations</li>
+                </ul>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">3.5.2 CONTENT MODERATION</h3>
+                <p className="text-muted-foreground mb-2">
+                  SquadUp employs automated content moderation tools and community reporting to identify and remove prohibited content. However, you acknowledge that:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Content moderation is not perfect and may not catch all violations immediately</li>
+                  <li>The operator is not liable for user-generated content or delayed removal of prohibited content</li>
+                  <li>Users are responsible for their own exposure to potentially offensive content</li>
+                  <li>Reporting inappropriate content does not guarantee immediate action or removal</li>
+                  <li>The operator reserves the right to remove any content at its sole discretion</li>
+                </ul>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">3.5.3 ENFORCEMENT AND CONSEQUENCES</h3>
+                <p className="text-muted-foreground mb-2">
+                  Violations of these content policies may result in the following actions, at the operator's sole discretion:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li><strong>Content Removal:</strong> Immediate removal of prohibited content without notice</li>
+                  <li><strong>Warnings:</strong> Formal warnings for first-time or minor violations</li>
+                  <li><strong>Temporary Suspension:</strong> Temporary account suspension (1-30 days) for repeated or serious violations</li>
+                  <li><strong>Permanent Ban:</strong> Permanent account termination for severe or repeated violations</li>
+                  <li><strong>No Appeals:</strong> The operator is not obligated to provide appeals or explanations for enforcement actions</li>
+                </ul>
+                <p className="text-muted-foreground mt-3 font-semibold">
+                  You acknowledge that content moderation decisions are made in good faith but may occasionally be incorrect. THE OPERATOR SHALL NOT BE LIABLE for any consequences of content removal, account suspension, or termination, including loss of data, connections, or access to the Service.
+                </p>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">3.5.4 USER RESPONSIBILITY</h3>
+                <p className="text-muted-foreground mb-2 font-semibold">
+                  BY USING THIS SERVICE, YOU ACKNOWLEDGE AND ACCEPT THAT:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>You may encounter offensive, inappropriate, or prohibited content created by other users</li>
+                  <li>The operator cannot guarantee a completely safe or offense-free environment</li>
+                  <li>Content moderation is a best-effort service, not a guarantee</li>
+                  <li>You use the Service at your own risk and must exercise your own judgment</li>
+                  <li>You are responsible for protecting yourself from offensive content (e.g., by blocking users, leaving communities, or discontinuing use)</li>
+                  <li>The operator is not liable for emotional distress, harm, or damages resulting from exposure to user-generated content</li>
+                </ul>
+                <p className="text-muted-foreground mt-3">
+                  If you find this level of moderation insufficient for your needs, we recommend not using the Service. Your continued use of the Service constitutes acceptance of these limitations.
+                </p>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">3.5.5 REPORTING VIOLATIONS</h3>
+                <p className="text-muted-foreground">
+                  Users may report prohibited content through the in-app reporting system. While we review reports, we do not guarantee response times, specific actions, or outcomes. Abuse of the reporting system may result in account suspension.
+                </p>
+              </section>
+
+              <section>
                 <h2 className="text-2xl font-bold mb-3">4. Assumption of Risk, Disclaimer of Liability, and Release of Claims</h2>
                 
                 <h3 className="text-xl font-semibold mb-2 mt-4">4.1 ASSUMPTION OF RISK</h3>

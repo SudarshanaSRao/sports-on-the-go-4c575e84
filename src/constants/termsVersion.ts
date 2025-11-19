@@ -1,7 +1,7 @@
 // Current version of Terms and Conditions
 // Update this version number whenever the terms are updated
 // Format: "X.Y" where X is major version, Y is minor version
-export const CURRENT_TERMS_VERSION = "1.0";
+export const CURRENT_TERMS_VERSION = "2.0";
 
 // History of terms versions (for reference)
 export const TERMS_VERSION_HISTORY = [
@@ -10,13 +10,11 @@ export const TERMS_VERSION_HISTORY = [
     date: "2025-11-16",
     description: "Initial version of Terms and Conditions",
   },
-  // Add new versions here when terms are updated
-  // Example:
-  // {
-  //   version: "2.0",
-  //   date: "2025-02-01",
-  //   description: "Updated liability provisions and dispute resolution",
-  // },
+  {
+    version: "2.0",
+    date: "2025-11-19",
+    description: "Added comprehensive Prohibited Content and User Conduct policies including protections against profanity, hate speech, harassment, and inappropriate content with enforcement mechanisms",
+  },
 ];
 
 // Helper function to get the latest version info
