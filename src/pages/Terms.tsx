@@ -529,19 +529,22 @@ const Terms = () => {
                   copyright infringement.
                 </p>
 
-                <h3 className="text-xl font-semibold mb-2 mt-4">11.2.1 Filing a DMCA Takedown Notice</h3>
+                <h3 className="text-xl font-semibold mb-2 mt-4">
+                  11.2.1 Copyright Concerns and Content Removal Requests
+                </h3>
                 <p className="text-muted-foreground mb-2">
-                  If you believe your copyrighted work has been infringed on SquadUp, please send a written notice to
-                  our designated DMCA agent (contact information in Section 21) that includes:
+                  If you believe that content on SquadUp may infringe your copyright, you can notify us by sending a
+                  written request that includes the following information so we can review the matter:
                 </p>
                 <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                  <li>A physical or electronic signature of the copyright owner or authorized agent</li>
-                  <li>Identification of the copyrighted work claimed to have been infringed</li>
+                  <li>A description of the copyrighted work you believe has been used without authorization</li>
                   <li>
-                    Identification of the infringing material and information reasonably sufficient to locate it (e.g.,
-                    URL, username, post ID)
+                    A description or link (e.g., URL, username, post ID) that helps us locate the content in question
                   </li>
-                  <li>Your contact information (address, phone number, email)</li>
+                  <li>
+                    Your contact information (email is sufficient, but you may provide additional details if you wish)
+                  </li>
+                  <li>A brief statement explaining why you believe the use of the material may be unauthorized</li>
                   <li>
                     A statement that you have a good faith belief that the use is not authorized by the copyright owner,
                     its agent, or the law
@@ -551,6 +554,12 @@ const Terms = () => {
                     are authorized to act on behalf of the copyright owner
                   </li>
                 </ul>
+                <p>
+                  Upon receiving a request, we will review it promptly and take appropriate action, which may include
+                  removing or disabling access to the reported content. We may also contact the user who posted the
+                  material for clarification. This process is intended to help resolve copyright concerns in good faith
+                  and does not require you to act as a DMCA agent or make legal declarations under penalty of perjury.
+                </p>
 
                 <h3 className="text-xl font-semibold mb-2 mt-4">11.2.2 Counter-Notice Procedure</h3>
                 <p className="text-muted-foreground mb-2">
