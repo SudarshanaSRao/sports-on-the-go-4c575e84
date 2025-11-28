@@ -1,10 +1,12 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { Home, Search, TrendingUp } from "lucide-react";
+import { Home, Search, TrendingUp, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const NotFound = () => {
   const location = useLocation();
+  const { user } = useAuth();
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
@@ -64,22 +66,42 @@ const NotFound = () => {
         <div className="pt-8 border-t border-border/50">
           <p className="text-sm text-muted-foreground mb-4">Popular destinations:</p>
           <div className="flex flex-wrap gap-3 justify-center">
-            <Link to="/my-games" className="text-sm text-primary hover:text-primary/80 story-link transition-colors">
-              My Games
-            </Link>
-            <span className="text-muted-foreground/30">•</span>
-            <Link to="/community" className="text-sm text-primary hover:text-primary/80 story-link transition-colors">
-              Community
-            </Link>
-            <span className="text-muted-foreground/30">•</span>
-            <Link to="/leaderboard" className="text-sm text-primary hover:text-primary/80 story-link transition-colors">
-              <TrendingUp className="w-3 h-3 inline mr-1" />
-              Leaderboard
-            </Link>
-            <span className="text-muted-foreground/30">•</span>
-            <Link to="/friends" className="text-sm text-primary hover:text-primary/80 story-link transition-colors">
-              Friends
-            </Link>
+            {user ? (
+              <>
+                <Link to="/my-games" className="text-sm text-primary hover:text-primary/80 story-link transition-colors">
+                  My Games
+                </Link>
+                <span className="text-muted-foreground/30">•</span>
+                <Link to="/community" className="text-sm text-primary hover:text-primary/80 story-link transition-colors">
+                  Community
+                </Link>
+                <span className="text-muted-foreground/30">•</span>
+                <Link to="/leaderboard" className="text-sm text-primary hover:text-primary/80 story-link transition-colors">
+                  <TrendingUp className="w-3 h-3 inline mr-1" />
+                  Leaderboard
+                </Link>
+                <span className="text-muted-foreground/30">•</span>
+                <Link to="/friends" className="text-sm text-primary hover:text-primary/80 story-link transition-colors">
+                  Friends
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/auth" className="text-sm text-primary hover:text-primary/80 story-link transition-colors">
+                  Sign In
+                </Link>
+                <span className="text-muted-foreground/30">•</span>
+                <Link to="/discover" className="text-sm text-primary hover:text-primary/80 story-link transition-colors">
+                  <Search className="w-3 h-3 inline mr-1" />
+                  Discover Games
+                </Link>
+                <span className="text-muted-foreground/30">•</span>
+                <Link to="/community" className="text-sm text-primary hover:text-primary/80 story-link transition-colors">
+                  <Users className="w-3 h-3 inline mr-1" />
+                  Community
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
