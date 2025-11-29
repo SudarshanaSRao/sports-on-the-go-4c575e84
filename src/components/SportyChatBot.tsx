@@ -19,6 +19,7 @@ const QUICK_ACTIONS = [
 
 export default function SportyChatBot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isTeaserDismissed, setIsTeaserDismissed] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -155,10 +156,19 @@ export default function SportyChatBot() {
   return (
     <>
       {/* Teaser message - appears above the cricket ball */}
-      {!isOpen && (
+      {!isOpen && !isTeaserDismissed && (
         <div className="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-[9998] animate-fade-in">
           {/* Speech bubble */}
           <div className="bg-background border-2 border-primary/20 rounded-2xl shadow-elegant p-3 md:p-4 mb-2 md:mb-3 max-w-[240px] md:max-w-[280px] relative">
+            {/* Close button */}
+            <button
+              onClick={() => setIsTeaserDismissed(true)}
+              className="absolute -top-2 -right-2 w-6 h-6 md:w-7 md:h-7 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-all hover:scale-110 flex items-center justify-center shadow-lg z-10"
+              aria-label="Dismiss teaser"
+            >
+              <X className="w-3 h-3 md:w-4 md:h-4" />
+            </button>
+
             <div className="flex items-start gap-2">
               <div className="text-2xl md:text-3xl shrink-0">⚽</div>
               <div>
