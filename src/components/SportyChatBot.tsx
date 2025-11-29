@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { X, Send, MessageCircle, ThumbsUp, ThumbsDown } from "lucide-react";
+import { X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
@@ -154,16 +154,64 @@ export default function SportyChatBot() {
 
   return (
     <>
-      {/* Floating trigger button */}
+      {/* Floating trigger button - Cricket Ball Design */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9998] bg-primary text-primary-foreground rounded-full shadow-elegant hover:scale-110 transition-all duration-300 ${
+        className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-[9998] group hover:scale-110 transition-all duration-300 ${
           isOpen ? "scale-0 opacity-0" : "scale-100 opacity-100"
         }`}
         aria-label="Open Sporty chat"
       >
-        <div className="p-3 md:p-4">
-          <MessageCircle className="w-5 h-5 md:w-6 md:h-6" />
+        <div className="relative w-14 h-14 md:w-16 md:h-16">
+          {/* Cricket ball background */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-600 via-red-500 to-red-700 shadow-2xl" />
+          
+          {/* Cricket ball stitching - left curve */}
+          <svg 
+            className="absolute inset-0 w-full h-full" 
+            viewBox="0 0 64 64"
+            style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }}
+          >
+            {/* Left seam curve */}
+            <path
+              d="M 20 10 Q 18 32 20 54"
+              stroke="white"
+              strokeWidth="1.5"
+              fill="none"
+              opacity="0.9"
+            />
+            {/* Left seam stitches */}
+            <path d="M 18 15 L 22 17" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 17 20 L 21 22" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 17 25 L 21 27" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 16.5 32 L 20.5 32" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 17 39 L 21 37" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 17 44 L 21 42" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 18 49 L 22 47" stroke="white" strokeWidth="1" opacity="0.8" />
+            
+            {/* Right seam curve */}
+            <path
+              d="M 44 10 Q 46 32 44 54"
+              stroke="white"
+              strokeWidth="1.5"
+              fill="none"
+              opacity="0.9"
+            />
+            {/* Right seam stitches */}
+            <path d="M 42 17 L 46 15" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 43 22 L 47 20" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 43 27 L 47 25" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 43.5 32 L 47.5 32" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 43 37 L 47 39" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 43 42 L 47 44" stroke="white" strokeWidth="1" opacity="0.8" />
+            <path d="M 42 47 L 46 49" stroke="white" strokeWidth="1" opacity="0.8" />
+          </svg>
+          
+          {/* Chat indicator dot */}
+          <div className="absolute -top-1 -right-1 w-3 h-3 md:w-3.5 md:h-3.5 bg-green-500 rounded-full border-2 border-background animate-pulse" />
+          
+          {/* Shine effect */}
+          <div className="absolute top-2 left-3 w-4 h-4 md:w-5 md:h-5 bg-white/30 rounded-full blur-sm" />
         </div>
       </button>
 
