@@ -2,3 +2,6 @@ project_id = "yayobpcaesnsybextnna"
 
 [functions.moderate-content]
 verify_jwt = false
+
+[functions.chat-sporty]
+verify_jwt = false

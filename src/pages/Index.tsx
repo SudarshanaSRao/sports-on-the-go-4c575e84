@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/Navbar";
 import { SEO } from "@/components/SEO";
 import { GameReminderBanner } from "@/components/GameReminderBanner";
+import SportyChatBot from "@/components/SportyChatBot";
 import { MapPin, Users, Star, Calendar, Trophy, Shield, Zap, MessageSquare, Medal, CalendarCheck, ChevronLeft, ChevronRight, Github } from "lucide-react";
 import heroImage from "@/assets/hero-sports.jpg";
 import {
@@ -713,6 +714,9 @@ const Index = () => {
           </div>
         </div>
       </footer>
+      
+      {/* Sporty AI Chatbot */}
+      <SportyChatBot />
     </div>
   );
 };
