@@ -18,6 +18,7 @@ Find more information about this website [here](https://sudarshanasrao.github.io
 - **Review System**: Rate and review players after games to build community trust
 - **Friend System**: Connect with regular players and build your sports network
 - **Leaderboard**: Track your stats including games played, ratings, and community standing
+- **AI Assistant**: Sporty is a Gemini AI chatbot for personalized game recommendations and natural-language match search
 
 ### For Hosts
 - **Host Games**: Create and organize pickup games with detailed information
