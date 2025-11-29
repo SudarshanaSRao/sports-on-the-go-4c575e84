@@ -154,6 +154,43 @@ export default function SportyChatBot() {
 
   return (
     <>
+      {/* Teaser message - appears above the cricket ball */}
+      {!isOpen && (
+        <div className="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-[9998] animate-fade-in">
+          {/* Speech bubble */}
+          <div className="bg-background border-2 border-primary/20 rounded-2xl shadow-elegant p-3 md:p-4 mb-2 md:mb-3 max-w-[240px] md:max-w-[280px] relative">
+            <div className="flex items-start gap-2">
+              <div className="text-2xl md:text-3xl shrink-0">⚽</div>
+              <div>
+                <p className="text-xs md:text-sm text-foreground leading-relaxed">
+                  Hi! I'm here to assist you. Need help?{" "}
+                  <button 
+                    onClick={() => setIsOpen(true)}
+                    className="text-primary font-semibold hover:underline"
+                  >
+                    Click here
+                  </button>{" "}
+                  to chat with me anytime.
+                </p>
+              </div>
+            </div>
+            {/* Speech bubble pointer */}
+            <div className="absolute -bottom-2 right-6 w-4 h-4 bg-background border-r-2 border-b-2 border-primary/20 transform rotate-45" />
+          </div>
+
+          {/* Connect button */}
+          <button
+            onClick={() => setIsOpen(true)}
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-lg px-4 py-2.5 md:px-5 md:py-3 flex items-center justify-center gap-2 transition-all hover:scale-105"
+          >
+            <div className="w-6 h-6 md:w-7 md:h-7 bg-white rounded-full flex items-center justify-center">
+              <Send className="w-3 h-3 md:w-4 md:h-4 text-primary" />
+            </div>
+            <span className="font-semibold text-sm md:text-base">Connect With Us!</span>
+          </button>
+        </div>
+      )}
+
       {/* Floating trigger button - Cricket Ball Design */}
       <button
         onClick={() => setIsOpen(!isOpen)}
