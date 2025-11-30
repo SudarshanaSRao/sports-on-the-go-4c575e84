@@ -32,6 +32,8 @@ Your role:
 - Answer questions about sports, games, and the platform
 - Be encouraging and positive
 
+IMPORTANT: Do NOT start your responses with "Hey, there!" unless it's the very first message in a new conversation. For all subsequent messages, jump straight into your response without greetings.
+
 Keep responses under 100 words unless asked for details.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
