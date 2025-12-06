@@ -36,6 +36,7 @@ const Privacy = () => {
                   <li><strong>Game Participation:</strong> Games you join or attend</li>
                   <li><strong>Usage Data:</strong> Basic logs for security and bot prevention</li>
                   <li><strong>Authentication Data:</strong> Login credentials and session information</li>
+                  <li><strong>AI Chat Interactions:</strong> Messages you send to the Sporty AI chatbot assistant during your session</li>
                 </ul>
                 <p className="text-muted-foreground mt-3 font-semibold">
                   <strong>IMPORTANT:</strong> We do NOT track or store your real-time location. We do NOT store your personal home address, city, or zip code. Only public game event addresses are stored for coordination purposes.
@@ -66,6 +67,7 @@ const Privacy = () => {
                   <li>Send important service notifications</li>
                   <li>Prevent fraudulent or abusive behavior</li>
                   <li>Maintain and improve the Service</li>
+                  <li>Process your AI chat messages through third-party AI service providers to generate responses</li>
                 </ul>
                 <p className="text-muted-foreground mt-3">
                   We do NOT use your information for location tracking, targeted advertising, or selling to third parties.
@@ -83,6 +85,7 @@ const Privacy = () => {
                   <li><strong>For Game Coordination:</strong> Your RSVP status and participation in games you join</li>
                   <li><strong>Legal Requirements:</strong> When required by law or to protect rights and safety</li>
                   <li><strong>Service Providers:</strong> With trusted infrastructure providers (e.g., authentication, database hosting) who are bound by confidentiality</li>
+                  <li><strong>AI Service Providers:</strong> Your chat messages sent to the Sporty chatbot are processed by third-party AI services (such as Google and OpenAI) to generate responses. These providers have their own privacy policies.</li>
                 </ul>
               </section>
 
@@ -200,6 +203,25 @@ const Privacy = () => {
                 <h2 className="text-2xl font-bold mb-3">12. Third-Party Authentication</h2>
                 <p className="text-muted-foreground">
                   If you sign up using Google or other third-party authentication services, we receive only the information you authorize and that is necessary for account creation. We do not have access to your third-party account credentials.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-3">12.1 AI Chatbot Data Practices</h2>
+                <p className="text-muted-foreground mb-2">
+                  When you use the Sporty AI chatbot assistant, please be aware of the following data practices:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li><strong>Third-Party Processing:</strong> Your chat messages are sent to third-party AI service providers (such as Google and OpenAI) for processing and response generation</li>
+                  <li><strong>Session-Based Context:</strong> Conversation history is maintained locally during your browser session to provide contextual responses</li>
+                  <li><strong>No Permanent Storage:</strong> We do NOT permanently store your AI chat conversations in our database</li>
+                  <li><strong>No Personal Data Retention:</strong> Chat content is not used to build user profiles or for marketing purposes</li>
+                </ul>
+                <p className="text-muted-foreground mt-3 font-semibold">
+                  <strong>Important:</strong> Third-party AI providers may have their own data retention and usage policies. By using the AI chatbot, you acknowledge that your messages are processed by external services subject to their own terms and privacy policies.
+                </p>
+                <p className="text-muted-foreground mt-3">
+                  We recommend avoiding sharing sensitive personal information (such as addresses, phone numbers, financial information, or health data) in your conversations with the AI chatbot.
                 </p>
               </section>
 

@@ -601,7 +601,72 @@ const Terms = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-bold mb-3">12. Changes to Terms</h2>
+                <h2 className="text-2xl font-bold mb-3">12. AI-Powered Features and Chatbot</h2>
+                
+                <h3 className="text-xl font-semibold mb-2 mt-4">12.1 AI ASSISTANT DESCRIPTION</h3>
+                <p className="text-muted-foreground mb-2">
+                  SquadUp includes an AI-powered chatbot assistant ("Sporty") designed to help users navigate the 
+                  platform and answer questions about sports activities. Sporty is an artificial intelligence system, 
+                  NOT a human being.
+                </p>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">12.2 AI-GENERATED CONTENT DISCLAIMER</h3>
+                <p className="text-muted-foreground mb-2 font-semibold">
+                  YOU ACKNOWLEDGE AND AGREE THAT:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>AI responses are generated automatically using third-party AI models</li>
+                  <li>AI responses may be <strong>inaccurate, incomplete, outdated, or inappropriate</strong></li>
+                  <li>AI responses do NOT constitute professional advice of any kind</li>
+                  <li>The AI may occasionally produce incorrect or misleading information</li>
+                  <li>You should <strong>NOT rely on AI-generated responses</strong> for safety decisions, medical advice, legal guidance, or any critical decision-making</li>
+                  <li>You are responsible for independently verifying any information provided by the AI</li>
+                </ul>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">12.3 THIRD-PARTY AI SERVICES</h3>
+                <p className="text-muted-foreground mb-2">
+                  AI features are powered by third-party AI service providers (such as Google and OpenAI). By using 
+                  these features, you acknowledge that:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Your chat messages may be processed by external AI services</li>
+                  <li>Third-party AI providers have their own terms of service and privacy policies</li>
+                  <li>We do not control how third-party AI providers process or store your data</li>
+                </ul>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">12.4 NO LIABILITY FOR AI CONTENT</h3>
+                <p className="text-muted-foreground mb-2 font-semibold">
+                  THE OPERATOR IS NOT LIABLE FOR:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Any actions you take based on AI-generated responses</li>
+                  <li>Any inaccuracies, errors, or omissions in AI responses</li>
+                  <li>Any harm, damages, or losses arising from AI interactions</li>
+                  <li>Any decisions made in reliance on AI-generated information</li>
+                  <li>The availability, reliability, or performance of AI features</li>
+                </ul>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">12.5 PROHIBITED AI CONDUCT</h3>
+                <p className="text-muted-foreground mb-2">
+                  When using AI features, you agree NOT to:
+                </p>
+                <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+                  <li>Attempt to manipulate, "jailbreak," or bypass AI safety measures</li>
+                  <li>Use AI features to generate harmful, inappropriate, or prohibited content</li>
+                  <li>Submit malicious prompts designed to produce dangerous or illegal outputs</li>
+                  <li>Abuse or overload AI features in a way that degrades service for other users</li>
+                </ul>
+
+                <h3 className="text-xl font-semibold mb-2 mt-4">12.6 AI SERVICE LIMITATIONS</h3>
+                <p className="text-muted-foreground">
+                  AI features may be unavailable, rate-limited, or discontinued at any time without notice. 
+                  We reserve the right to modify, suspend, or terminate AI features at our sole discretion. 
+                  The operator has no obligation to provide AI features or maintain their availability.
+                </p>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-bold mb-3">13. Changes to Terms</h2>
                 <p className="text-muted-foreground">
                   We may update these terms at any time. Continued use of the Service after changes constitutes
                   acceptance of the updated terms. We encourage users to review this page periodically.
