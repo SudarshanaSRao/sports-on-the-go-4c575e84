@@ -692,7 +692,7 @@ export default function HostGame() {
 
                 {/* Players */}
                 <div className="space-y-1.5 sm:space-y-2">
-                  <Label htmlFor="maxPlayers" className="text-sm">Max Players</Label>
+                  <Label htmlFor="maxPlayers" className="text-sm">Max Players *</Label>
                   <Input type="number" id="maxPlayers" name="maxPlayers" placeholder="10" value={formData.maxPlayers} onChange={handleInputChange} min="2" max="99999" required className="text-sm" />
                 </div>
 
