@@ -8,6 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { TermsVersionChecker } from "./components/TermsVersionChecker";
 import { useMobileViewport } from "./hooks/useMobileViewport";
+import { useScrollLockCleanup } from "./hooks/useScrollLockCleanup";
 
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
