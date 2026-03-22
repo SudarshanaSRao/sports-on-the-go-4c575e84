@@ -32,6 +32,7 @@ const queryClient = new QueryClient();
 const App = () => {
   // Enable mobile viewport optimization
   useMobileViewport();
+  useScrollLockCleanup();
   
   return (
   <QueryClientProvider client={queryClient}>

@@ -118,8 +118,9 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    /* Prevent horizontal scroll */
+    /* Prevent horizontal scroll, guarantee vertical scroll */
     overflow-x: hidden;
+    overflow-y: auto !important;
     width: 100vw;
     max-width: 100vw;
     /* Disable pull-to-refresh on mobile */

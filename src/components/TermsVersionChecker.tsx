@@ -146,13 +146,15 @@ export const TermsVersionChecker = ({ children }: TermsVersionCheckerProps) => {
   return (
     <>
       {children}
-      <TermsUpdateDialog
-        open={showTermsUpdate}
-        currentVersion={CURRENT_TERMS_VERSION}
-        previousVersion={previousVersion}
-        onAccept={handleAcceptTerms}
-        isSubmitting={isSubmitting}
-      />
+      {showTermsUpdate && (
+        <TermsUpdateDialog
+          open={showTermsUpdate}
+          currentVersion={CURRENT_TERMS_VERSION}
+          previousVersion={previousVersion}
+          onAccept={handleAcceptTerms}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </>
   );
 };
