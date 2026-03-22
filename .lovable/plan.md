@@ -1,61 +1,36 @@
 
-Goal: restore native mouse-wheel scrolling across all pages without regressing dialogs, sheets, map interactions, or chatbot behavior.
 
-What I found from the deep code sanity check
-1) There is only one explicit wheel listener in the app, and it is global:
-- src/hooks/useWheelScrollFix.ts adds document-level wheel listener and calls stopImmediatePropagation() for every wheel event.
-- It is mounted globally in src/App.tsx, so it affects every route.
+## Fix: Restore Mouse Wheel Scrolling (Full 3-Part Solution)
 
-2) I did not find any other page-level wheel handlers or preventDefault-on-wheel logic in page components (Home, Discover, Community, Host Game, etc.).
+### Root Cause
+`react-remove-scroll` (used internally by Radix UI Dialog/Sheet) adds a global wheel `preventDefault()` when any dialog is open. The `TermsUpdateDialog` is always mounted (even when `open={false}`), and HMR or timing issues can cause `react-remove-scroll` to leave stale scroll-lock listeners active, blocking wheel scrolling site-wide.
 
-3) Several UI overlay primitives (Dialog/Sheet/AlertDialog) use full-screen overlays with closed-state animations but do not defensively disable pointer-events in closed state classes. If a closed layer lingers during animation/presence timing, it can still intercept wheel on main content.
+### Changes
 
-Likely root cause (combined)
-- Primary: the global wheel “fix” is too aggressive and can interfere with normal page wheel behavior.
-- Secondary hardening needed: closed overlay layers should be non-interactive to prevent transparent interception edge cases.
+**1. Conditional render of TermsUpdateDialog** — `src/components/TermsVersionChecker.tsx`
+- Change line 149-155 from always-mounted `<TermsUpdateDialog>` to `{showTermsUpdate && <TermsUpdateDialog ... />}`
+- Ensures full unmount → guaranteed `react-remove-scroll` cleanup
 
-Implementation plan
-Step 1 — Remove the risky global wheel interceptor
-- Update src/App.tsx:
-  - Remove import/use of useWheelScrollFix().
-- Remove or retire src/hooks/useWheelScrollFix.ts so no global wheel propagation tampering remains.
+**2. Scroll lock cleanup hook** — `src/hooks/useScrollLockCleanup.ts` (new file)
+- Runs every 2 seconds via `setInterval`
+- If no `[data-state="open"]` dialog/sheet overlays exist in the DOM:
+  - Removes `data-scroll-locked` attribute from `<html>`
+  - Removes any `react-remove-scroll`-injected classes from `<body>` (classes matching `block-interactivity`)
+  - Resets `overflow` on `<html>` and `<body>` if they were set to `hidden`
+- Lightweight DOM attribute checks only
 
-Step 2 — Harden overlay primitives against invisible wheel interception
-- Update:
-  - src/components/ui/dialog.tsx
-  - src/components/ui/sheet.tsx
-  - src/components/ui/alert-dialog.tsx
-- Add closed-state non-interactive classes to overlays/content where appropriate:
-  - data-[state=closed]:pointer-events-none
-  - (and keep existing fade/animate classes)
-- This ensures any closed-but-still-mounted overlay cannot capture wheel input.
+**3. Mount cleanup hook** — `src/App.tsx`
+- Import and call `useScrollLockCleanup()` alongside `useMobileViewport()`
 
-Step 3 — Verify chatbot is not creating an oversized hit area
-- Re-check src/components/SportyChatBot.tsx fixed elements:
-  - Confirm only the visible bubble/button/chat panel receives pointer events.
-  - Ensure no accidental full-viewport interactive wrapper exists.
+**4. CSS safety net** — `src/index.css`
+- Add `overflow-y: auto !important;` to both `html` and `body` base styles
+- This provides a last-resort guarantee that scroll is never permanently locked by injected inline styles
 
-Step 4 — Route-by-route QA pass (desktop mouse wheel)
-- Validate on: /, /discover, /community, /host-game, /my-games, /friends, /leaderboard, /settings.
-- For each route:
-  - Wheel scroll works with cursor over normal content (not chatbot).
-  - Scrollbar drag still works.
-  - Keyboard scroll unchanged.
-- Modal/sheet QA:
-  - Open/close dialogs and mobile sheet, then re-test page wheel immediately after close.
-- Discover QA:
-  - Ensure map interactions still behave correctly (wheel over map vs page context).
+### Files
+| File | Action |
+|------|--------|
+| `src/components/TermsVersionChecker.tsx` | Edit: conditional render |
+| `src/hooks/useScrollLockCleanup.ts` | Create |
+| `src/App.tsx` | Edit: add hook import/call |
+| `src/index.css` | Edit: add overflow-y to html/body |
 
-Step 5 — Regression guard (non-invasive)
-- Add a short code comment near overlay primitives documenting why closed-state pointer-events are disabled (prevents wheel-capture regressions).
-- Keep changes tightly scoped to scrolling/overlay primitives only.
-
-Technical details
-- No backend/database/auth changes.
-- Files to change:
-  - src/App.tsx
-  - src/hooks/useWheelScrollFix.ts (remove/retire)
-  - src/components/ui/dialog.tsx
-  - src/components/ui/sheet.tsx
-  - src/components/ui/alert-dialog.tsx
-  - (only if needed after validation) src/components/SportyChatBot.tsx
