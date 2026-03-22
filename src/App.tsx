@@ -31,8 +31,6 @@ const queryClient = new QueryClient();
 const App = () => {
   // Enable mobile viewport optimization
   useMobileViewport();
-  // Ensure mouse wheel scrolling isn't blocked by any global wheel listeners
-  useWheelScrollFix();
   
   return (
   <QueryClientProvider client={queryClient}>
