@@ -8,7 +8,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { TermsVersionChecker } from "./components/TermsVersionChecker";
 import { useMobileViewport } from "./hooks/useMobileViewport";
-import { useWheelScrollFix } from "./hooks/useWheelScrollFix";
+
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
@@ -31,8 +31,6 @@ const queryClient = new QueryClient();
 const App = () => {
   // Enable mobile viewport optimization
   useMobileViewport();
-  // Ensure mouse wheel scrolling isn't blocked by any global wheel listeners
-  useWheelScrollFix();
   
   return (
   <QueryClientProvider client={queryClient}>

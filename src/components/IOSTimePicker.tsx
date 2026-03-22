@@ -112,7 +112,7 @@ export function IOSTimePicker({ value, onChange }: IOSTimePickerProps) {
     columnRef: React.RefObject<HTMLDivElement>;
     onScroll: () => void;
   }) => {
-    const scrollTimeoutRef = useRef<NodeJS.Timeout>();
+    const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
     const handleScrollEvent = () => {
       if (scrollTimeoutRef.current) {
