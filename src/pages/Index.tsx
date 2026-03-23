@@ -621,7 +621,7 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 gradient-hero relative overflow-hidden">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 gradient-hero relative">
         <div className="absolute inset-0 bg-grid-white/10 [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]" />
         <div className="container mx-auto relative z-10">
           <div className="max-w-3xl mx-auto text-center">
