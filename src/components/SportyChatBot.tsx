@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { toast } from "sonner";
 
 type Message = {
@@ -284,7 +284,7 @@ export default function SportyChatBot() {
         </div>
 
         {/* Messages area */}
-        <ScrollArea className="flex-1 p-3 md:p-4" style={{ height: "calc(100% - 140px)" }} ref={scrollRef}>
+        <div className="flex-1 p-3 md:p-4 overflow-y-auto" style={{ height: "calc(100% - 140px)" }} ref={scrollRef}>
           <div className="space-y-3 md:space-y-4">
             {messages.map((message) => (
               <div
@@ -333,7 +333,7 @@ export default function SportyChatBot() {
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Input area */}
         <div className="p-2 md:p-3 border-t border-border">
