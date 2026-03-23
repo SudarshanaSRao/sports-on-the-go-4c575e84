@@ -13,7 +13,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -267,6 +266,7 @@ const Index = () => {
   ];
 
   const [selectedSport, setSelectedSport] = useState<typeof sports[0] | null>(null);
+  const [dialogSport, setDialogSport] = useState<typeof sports[0] | null>(null);
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -513,27 +513,33 @@ const Index = () => {
               }}
             >
               {infiniteSports.map((sport, index) => (
-                <Dialog key={`${sport.name}-${index}`}>
-                  <DialogTrigger asChild>
-                    <Card className="flex-shrink-0 w-72 hover:shadow-elevated transition-smooth cursor-pointer group/card">
-                      <CardContent className="p-6">
-                        <div className="text-6xl mb-4 text-center group-hover/card:scale-110 transition-bounce">{sport.emoji}</div>
-                        <div className="font-bold text-lg text-center mb-2">{sport.name}</div>
-                        <p className="text-sm text-muted-foreground text-center line-clamp-2">{sport.description}</p>
-                      </CardContent>
-                    </Card>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <Card
+                  key={`${sport.name}-${index}`}
+                  className="flex-shrink-0 w-72 hover:shadow-elevated transition-smooth cursor-pointer group/card"
+                  onClick={() => setDialogSport(sport)}
+                >
+                  <CardContent className="p-6">
+                    <div className="text-6xl mb-4 text-center group-hover/card:scale-110 transition-bounce">{sport.emoji}</div>
+                    <div className="font-bold text-lg text-center mb-2">{sport.name}</div>
+                    <p className="text-sm text-muted-foreground text-center line-clamp-2">{sport.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Dialog open={!!dialogSport} onOpenChange={(open) => !open && setDialogSport(null)}>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                {dialogSport && (
+                  <>
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-3 text-3xl">
-                        <span className="text-4xl">{sport.emoji}</span>
-                        {sport.name}
+                        <span className="text-4xl">{dialogSport.emoji}</span>
+                        {dialogSport.name}
                       </DialogTitle>
                       <DialogDescription className="text-base pt-2">
-                        {sport.description}
+                        {dialogSport.description}
                       </DialogDescription>
                     </DialogHeader>
-                    
                     <div className="space-y-6 mt-4">
                       <div>
                         <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
@@ -541,7 +547,7 @@ const Index = () => {
                           Basic Rules
                         </h3>
                         <ul className="space-y-2">
-                          {sport.rules.map((rule, idx) => (
+                          {dialogSport.rules.map((rule, idx) => (
                             <li key={idx} className="flex items-start gap-2">
                               <span className="text-primary mt-1">•</span>
                               <span className="text-muted-foreground">{rule}</span>
@@ -549,37 +555,35 @@ const Index = () => {
                           ))}
                         </ul>
                       </div>
-                      
                       <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                         <div>
                           <h4 className="font-semibold mb-1 flex items-center gap-2">
                             <Star className="w-4 h-4 text-primary" />
                             Skill Levels
                           </h4>
-                          <p className="text-sm text-muted-foreground">{sport.skillLevels}</p>
+                          <p className="text-sm text-muted-foreground">{dialogSport.skillLevels}</p>
                         </div>
                         <div>
                           <h4 className="font-semibold mb-1 flex items-center gap-2">
                             <Shield className="w-4 h-4 text-primary" />
                             Equipment Needed
                           </h4>
-                          <p className="text-sm text-muted-foreground">{sport.equipment}</p>
+                          <p className="text-sm text-muted-foreground">{dialogSport.equipment}</p>
                         </div>
                       </div>
-
                       <div className="pt-4 border-t">
-                        <Button 
-                          className="w-full gradient-primary text-white" 
-                          onClick={() => handleFindGames(sport.name)}
+                        <Button
+                          className="w-full gradient-primary text-white"
+                          onClick={() => handleFindGames(dialogSport.name)}
                         >
-                          Find {sport.name} Games Near You
+                          Find {dialogSport.name} Games Near You
                         </Button>
                       </div>
                     </div>
-                  </DialogContent>
-                </Dialog>
-              ))}
-            </div>
+                  </>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </section>

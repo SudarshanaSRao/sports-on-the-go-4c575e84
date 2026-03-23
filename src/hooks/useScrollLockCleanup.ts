@@ -11,9 +11,11 @@ import { useEffect } from "react";
 export function useScrollLockCleanup() {
   useEffect(() => {
     const cleanup = () => {
-      // If any dialog/sheet is genuinely open, don't touch anything
+      // Check for any genuinely open Radix overlay (Dialog, Sheet, AlertDialog, etc.)
       const hasOpenOverlay = document.querySelector(
-        "[data-state='open'][role='dialog'], [data-state='open'][role='alertdialog']"
+        "[data-state='open'][role='dialog'], " +
+        "[data-state='open'][role='alertdialog'], " +
+        "[data-radix-scroll-lock-wrapper] [data-state='open']"
       );
       if (hasOpenOverlay) return;
 
@@ -27,25 +29,32 @@ export function useScrollLockCleanup() {
 
       // Remove react-remove-scroll injected classes
       const staleClasses = Array.from(body.classList).filter(
-        (cls) => cls.startsWith("block-interactivity") || cls.startsWith("allow-interactivity")
+        (cls) =>
+          cls.startsWith("block-interactivity") ||
+          cls.startsWith("allow-interactivity") ||
+          cls.includes("scroll-locked")
       );
       if (staleClasses.length > 0) {
         body.classList.remove(...staleClasses);
       }
 
       // Reset overflow if it was forced to hidden with no open overlay
-      if (html.style.overflow === "hidden") {
-        html.style.overflow = "";
-      }
-      if (body.style.overflow === "hidden") {
-        body.style.overflow = "";
-      }
+      if (html.style.overflow === "hidden") html.style.overflow = "";
+      if (body.style.overflow === "hidden") body.style.overflow = "";
+      // Also clear paddingRight injected by react-remove-scroll
+      if (body.style.paddingRight) body.style.paddingRight = "";
     };
 
-    const id = setInterval(cleanup, 2000);
-    // Also run once immediately
+    // Run on mount and after any dialog-close event
     cleanup();
-
-    return () => clearInterval(id);
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setTimeout(cleanup, 100);
+    };
+    document.addEventListener("keydown", handleEscape);
+    const id = setInterval(cleanup, 2000);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, []);
 }
