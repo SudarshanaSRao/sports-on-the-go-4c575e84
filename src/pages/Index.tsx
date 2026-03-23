@@ -267,6 +267,7 @@ const Index = () => {
   ];
 
   const [selectedSport, setSelectedSport] = useState<typeof sports[0] | null>(null);
+  const [dialogSport, setDialogSport] = useState<typeof sports[0] | null>(null);
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
